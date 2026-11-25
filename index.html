@@ -225,6 +225,13 @@ nav a {display:inline-flex; align-items:center; justify-content:center; min-widt
   .signature {margin-top:2.5rem}
 }
 
+/* Footer links: domain and privacy grouped on the right, together on their own line on phones. */
+footer .footer-links {display:inline-flex; align-items:center; gap:1.5rem}
+footer .footer-privacy {font-size:.875rem; font-weight:700}
+@media (max-width:700px) {
+  footer .footer-links {flex-basis:100%}
+}
+
 @media (max-width:355px) {
   .shell {width:calc(100% - 1.6rem)}
   .a h1 {font-size:2.4rem}
@@ -427,7 +434,7 @@ nav a {display:inline-flex; align-items:center; justify-content:center; min-widt
 <div class="command"><code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","github:lars-hv/domain-hound"]}}}</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy config</span></button></div>
 <p class="hint">Add this JSON to your client's MCP configuration.</p></div>
 <p class="feedback" role="status"></p></div></div>
-<footer><div class="signature"><a class="brand" href="#top" aria-label="Domain Hound, back to top"><img src="assets/hound-mark.svg" width="42" height="42" alt="">Domain Hound</a><a class="mono domain" href="https://domainhound.dev/">domainhound.dev</a></div>
+<footer><div class="signature"><a class="brand" href="#top" aria-label="Domain Hound, back to top"><img src="assets/hound-mark.svg" width="42" height="42" alt="">Domain Hound</a><span class="footer-links"><a class="mono domain" href="https://domainhound.dev/">domainhound.dev</a><a class="footer-privacy" href="privacy/">Privacy</a></span></div>
 </footer>
 </div></section></main>
 <script>
