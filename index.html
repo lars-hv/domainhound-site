@@ -5,22 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>Domain Hound | Name it already.</title>
-  <meta name="description" content="Find a startup name you can actually buy. Ask Claude or Codex. Free names, trademark-checked, cheapest price first, bought and set up after you approve.">
+  <meta name="description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <link rel="canonical" href="https://domainhound.dev/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Domain Hound">
   <meta property="og:url" content="https://domainhound.dev/">
   <meta property="og:title" content="Domain Hound | Name it already.">
-  <meta property="og:description" content="Find a startup name you can actually buy. Ask Claude or Codex. Free names, trademark-checked, cheapest price first, bought and set up after you approve.">
+  <meta property="og:description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
   <meta property="og:image:alt" content="Domain Hound: Name it already.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Domain Hound | Name it already.">
-  <meta name="twitter:description" content="Find a startup name you can actually buy. Ask Claude or Codex. Free names, trademark-checked, cheapest price first, bought and set up after you approve.">
+  <meta name="twitter:description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <meta name="twitter:image" content="https://domainhound.dev/assets/social-preview.png">
   <link rel="icon" href="assets/hound-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/site.css">
   <link rel="stylesheet" href="assets/brand-b.css">
+  <link rel="stylesheet" href="assets/search.css">
+  <meta name="domain-hound-api" content="https://domainhound-mcp.domainhound.workers.dev">
+  <noscript>
+    <style>
+      .hunt-tabs, .hunt-form, .installer .tabs, .installer .copy, .install-close { display: none; }
+      .installer [role="tabpanel"][hidden] { display: block !important; }
+    </style>
+  </noscript>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -91,7 +99,7 @@
           {
             "@type": "Question",
             "name": "Share with a cofounder?",
-            "acceptedAnswer": { "@type": "Answer", "text": "One link carries your shortlist. Our server never sees it." }
+            "acceptedAnswer": { "@type": "Answer", "text": "One link carries your shortlist. Send it to your cofounder." }
           },
           {
             "@type": "Question",
@@ -113,7 +121,7 @@
 </header>
 <main>
   <section class="hero">
-    <div class="wrap hero-grid">
+    <div class="wrap hero-grid search-hero">
       <div class="paper-art" aria-hidden="true">
         <span class="paper-word first">Domain</span>
         <span class="paper-word second">Hound</span>
@@ -121,35 +129,83 @@
       </div>
       <div class="lead">
         <p class="stamp">Name it already.</p>
-        <h1>Find a startup name you can actually buy.</h1>
-        <p class="subline">Ask Claude or Codex to check domains, app names and Google for free.</p>
+        <h1><span>One search</span> instead of ten tabs.</h1>
+        <p class="subline">Search for free. See what a domain costs to buy and keep.</p>
       </div>
-      <div class="installer" id="install">
-        <div class="install-heading"><h2>Install</h2><p>Free · open source</p></div>
-        <div class="tabs" role="tablist" aria-label="Install for">
-          <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
-          <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
-          <button type="button" role="tab" id="tab-other" aria-selected="false" aria-controls="panel-other" tabindex="-1">Other MCP</button>
+      <div class="hunt-box" id="search">
+        <div class="hunt-tabs" role="tablist" aria-label="Search by">
+          <button type="button" role="tab" id="tab-idea" aria-controls="panel-idea" aria-selected="true">I have an idea</button>
+          <button type="button" role="tab" id="tab-name" aria-controls="panel-name" aria-selected="false" tabindex="-1">I have a name</button>
+          <button type="button" role="tab" id="tab-personal" aria-controls="panel-personal" aria-selected="false" tabindex="-1">My own name</button>
         </div>
-        <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude">
-          <p class="hint">In your terminal</p>
-          <code tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
-          <button type="button" class="copy action"><span>Copy command</span></button>
+        <div role="tabpanel" id="panel-idea" aria-labelledby="tab-idea">
+          <form class="hunt-form" data-mode="idea">
+            <label for="idea">What are you building?</label>
+            <textarea id="idea" rows="2" minlength="3" maxlength="400" required placeholder="A trip planner for people who travel by train"></textarea>
+            <button class="hunt-submit action" type="submit" disabled>Find available names</button>
+          </form>
         </div>
-        <div role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
-          <p class="hint">In your terminal</p>
-          <code tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
-          <button type="button" class="copy action"><span>Copy command</span></button>
+        <div role="tabpanel" id="panel-name" aria-labelledby="tab-name" hidden>
+          <form class="hunt-form" data-mode="name">
+            <label for="name">What name do you have in mind?</label>
+            <input id="name" type="text" required maxlength="253" autocapitalize="none" spellcheck="false" placeholder="A name or an exact domain">
+            <button class="hunt-submit action" type="submit" disabled>Check availability</button>
+          </form>
         </div>
-        <div role="tabpanel" id="panel-other" aria-labelledby="tab-other" hidden>
-          <p class="hint">MCP configuration</p>
-          <code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
-          <button type="button" class="copy action"><span>Copy config</span></button>
+        <div role="tabpanel" id="panel-personal" aria-labelledby="tab-personal" hidden>
+          <form class="hunt-form" data-mode="personal">
+            <label for="personal">What’s your full name?</label>
+            <input id="personal" type="text" autocomplete="name" required maxlength="80" placeholder="First and last name">
+            <button class="hunt-submit action" type="submit" disabled>Find my domain</button>
+          </form>
         </div>
-        <p class="feedback" role="status"></p>
+        <noscript><p class="hunt-notice">Turn on JavaScript to search here, or open the agent setup below.</p></noscript>
       </div>
     </div>
   </section>
+  <section class="hunt-results" id="search-results" aria-label="Search results" hidden>
+    <div class="wrap" id="result-pages"></div>
+  </section>
+  <aside class="agent-strip" aria-label="Agent setup">
+    <div class="wrap">
+      <details id="install">
+        <summary>Do the rest in your agent</summary>
+        <div class="installer">
+          <div class="tabs" role="tablist" aria-label="Install for">
+            <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
+            <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
+            <button type="button" role="tab" id="tab-chatgpt" aria-selected="false" aria-controls="panel-chatgpt" tabindex="-1">ChatGPT</button>
+            <button type="button" role="tab" id="tab-other" aria-selected="false" aria-controls="panel-other" tabindex="-1">Other MCP</button>
+          </div>
+          <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude">
+            <noscript><strong>Claude Code</strong></noscript>
+            <p class="hint">In your terminal</p>
+            <code tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
+            <button type="button" class="copy action"><span>Copy command</span></button>
+          </div>
+          <div role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
+            <noscript><strong>Codex</strong></noscript>
+            <p class="hint">In your terminal</p>
+            <code tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
+            <button type="button" class="copy action"><span>Copy command</span></button>
+          </div>
+          <div role="tabpanel" id="panel-chatgpt" aria-labelledby="tab-chatgpt" hidden>
+            <noscript><strong>ChatGPT</strong></noscript>
+            <p class="hint">Paste this URL when adding a connector</p>
+            <code tabindex="0">https://domainhound-mcp.domainhound.workers.dev/mcp</code>
+            <button type="button" class="copy action"><span>Copy URL</span></button>
+          </div>
+          <div role="tabpanel" id="panel-other" aria-labelledby="tab-other" hidden>
+            <noscript><strong>Other MCP clients</strong></noscript>
+            <p class="hint">MCP configuration</p>
+            <code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
+            <button type="button" class="copy action"><span>Copy config</span></button>
+          </div>
+          <p class="feedback" role="status"></p>
+        </div>
+      </details>
+    </div>
+  </aside>
   <section class="facts">
     <div class="wrap">
       <h2>Every good name is taken.</h2>
@@ -236,7 +292,7 @@
       </div>
     </div>
   </section>
-  <aside class="trust"><p class="wrap">Open source. Runs on your machine. <strong>Never buys without you.</strong> You hold the leash.</p></aside>
+  <aside class="trust"><p class="wrap">Open source. Run it in your own agent. <strong>Never buys without you.</strong> You hold the leash.</p></aside>
   <section class="watch-section">
     <div class="wrap">
       <form class="watch" id="watch" novalidate aria-labelledby="watch-title" autocomplete="off">
@@ -277,7 +333,7 @@
       <h2>FAQ</h2>
       <dl>
         <div><dt>Purchase limits?</dt><dd>$30 default quote cap. Enable direct buying yourself. No retries on uncertain orders.</dd></div>
-        <div><dt>Share with a cofounder?</dt><dd>One link carries your shortlist. Our server never sees it.</dd></div>
+        <div><dt>Share with a cofounder?</dt><dd>One link carries your shortlist. Send it to your cofounder.</dd></div>
         <div><dt>Trademark screening?</dt><dd>US automatically. EU and Norway with free keys, or by link.</dd></div>
       </dl>
     </div>
@@ -292,8 +348,9 @@
 <footer><div class="wrap foot"><a href="https://domainhound.dev/">domainhound.dev</a><a href="guides/">Guides</a><a href="privacy/">Privacy</a></div></footer>
 <script src="assets/site.js"></script>
 <script src="assets/watch.js"></script>
+<script type="module" src="assets/search.mjs"></script>
 <script>
-  const installer = document.getElementById('install');
+  const installer = document.querySelector('.installer');
   const closingCopy = document.querySelector('.install-close .copy');
   const closingLabel = closingCopy.querySelector('span');
   const closingFeedback = document.querySelector('.close-feedback');

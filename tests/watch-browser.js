@@ -27,8 +27,8 @@ async function checkWatch({ dedicated, width }) {
   } else if (width === 390) {
     const art = document.querySelector('.paper-art').getBoundingClientRect();
     const lead = document.querySelector('.lead').getBoundingClientRect();
-    const installer = document.querySelector('.installer').getBoundingClientRect();
-    assert(art.bottom <= lead.top && lead.bottom <= installer.top, 'Mobile hero overlaps the installer or headline');
+    const search = document.querySelector('#search').getBoundingClientRect();
+    assert(art.bottom <= lead.top && lead.bottom <= search.top, 'Mobile hero overlaps the search form or headline');
   }
 
   const calls = [];

@@ -2,7 +2,8 @@ const installers = document.querySelectorAll('.installer');
 
 function selectClient(index) {
   const terminal = document.querySelector('.terminal');
-  const client = ['Claude Code', 'Codex', 'MCP client'][index];
+  const selectedTab = installers[0].querySelectorAll('[role="tab"]')[index];
+  const client = selectedTab.id === 'tab-other' ? 'MCP client' : selectedTab.textContent;
   for (const mark of terminal.querySelectorAll('.brand-mark')) {
     mark.toggleAttribute('hidden', index !== (mark.matches('.claude-spark') ? 0 : 1));
   }
@@ -30,6 +31,8 @@ async function copyLine(panel, feedback) {
   try {
     await navigator.clipboard.writeText(code.textContent);
   } catch {
+    const disclosure = panel.closest('details');
+    if (disclosure) disclosure.open = true;
     const range = document.createRange();
     range.selectNodeContents(code);
     const selection = window.getSelection();
@@ -46,6 +49,12 @@ async function copyLine(panel, feedback) {
   const client = document.getElementById(panel.getAttribute('aria-labelledby'));
   feedback.textContent = client.textContent + ' setup copied.';
 }
+
+function openLinkedInstaller() {
+  if (location.hash === '#install') document.getElementById('install').open = true;
+}
+openLinkedInstaller();
+window.addEventListener('hashchange', openLinkedInstaller);
 
 for (const installer of installers) {
   const tabs = [...installer.querySelectorAll('[role="tab"]')];
