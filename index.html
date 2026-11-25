@@ -304,6 +304,41 @@ footer .footer-privacy {font-size:.875rem; font-weight:700}
   .hero .summary .installer {order:-1; margin-top:0}
   .termbar {padding:.1rem .8rem; gap:.6rem}
 }
+
+/* Domain watch: its own row under the footer installer, aligned to the installer column. */
+.watch-row {display:grid; grid-template-columns:1fr 1.15fr; column-gap:9%; margin-top:24px}
+.watch {grid-column:2; min-width:0; display:grid; gap:12px}
+.watch h3 {font-family:var(--sk-font); font-size:1.25rem; line-height:1.35}
+.watch-controls {display:grid; grid-template-columns:minmax(0,1fr); gap:12px}
+.watch-field {display:grid; gap:6px; min-width:0}
+.watch-field label {color:var(--sk-linen); font-size:.875rem; font-weight:700; line-height:1.3}
+.watch input {width:100%; min-width:0; min-height:44px; margin:0; padding:0 12px; background:var(--sk-charcoal); color:var(--sk-ivory); border:1px solid var(--sk-stone); border-radius:8px; font:400 1rem/1.3 var(--sk-font)}
+.watch input::placeholder {color:var(--sk-stone); opacity:.8}
+.watch input:focus-visible {outline:2px solid var(--button); outline-offset:2px; border-color:var(--button)}
+.watch input[aria-invalid="true"] {border-color:#f5a99b}
+.watch-submit {min-height:44px; padding:0 20px; background:var(--button); color:var(--sk-ink); border:0; border-radius:8px; font-size:1rem; font-weight:800; white-space:nowrap}
+.watch-submit:not(:disabled):not([aria-disabled="true"]):hover {background:var(--sk-ivory)}
+.watch-submit:focus-visible {outline:3px solid var(--sk-ivory); outline-offset:3px}
+.watch-submit:disabled {opacity:.6; cursor:default}
+.watch-submit[aria-disabled="true"] {opacity:.75; cursor:progress}
+.watch-note {color:var(--sk-stone); font-size:.875rem; line-height:1.45}
+.watch-note a {display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; vertical-align:middle; color:var(--sk-ivory); font-weight:700; text-underline-offset:4px}
+.watch-note a:focus-visible {outline:2px solid var(--sk-ivory); outline-offset:0}
+/* Room for the longest message (three lines here, two in the wide row) so nothing below moves. */
+.watch-status {min-height:calc(3 * 1.45em); color:var(--sk-linen); font-size:.875rem; font-weight:700; line-height:1.45}
+.watch-status[data-state="error"] {color:#f5a99b}
+.watch-status[data-state="success"] {color:var(--button)}
+@media (min-width:701px) and (max-width:1150px) {
+  .watch-row {grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); column-gap:5%}
+}
+@media (min-width:1151px) {
+  .watch-controls {grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto; align-items:end}
+  .watch-status {min-height:calc(2 * 1.45em)}
+}
+@media (max-width:700px) {
+  .watch-row {grid-template-columns:minmax(0,1fr)}
+  .watch {grid-column:auto}
+}
 </style>
 </head>
 <body class="a"><main>
@@ -434,6 +469,17 @@ footer .footer-privacy {font-size:.875rem; font-weight:700}
 <div class="command"><code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy config</span></button></div>
 <p class="hint">Add this JSON to your client's MCP configuration.</p></div>
 <p class="feedback" role="status"></p></div></div>
+<div class="watch-row"><form class="watch" id="watch" novalidate aria-labelledby="watch-title">
+<h3 id="watch-title">Alert me when the domain frees up</h3>
+<div class="watch-controls">
+<div class="watch-field"><label for="watch-domain">Domain</label><input id="watch-domain" required type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="brightname.com"></div>
+<div class="watch-field"><label for="watch-email">Email</label><input id="watch-email" required type="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="you@example.com"></div>
+<button class="watch-submit" type="submit" disabled>Watch it</button>
+</div>
+<div hidden><label for="watch-website">Website</label><input id="watch-website" type="text" tabindex="-1" autocomplete="off"></div>
+<p class="watch-note">We email you once when it frees up. One click erases you. <a href="privacy/#watch">Privacy</a></p>
+<p class="watch-status" id="watch-status" role="status" aria-live="polite"></p>
+</form></div>
 <footer><div class="signature"><a class="brand" href="#top" aria-label="Domain Hound, back to top"><img src="assets/hound-mark.svg" width="42" height="42" alt="">Domain Hound</a><span class="footer-links"><a class="mono domain" href="https://domainhound.dev/">domainhound.dev</a><a class="footer-privacy" href="privacy/">Privacy</a></span></div>
 </footer>
 </div></section></main>
@@ -511,4 +557,99 @@ for (const installer of installers) {
     button.addEventListener('click', () => copyLine(panel, installer.querySelector('.feedback')));
   }
 }
+</script>
+<script>
+/* Domain watch form. Fields carry no name, so a native submit could never send the email anywhere. */
+(() => {
+  const form = document.getElementById('watch');
+  if (!form || !window.fetch || !window.AbortController) return;
+  const endpoint = 'https://domainhound-alerts.domainhound.workers.dev/watch';
+  const domainInput = document.getElementById('watch-domain');
+  const emailInput = document.getElementById('watch-email');
+  const trap = document.getElementById('watch-website');
+  const button = form.querySelector('.watch-submit');
+  const status = document.getElementById('watch-status');
+  /* Same rules as the alerts service, so most mistakes are caught before sending. */
+  function watchHostname(value) {
+    const raw = value.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/\.$/, '');
+    if (!raw || raw.length > 253 || /[\s@:/?#]/.test(raw)) return null;
+    try {
+      const host = new URL('http://' + raw).hostname;
+      return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,63}$/.test(host) ? host : null;
+    } catch {
+      return null;
+    }
+  }
+  function validEmail(value) {
+    const email = value.toLowerCase();
+    return email.length <= 254 && /^[^\s@<>()[\]",;:\\]{1,64}@(?:[a-z0-9-]+\.)+[a-z]{2,63}$/.test(email);
+  }
+
+  function showStatus(message, state, invalidInput) {
+    status.textContent = message;
+    status.dataset.state = state;
+    if (invalidInput) {
+      invalidInput.setAttribute('aria-invalid', 'true');
+      invalidInput.setAttribute('aria-describedby', status.id);
+      invalidInput.focus();
+    }
+  }
+
+  function clearStatus() {
+    for (const input of [domainInput, emailInput]) {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    }
+    showStatus('', '');
+  }
+
+  form.addEventListener('input', clearStatus);
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (button.getAttribute('aria-disabled') === 'true') return;
+    clearStatus();
+    const domain = watchHostname(domainInput.value.trim());
+    const email = emailInput.value.trim();
+    if (!domain) return showStatus('Enter a domain like brightname.com.', 'error', domainInput);
+    if (!validEmail(email)) return showStatus('Enter a valid email address.', 'error', emailInput);
+
+    button.setAttribute('aria-disabled', 'true');
+    domainInput.readOnly = emailInput.readOnly = true;
+    showStatus('Sending…', 'sending');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, domain, website: trap.value }),
+        credentials: 'omit',
+        redirect: 'error',
+        signal: controller.signal
+      });
+      if (response.status === 429) {
+        showStatus('Too many tries. Wait a minute and try again.', 'error');
+        return;
+      }
+      const result = await response.json().catch(() => null);
+      if (response.status === 202 && result?.ok === true) {
+        form.reset();
+        showStatus('Check your inbox to confirm.', 'success');
+      } else if ([400, 422].includes(response.status) && typeof result?.message === 'string' && result.message) {
+        const field = response.status === 422 || /domain/i.test(result.message) ? domainInput : emailInput;
+        showStatus(result.message, 'error', field);
+      } else {
+        showStatus('The watch service is unavailable. Try again later.', 'error');
+      }
+    } catch {
+      showStatus('Couldn’t reach the server. Try again later.', 'error');
+    } finally {
+      clearTimeout(timer);
+      domainInput.readOnly = emailInput.readOnly = false;
+      button.removeAttribute('aria-disabled');
+    }
+  });
+
+  button.disabled = false;
+})();
 </script></body></html>
