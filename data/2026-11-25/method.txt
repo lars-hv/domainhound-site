@@ -19,15 +19,37 @@ Repeat for each root. availability.csv keeps the tool's result for every name an
 nc = registry free, no shop confirmation. ok = free with a shop quote.
 taken and resale = registered. prem = premium, separate from ordinary availability.
 shop_check = unsettled, including DNS hints. We did not promote hints to answers.
-The ending percentages divide free results by all 200 names, including unsettled checks.
 The length table counts letters before .com. This word list is not a random sample.
+
+Shop rechecks (fix round, 25 November 2026)
+-------------------------------------------
+The .ai and .io registries left 139 and 122 names as shop_check. A registry retry
+on 25 November returned HTTP 429 (rate limit). We then asked GoDaddy about all 261
+names using check_domain_availability at https://mcp.godaddy.com in batches
+of up to 20, with a pause between requests. Each of the 261 unique names appears
+once in registrar-rechecks.csv. The saved fields for the exact requested domain are
+inventory type, available and purchasable. availability.csv is unchanged.
+Results: .ai 139 Standard and available. .io 119 Standard and available,
+1 Premium, 2 Not Available.
+
+Categories in the guide tables:
+  Registry free = nc in availability.csv.
+  Shop free = shop_check in availability.csv, then Standard and available at GoDaddy.
+  Unavailable = taken or resale in availability.csv, plus GoDaddy Not Available.
+  Premium = prem in availability.csv, plus GoDaddy Premium.
+  Unsettled = shop_check with no recheck (.me, .dev, .app, .si, .so, .no).
+Shares divide free names (registry free plus shop free) by settled names only:
+all 200 minus unsettled. Each share states its denominator. Premium names count
+as settled, but not as free.
 
 Prices
 ------
 Prices are annual USD list amounts before tax, for standard domains. A quoted list rate
-does not confirm the name is available. A .ai registration or renewal covers at least
-two years: see https://www.dynadot.com/domain/ai . Double the listed annual rate to
-estimate its minimum payment. Never double a figure already quoted for the full term.
+does not confirm the name is available. Spaceship sells .ai at $79.98 per year
+with a 2 year minimum: see https://www.spaceship.com/domains/cctld/ai/ (checked
+25 November 2026). That is $159.96 up front. Spaceship's .co page showed $3.11
+first year and $31.05 renewal the same day: https://www.spaceship.com/domains/cctld/co/
+Never double a figure already quoted for the full term.
 
 We ran the CLI for brindleledger under all 14 endings, and copperfernledger.org and
 copperfernledger.info. We also ran:
@@ -43,7 +65,7 @@ No installed code was edited. Each row in registrar-offers.csv names its source.
 
 For each ending, compare shops Domain Hound makes eligible for a purchase link.
 Rank by renewal, then by standard first year for ties. Show both prices from that
-same shop. The package marks Porkbun as comparison data only. Limited coverage:
+same shop. Porkbun: public price list used for comparison, not ranked. Limited coverage:
 Spaceship and Dynadot had rates for eight endings; only Dynadot had eligible
 prices for the others. We did not rank shops without usable prices or claim a
 market-wide minimum. Exclude coupon codes, resale prices and premium offers.
@@ -57,19 +79,33 @@ An empty result and a source failure have different meanings. We counted the App
 record and the distinct Play listings returned. The CLI searched US storefronts.
 Its automatic trademark results cover the US. Search other markets separately.
 The X and Google results are the tool's own classifications. No handles were claimed.
+The startup guide treats two rows as pass or fail: the exact .com and the X handle.
+App stores, the US mark and Google are screens to review. A similar mark is a
+follow-up, not a failed check or a legal conclusion. We did not confirm the
+current USPTO status of MOSSLOO. Apple's wording on names, checked 25 November
+2026: "You can use an app name for one app per localization."
 
 Registration records and MCP
 ----------------------------
   node clis/domain-check/index.mjs github.com
   node clis/domain-check/index.mjs mozilla.org
 registry-records.csv retains the exact RDAP expiry timestamps. An expiry is not a release date.
+github.com's expiry, 2028-10-09T18:20:50Z, was rechecked at Verisign RDAP on 25 November.
+The expiry timeline (auto-renew grace up to 45 days, redemption grace 30 days,
+pending delete 5 days) comes from ICANN's life cycle page:
+https://www.icann.org/resources/pages/gtld-lifecycle-2012-02-25-en
 For the setup guide we ran the published server with npx -y domain-hound, sent
 initialize and tools/list, then called check_domains on example.com, naming_method
 for a bookkeeping app and triage_names on Moss Loom. The latter used category
 software, the bookkeeping brief and an unknown prior brand association.
 mcp-results.json records the tool names, excerpts and package requirements.
-The comparison uses this run for Domain Hound and pinned project documentation for
-the other servers. Those servers were not run. Links are recorded in sources.json.
+The comparison uses this run for Domain Hound and each other tool's own docs or
+pages: GoDaddy MCP server, Domain Search MCP (dorukardahan/domain-search-mcp,
+pinned commit), Namelix, Instant Domain Search, Domain Check MCP and Internet
+Names MCP (pinned commits). "Not documented" means we could not confirm the
+feature from that source on 25 November. We also used the GoDaddy MCP server for the shop rechecks. The feature table
+uses first-party documentation and is not a performance benchmark.
+Links are recorded in sources.json.
 
 Each file in tables/ contains the full table from one guide. The first field is
 the guide check date. Individual registrar price dates are in registrar-offers.csv.

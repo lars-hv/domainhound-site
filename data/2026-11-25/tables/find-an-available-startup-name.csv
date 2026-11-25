@@ -1,6 +1,6 @@
 checked_utc,Check,Brindle Ledger,Moss Loom
-2026-11-25,.com,Registry free,Taken
-2026-11-25,US app stores,No match returned,No match returned
-2026-11-25,X handle,Reported free,Reported taken
-2026-11-25,US word mark,No close hit,Similar mark
-2026-11-25,Google results,Reported open,Reported open
+2026-11-25,.com (pass or fail),Pass: registry free,Fail: taken
+2026-11-25,X handle (pass or fail),Pass: free,Fail: taken
+2026-11-25,US app stores (review),No listing,No listing
+2026-11-25,US word mark (review),No close hit,"Similar: MOSSLOO, review it"
+2026-11-25,Google results (review),Open,Open

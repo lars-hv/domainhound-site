@@ -29,3 +29,18 @@
 @media (max-width: 360px) {
   .guide th, .guide td { overflow-wrap: anywhere; }
 }
+
+.guide .tool-comparison { min-width: 54rem; }
+.tool-comparison th:first-child { position: sticky; left: 0; background: var(--cream); }
+.tool-comparison thead th:first-child { background: var(--gold); }
+.tool-comparison caption small { font-weight: 600; }
+@media (min-width: 64rem) {
+  .guide .table-wrap:has(.tool-comparison) {
+    width: min(76rem, calc(100vw - 2 * var(--gutter)));
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
+}
+@media (min-width: 80rem) {
+  .tool-comparison caption small { display: none; }
+}

@@ -40,282 +40,551 @@ Use Node.js 20 or later. Add the server in your terminal and start a fresh clien
 - [Use Domain Hound in Claude Code or Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/)
 - [What makes a good startup name?](https://domainhound.dev/guides/good-startup-name/)
 
+## Full text
+
+- [Full guide text and tables](https://domainhound.dev/llms-full.txt)
+
 ## How to check if a domain is available
 
 https://domainhound.dev/guides/how-to-check-domain-availability/
 
-Look up the full domain in its registry, then ask a registrar for the price. A blank website tells you nothing about who owns the name.
+Registry and shop checks settled 1,701 domains on 2026-11-25. We checked 200 names under 10 endings.
 
-What the registry checks returned (25 November 2026 UTC)
+The same 200 names under 10 endings · Checked 2026-11-25 UTC
 
-Ending | Free | Taken | Unsettled | Premium
---- | --- | --- | --- | ---
-.com | 8 | 192 | 0 | 0
-.ai | 35 | 26 | 139 | 0
-.io | 43 | 35 | 122 | 0
-.me | 64 | 21 | 115 | 0
-.co | 111 | 89 | 0 | 0
-.dev | 85 | 27 | 88 | 0
-.app | 76 | 40 | 84 | 0
-.si | 178 | 21 | 1 | 0
-.so | 180 | 19 | 1 | 0
-.no | 170 | 19 | 10 | 1
+| Ending | Registry free | Shop free | Unavailable | Premium | Unsettled | Free of settled |
+| --- | --- | --- | --- | --- | --- | --- |
+| .com | 8 | 0 | 192 | 0 | 0 | 8 of 200 (4.0%) |
+| .ai | 35 | 139 | 26 | 0 | 0 | 174 of 200 (87.0%) |
+| .io | 43 | 119 | 37 | 1 | 0 | 162 of 200 (81.0%) |
+| .co | 111 | 0 | 89 | 0 | 0 | 111 of 200 (55.5%) |
+| .me | 64 | 0 | 21 | 0 | 115 | 64 of 85 (75.3%) |
+| .dev | 85 | 0 | 27 | 0 | 88 | 85 of 112 (75.9%) |
+| .app | 76 | 0 | 40 | 0 | 84 | 76 of 116 (65.5%) |
+| .si | 178 | 0 | 21 | 0 | 1 | 178 of 199 (89.4%) |
+| .so | 180 | 0 | 19 | 0 | 1 | 180 of 199 (90.5%) |
+| .no | 170 | 0 | 19 | 1 | 10 | 170 of 190 (89.5%) |
+| All 10 | 950 | 258 | 491 | 2 | 299 | 1,208 of 1,701 (71.0%) |
 
-We tried the same 200 names under each ending. Free means the registry showed no registration. Taken includes possible resale listings. Unsettled means the tool needs a shop check. Premium names have a separate count.
+Registry free means no registration was on record. Shop free means GoDaddy offered a standard registration after the first lookup gave no answer. Unavailable includes resale listings and names the shop could not register. Premium names count as settled. The 299 unresolved checks stay out of the percentages.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/how-to-check-domain-availability.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/how-to-check-domain-availability.csv) · [Registry lookups](https://domainhound.dev/data/2026-11-25/availability.csv) · [Shop rechecks for .ai and .io](https://domainhound.dev/data/2026-11-25/registrar-rechecks.csv) · [ICANN registration lookup](https://lookup.icann.org/en)
 
-Give Domain Hound a full name such as example.com. It looks for a registry record using RDAP or WHOIS. If the registry stays silent, it can use DNS for a clue. Ask for a shop check before you pay.
+### How Domain Hound does it
 
-What if the site never loads? The owner may use the domain for email, park it or leave it empty.
+Give it a full name such as brindleledger.com. It asks the registry over RDAP or WHOIS. When the registry stays quiet, it says unsettled instead of guessing. Ask a shop to confirm before you pay.
 
-Why does the shop want more? The registry can set a premium price for an unregistered name. A price set by an existing owner is a resale price.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-When is the name mine? After the registrar accepts the registration. A lookup does not hold it for you.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+What if the site never loads?
+
+The owner may use the domain for email, park it or leave it empty.
+
+Why does the shop want more?
+
+The registry can set a premium price for an unregistered name. A price set by an existing owner is a resale price.
+
+When is the name mine?
+
+After the registrar accepts the registration. A lookup does not hold it for you.
+
+### Related guides
+
+- [How to find an available startup name](https://domainhound.dev/guides/find-an-available-startup-name/)
+- [What does a domain cost to renew?](https://domainhound.dev/guides/domain-renewal-prices/)
+
+Last updated 25 November 2026.
+
+The hound won’t call a guess a catch.
 
 ## How to find an available startup name
 
 https://domainhound.dev/guides/find-an-available-startup-name/
 
-Say each name aloud, then check the domain, app stores, handles and trademarks together. Keep a backup until you know what the domain costs and which names already trade in your market.
+Brindle Ledger passes, Moss Loom fails 2 checks (2026-11-25). We wanted the exact .com and X handle for a bookkeeping app.
 
-A shortlist for a bookkeeping app (25 November 2026 UTC)
+A shortlist for a bookkeeping app · Checked 2026-11-25 UTC
 
-Check | Brindle Ledger | Moss Loom
---- | --- | ---
-.com | Registry free | Taken
-US app stores | No match returned | No match returned
-X handle | Reported free | Reported taken
-US word mark | No close hit | Similar mark
-Google results | Reported open | Reported open
+| Check | Brindle Ledger | Moss Loom |
+| --- | --- | --- |
+| .com (pass or fail) | Pass: registry free | Fail: taken |
+| X handle (pass or fail) | Pass: free | Fail: taken |
+| US app stores (review) | No listing | No listing |
+| US word mark (review) | No close hit | Similar: MOSSLOO, review it |
+| Google results (review) | Open | Open |
 
-Both Google checks looked open. The X handle and the similar US mark made Moss Loom the harder choice. Open each source before you build a brand around the result.
+Mossloom.com was taken, as was the X handle. Brindle Ledger had both available. The store and Google searches returned no conflict for either name. Before choosing Moss Loom, check which goods the similar US mark MOSSLOO covers.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/find-an-available-startup-name.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/find-an-available-startup-name.csv) · [Lookup data](https://domainhound.dev/data/2026-11-25/name-screens.json)
 
-Describe the product and ask for names. Domain Hound can pair common words, check domains in batches and screen the shortlist against existing apps and brands.
+### How Domain Hound does it
 
-Should I start with the logo? Start with the shortlist. Changing a word on a page is cheaper than changing a sign.
+Describe the product and ask for names. It checks domains in batches of up to 20, then screens the shortlist against apps, US marks, search results and handles.
 
-Do I need every handle? Check the places where buyers will look for you. Look at who uses each handle and what they sell.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-What comes before registration? Check renewal, search similar marks in your markets and read the shop’s final quote.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+Should I start with the logo?
+
+Start with the shortlist. Changing a word on a page is cheaper than changing a sign.
+
+Do I need every handle?
+
+Only where your buyers look for you. Check who holds each handle and what they sell.
+
+What comes before registration?
+
+Check the renewal price, search similar marks in each market and read the shop’s final quote.
+
+### Related guides
+
+- [Is my app name available?](https://domainhound.dev/guides/is-my-app-name-available/)
+- [How to check a trademark before naming](https://domainhound.dev/guides/trademark-check-before-naming/)
+
+Last updated 25 November 2026.
+
+The hound won’t claim the handle for you.
 
 ## Which domain name MCP server fits?
 
 https://domainhound.dev/guides/best-domain-name-mcp-servers/
 
-Pick Domain Hound when you need a shortlist with prices and name checks. For a registry lookup or a search across social handles, a smaller tool may cover the whole job.
+4 of 7 naming tools run locally (checked 2026-11-25). Domain Hound also checks renewal prices, both US app stores and US word marks.
 
-What each server can check (25 November 2026 UTC)
+What each tool documents · Checked 2026-11-25 UTC
 
-Server | Checks and price access | Run locally
---- | --- | ---
-Domain Hound | Our run found example.com taken. Standard renewal estimates are free. | npx -y domain-hound
-Domain Check MCP | RDAP and selected WHOIS lookups. Its MIT licensed server documents lookups, with no shop quotes listed. | uvx domain-check-mcp
-Internet Names MCP | Free RDAP and social handle checks. An optional free NameSilo API key adds domain prices. | uvx internet-names-mcp
+| Tool | Registry-confirmed availability | Renewal price shown | iOS + Android app names | US trademarks | Google / SEO signals | Free + runs locally | Install |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [Domain Hound](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) | [RDAP or WHOIS](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) | [Dated list prices](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) | [Both US stores](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) | [USPTO word marks](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) | [Google Search and Trends](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) | [Yes, MIT license](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) | [npx -y domain-hound](https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md) |
+| [GoDaddy MCP server](https://developer.godaddy.com/en/docs/api-users/mcp/set-up) | [Registrar lookup (registry source not documented)](https://developer.godaddy.com/en/docs/api-users/mcp/tools/domains) | [First year and renewal](https://developer.godaddy.com/en/docs/api-users/mcp/tools/domains) | [not documented](https://developer.godaddy.com/en/docs/api-users/mcp/tools/domains) | [not documented](https://developer.godaddy.com/en/docs/api-users/mcp/tools/domains) | [not documented](https://developer.godaddy.com/en/docs/api-users/mcp/tools/domains) | [Hosted](https://developer.godaddy.com/en/docs/api-users/mcp/set-up) | [Add GoDaddy in connectors](https://developer.godaddy.com/en/docs/api-users/mcp/set-up) |
+| [Domain Search MCP](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md) | [RDAP with fallbacks](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md) | [With pricing backend](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/src/services/pricing-api.ts) | [not documented](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md) | [not documented](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md) | [not documented](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md) | [Yes, local stdio](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md) | [npx -y domain-search-mcp@latest](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md) |
+| [Namelix](https://namelix.com/) | [not documented](https://namelix.com/domain-search/) | [not documented](https://namelix.com/domain-search/) | [not documented](https://namelix.com/domain-search/) | [USPTO matches](https://namelix.com/domain-search/) | [not documented](https://namelix.com/domain-search/) | [Free website](https://namelix.com/) | [Open in browser](https://namelix.com/) |
+| [Instant Domain Search](https://instantdomainsearch.com/mcp) | [Daily registry and DNS index](https://instantdomainsearch.com/mcp) | [not documented](https://instantdomainsearch.com/mcp) | [not documented](https://instantdomainsearch.com/mcp) | [Indexed USPTO records](https://instantdomainsearch.com/mcp) | [not documented](https://instantdomainsearch.com/mcp) | [Free, hosted](https://instantdomainsearch.com/mcp) | [Add Instant in connectors](https://instantdomainsearch.com/mcp) |
+| [Domain Check MCP](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) | [RDAP or WHOIS](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) | [not documented](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) | [not documented](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) | [not documented](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) | [not documented](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) | [Yes, MIT license](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) | [uvx domain-check-mcp](https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md) |
+| [Internet Names MCP](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) | [RDAP](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) | [not documented](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) | [not documented](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) | [not documented](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) | [not documented](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) | [Yes, local RDAP](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) | [uvx internet-names-mcp](https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md) |
 
-We ran Domain Hound and read the other projects’ own instructions. The table compares tasks and setup. It does not rank speed or accuracy.
+Our assistant tests named [dorukardahan’s Domain Search MCP](https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md). GoDaddy checks its own inventory. Instant searches a daily index. A cell marked “not documented” links to the source we checked.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/best-domain-name-mcp-servers.csv
+Domain Hound checks up to 20 names per call. The US app and trademark screens cover one market. The registry left 261 of 400 .ai and .io lookups unsettled. GoDaddy supplied the [follow-up results](https://domainhound.dev/data/2026-11-25/registrar-rechecks.csv). Confirm the price with the registrar before paying.
 
-Give the assistant a product idea for the naming recipe, or send an exact domain for a lookup. Domain Hound returned a registration result for example.com, plus a separate list price as a reference.
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/best-domain-name-mcp-servers.csv) · [Domain Hound run](https://domainhound.dev/data/2026-11-25/mcp-results.json) · [All sources](https://domainhound.dev/data/2026-11-25/sources.json) · [Domain Hound on npm](https://www.npmjs.com/package/domain-hound/v/0.1.3)
 
-Which one generates names? Domain Hound gives your assistant a naming recipe. The assistant writes the shortlist.
+### How Domain Hound does it
 
-Are Domain Hound prices binding? Most are dated list prices. A confirmed quote needs a shop response, and premium prices can differ.
+Give the assistant a product idea and it gets a naming recipe. Send a shortlist and Domain Hound checks domains, renewal prices, apps, US marks, Google results and handles.
 
-Will it clear a trademark or buy a domain? It screens US marks. You handle clearance and checkout.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
+
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+Which one generates names?
+
+Domain Hound gives your assistant a naming recipe. The assistant writes the shortlist, then Domain Hound checks it.
+
+Are Domain Hound prices binding?
+
+No. They are dated list prices. The shop’s checkout has the final price, and premium names cost more.
+
+Will it clear a trademark or buy a domain?
+
+Neither. It screens US marks. You handle clearance and checkout.
+
+### Related guides
+
+- [Use Domain Hound in Claude Code or Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/)
+- [How to check if a domain is available](https://domainhound.dev/guides/how-to-check-domain-availability/)
+
+Last updated 25 November 2026.
+
+The hound won’t buy a domain for you.
 
 ## Is my app name available?
 
 https://domainhound.dev/guides/is-my-app-name-available/
 
-Search your title in the Apple App Store and Google Play, including similar spellings. Check your app record and trademark rights before you announce the name.
+2 of 3 names had no US store matches (2026-11-25). Spotify appeared in both the App Store and Google Play.
 
-US store matches returned (25 November 2026 UTC)
+Titles and publishers found in US stores · Checked 2026-11-25 UTC
 
-Name searched | Apple matches | Play matches
---- | --- | ---
-Spotify | 1 | 2
-Moss Loom | 0 | 0
-Brindle Ledger | 0 | 0
+| Name searched | App Store (US) | Google Play (US) |
+| --- | --- | --- |
+| Spotify | [Spotify: Music and Podcasts](https://apps.apple.com/us/app/id324684580), by Spotify | [Spotify: Music and Podcasts](https://play.google.com/store/apps/details?id=com.spotify.music), by Spotify AB. [Spotify: Music & Podcasts](https://play.google.com/store/apps/details?id=com.spotify.tv.android) (TV), by Spotify AB |
+| Moss Loom | None found | None found |
+| Brindle Ledger | None found | None found |
 
-These are matches returned by the tool in the US stores. Spotify’s Play results included separate mobile and TV listings. A zero means the search returned no matching listing.
+Spotify returned 1 Apple listing and 2 Play listings, all from Spotify itself. “None found” means the US search returned no listing. It misses unpublished apps and other storefronts.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/is-my-app-name-available.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/is-my-app-name-available.csv) · [Lookup data](https://domainhound.dev/data/2026-11-25/name-screens.json) · [Apple’s app name rules](https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/) · [Google Play app setup](https://support.google.com/googleplay/android-developer/answer/9859152?hl=en)
 
-Ask Domain Hound to screen the name for your kind of app. Read the titles and publishers it finds, then repeat the search in each country where you plan to launch.
+### How Domain Hound does it
 
-Can I claim the iOS title? Try it in App Store Connect. Apple allows one app to use a given name in each localization.
+Ask it to screen the name for your kind of app. It brings back titles and publishers from both US stores. Repeat the search in each country where you launch.
 
-Is the Android title the app’s ID? Google Play uses a unique, permanent package name. The title shoppers see is a separate field.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-What if both searches are empty? Check similar trademarks, domains and handles. Store searches miss unpublished apps and names outside the storefront searched.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+Can two iOS apps share a name?
+
+Apple says, “You can use an app name for one app per localization.” Try the name in App Store Connect.
+
+Is the Android title the app’s ID?
+
+No. Google Play uses a unique, permanent package name. The title shoppers see is a separate field.
+
+What if both searches are empty?
+
+Check similar trademarks, domains and handles. Store searches miss unpublished apps and other countries.
+
+### Related guides
+
+- [How to check a trademark before naming](https://domainhound.dev/guides/trademark-check-before-naming/)
+- [How to find an available startup name](https://domainhound.dev/guides/find-an-available-startup-name/)
+
+Last updated 25 November 2026.
+
+The hound won’t reserve your spot in the store.
 
 ## What does a domain cost to renew?
 
 https://domainhound.dev/guides/domain-renewal-prices/
 
-Compare the renewal fee before you pick a registrar. In our price lists, a .com at Spaceship cost $9.48 for the first year and $10.68 to renew.
+.co: $3.11 today, $31.05 next year (2026-11-25). Spaceship listed both rates for the same domain ending.
 
-Lowest listed renewal by ending, USD per year (25 November 2026 UTC)
+Lowest renewal among ranked shops, USD per year · Checked 2026-11-25 UTC
 
-Ending | First year | Renewal | Shop
---- | --- | --- | ---
-.com | $9.48 | $10.68 | Spaceship
-.net | $7.49 | $12.52 | Dynadot
-.org | $7.99 | $11.64 | Dynadot
-.co | $3.11 | $31.05 | Spaceship
-.io | $31.98 | $51.75 | Spaceship
-.ai | $79.98 | $79.98 | Spaceship
-.dev | $8.28 | $12.42 | Spaceship
-.app | $8.28 | $14.49 | Spaceship
-.me | $8.70 | $15.53 | Spaceship
-.si | $11.29 | $11.29 | Dynadot
-.so | $57.50 | $57.50 | Dynadot
-.no | $7.97 | $7.97 | Dynadot
-.xyz | $1.50 | $14.45 | Dynadot
-.info | $3.99 | $22.69 | Dynadot
+| Ending | First year | Renewal | Shop |
+| --- | --- | --- | --- |
+| .com | [$9.48](https://www.spaceship.com/domain-search/pricing/) | [$10.68](https://www.spaceship.com/domain-search/pricing/) | [Spaceship](https://www.spaceship.com/domain-search/pricing/) |
+| .net | [$7.49](https://www.dynadot.com/domain/prices?currency=USD) | [$12.52](https://www.dynadot.com/domain/prices?currency=USD) | [Dynadot](https://www.dynadot.com/domain/prices?currency=USD) |
+| .org | [$7.99](https://www.dynadot.com/domain/prices?currency=USD) | [$11.64](https://www.dynadot.com/domain/prices?currency=USD) | [Dynadot](https://www.dynadot.com/domain/prices?currency=USD) |
+| .co | [$3.11](https://www.spaceship.com/domains/cctld/co/) | [$31.05](https://www.spaceship.com/domains/cctld/co/) | [Spaceship](https://www.spaceship.com/domains/cctld/co/) |
+| .io | [$31.98](https://www.spaceship.com/domain-search/pricing/) | [$51.75](https://www.spaceship.com/domain-search/pricing/) | [Spaceship](https://www.spaceship.com/domain-search/pricing/) |
+| .ai | [$79.98](https://www.spaceship.com/domains/cctld/ai/) | [$79.98](https://www.spaceship.com/domains/cctld/ai/) | [Spaceship](https://www.spaceship.com/domains/cctld/ai/) |
+| .dev | [$8.28](https://www.spaceship.com/domain-search/pricing/) | [$12.42](https://www.spaceship.com/domain-search/pricing/) | [Spaceship](https://www.spaceship.com/domain-search/pricing/) |
+| .app | [$8.28](https://www.spaceship.com/domain-search/pricing/) | [$14.49](https://www.spaceship.com/domain-search/pricing/) | [Spaceship](https://www.spaceship.com/domain-search/pricing/) |
+| .me | [$8.70](https://www.spaceship.com/domain-search/pricing/) | [$15.53](https://www.spaceship.com/domain-search/pricing/) | [Spaceship](https://www.spaceship.com/domain-search/pricing/) |
+| .si | [$11.29](https://www.dynadot.com/domain/prices?currency=USD) | [$11.29](https://www.dynadot.com/domain/prices?currency=USD) | [Dynadot](https://www.dynadot.com/domain/prices?currency=USD) |
+| .so | [$57.50](https://www.dynadot.com/domain/prices?currency=USD) | [$57.50](https://www.dynadot.com/domain/prices?currency=USD) | [Dynadot](https://www.dynadot.com/domain/prices?currency=USD) |
+| .no | [$7.97](https://www.dynadot.com/domain/prices?currency=USD) | [$7.97](https://www.dynadot.com/domain/prices?currency=USD) | [Dynadot](https://www.dynadot.com/domain/prices?currency=USD) |
+| .xyz | [$1.50](https://www.dynadot.com/domain/prices?currency=USD) | [$14.45](https://www.dynadot.com/domain/prices?currency=USD) | [Dynadot](https://www.dynadot.com/domain/prices?currency=USD) |
+| .info | [$3.99](https://www.dynadot.com/domain/prices?currency=USD) | [$22.69](https://www.dynadot.com/domain/prices?currency=USD) | [Dynadot](https://www.dynadot.com/domain/prices?currency=USD) |
 
-Each row pairs the lowest renewal with the first year at that same shop. We ranked available Spaceship and Dynadot list prices. Dynadot was the only ranked shop for some endings. Porkbun supplied comparison data. Spaceship’s list is from Nov 24 and Dynadot’s from Nov 25. See all offers for coverage.
+We ranked Spaceship and Dynadot by renewal price. Both prices in each row come from the same shop. Porkbun provided the public price list used for comparison. Spaceship’s list was dated November 24. We checked its .co and .ai pages again on November 25. Dynadot’s November 25 list was the only ranked source for 6 endings.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/domain-renewal-prices.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/domain-renewal-prices.csv) · [All registrar offers](https://domainhound.dev/data/2026-11-25/registrar-offers.csv) · [Spaceship’s .co page](https://www.spaceship.com/domains/cctld/co/) · [Spaceship’s .ai page](https://www.spaceship.com/domains/cctld/ai/) · [Norid’s .no rules](https://www.norid.no/en/om-domenenavn/regelverk-for-no/)
 
-Ask for both payments on an exact domain. Domain Hound compares dated public price lists. These are standard rates before tax. Premium names, coupons and resale deals can change the bill.
+### How Domain Hound does it
 
-How much is due for .ai? The listed rate is per year. A two year term at the table rate comes to $159.96 up front.
+Ask about an exact domain. You get the first year and the renewal side by side, from dated public price lists. Standard rates, before fees and tax. Premium names, coupons and resale deals change the bill.
 
-Does the cheapest first year win? No. Dynadot listed .io at $21.40 for the first year and $53.50 to renew. Spaceship charged more up front and less at renewal.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-Can anyone buy a .no? Norid has eligibility rules, including a Norwegian postal address. Check the rules before you choose it.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+How much is due for .ai?
+
+Spaceship sells .ai for 2 years minimum at $79.98 a year. That is $159.96 up front.
+
+Does the cheapest first year win?
+
+No. Dynadot listed .io at $21.40 for the first year and $53.50 to renew. Spaceship charged more up front and less at renewal.
+
+Can anyone buy a .no?
+
+No. Norid’s policy, section 5, allows people over 18 in the Norwegian population register with a Norwegian national ID, and eligible registered organisations. Both need a local postal address.
+
+### Related guides
+
+- [Should you buy .com, .ai or .io?](https://domainhound.dev/guides/com-vs-ai-vs-io/)
+- [How to check if a domain is available](https://domainhound.dev/guides/how-to-check-domain-availability/)
+
+Last updated 25 November 2026.
+
+The hound won’t reach for your wallet.
 
 ## Should you buy .com, .ai or .io?
 
 https://domainhound.dev/guides/com-vs-ai-vs-io/
 
-Start with .com if customers will guess your address from the name. If it is taken, weigh the cost of a new name against the renewal bill for .ai, .io or .dev.
+87% of our .ai sample was available on 2026-11-25. The same 200 names yielded 81% under .io and 4% under .com.
 
-Same names, different endings (25 November 2026 UTC)
+Same names, different endings · Checked 2026-11-25 UTC
 
-Ending | Registry free | First year | Renewal
---- | --- | --- | ---
-.com | 8 of 200 (4%) | $9.48 | $10.68
-.ai | 35 of 200 (17.5%) | $79.98 | $79.98
-.io | 43 of 200 (21.5%) | $31.98 | $51.75
-.dev | 85 of 200 (42.5%) | $8.28 | $12.42
+| Ending | Free of settled | First year | Renewal |
+| --- | --- | --- | --- |
+| .com | 8 of 200 (4.0%) | [$9.48](https://www.spaceship.com/domain-search/pricing/) | [$10.68](https://www.spaceship.com/domain-search/pricing/) |
+| .ai | 174 of 200 (87.0%) | [$79.98](https://www.spaceship.com/domains/cctld/ai/) | [$79.98](https://www.spaceship.com/domains/cctld/ai/) |
+| .io | 162 of 200 (81.0%) | [$31.98](https://www.spaceship.com/domain-search/pricing/) | [$51.75](https://www.spaceship.com/domain-search/pricing/) |
+| .dev | 85 of 112 (75.9%) | [$8.28](https://www.spaceship.com/domain-search/pricing/) | [$12.42](https://www.spaceship.com/domain-search/pricing/) |
 
-We tested the same 200 names under each ending. The share shown counts free results across the whole sample. Unsettled lookups stay in the total. Prices are annual USD list rates at the lowest renewal shop in our price table.
+Of the 174 available .ai names, 35 had no registry record and GoDaddy offered 139 at its standard price. For .io the counts were 43 and 119. One more .io was premium. We excluded 88 unresolved .dev checks. Prices are Spaceship’s annual USD list rates before fees.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/com-vs-ai-vs-io.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/com-vs-ai-vs-io.csv) · [Registry lookups](https://domainhound.dev/data/2026-11-25/availability.csv) · [Shop rechecks for .ai and .io](https://domainhound.dev/data/2026-11-25/registrar-rechecks.csv) · [Price lists](https://domainhound.dev/data/2026-11-25/registrar-offers.csv) · [Spaceship’s .ai page](https://www.spaceship.com/domains/cctld/ai/)
 
-Ask for the same name under each ending. Read the registry result and renewal together. A free .ai might fit a product well, but you need enough cash for its two year term.
+### How Domain Hound does it
 
-Are these my odds of finding a name? No. The sample uses English roots and endings we picked. It shows how those particular names fared.
+Ask for the same name under each ending. You get the availability and both prices together. At Spaceship, .ai requires 2 years at $79.98 per year. The first payment is $159.96 before tax.
 
-What does .dev add? It signals a developer audience. Say the full address aloud and see whether people remember the ending.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-What if someone owns the .com? Visit it. An active business with a similar product is a reason to try another name.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+Are these my odds of finding a name?
+
+No. The sample uses 200 English names we picked. It shows how those names fared on one day.
+
+What does .dev add?
+
+It signals a developer audience. Say the full address aloud and see whether people remember the ending.
+
+What if someone owns the .com?
+
+Visit it. An active business with a similar product is a reason to try another name.
+
+### Related guides
+
+- [What does a domain cost to renew?](https://domainhound.dev/guides/domain-renewal-prices/)
+- [What makes a good startup name?](https://domainhound.dev/guides/good-startup-name/)
+
+Last updated 25 November 2026.
+
+The hound won’t pick up the renewal bill.
 
 ## How to check a trademark before naming
 
 https://domainhound.dev/guides/trademark-check-before-naming/
 
-Search the name, similar spellings and words that sound alike in each market where you plan to sell. Read what the owners sell, since similar marks on related goods can conflict.
+1 of 3 returned no US word-mark hits (2026-11-25). Brindle Ledger returned no close hit. Moss Loom turned up MOSSLOO.
 
-US word mark screen for a software product (25 November 2026 UTC)
+US word mark screen for a software product · Checked 2026-11-25 UTC
 
-Name | Screen result | Mark returned
---- | --- | ---
-Spotify | Exact | SPOTIFY
-Moss Loom | Similar spelling | MOSSLOO
-Brindle Ledger | No close hit | None returned
+| Name | Screen result | Mark returned | Owner and classes |
+| --- | --- | --- | --- |
+| Spotify | Exact | [SPOTIFY](https://tsdr.uspto.gov/#caseNumber=79037568&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch) | Spotify AB (9, 35, 38, 41) |
+| Moss Loom | Similar spelling | [MOSSLOO](https://tsdr.uspto.gov/#caseNumber=86576849&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch) | Eagle Rox Electronics USA Inc. (9) |
+| Brindle Ledger | No close hit | None returned | None |
 
-Moss Loom drew a hit even though the spelling differed. Read the record, its status and its goods before deciding what the match means.
+The tool flagged MOSSLOO in class 9. Check the USPTO record for its current status and listed goods. Not legal advice.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/trademark-check-before-naming.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/trademark-check-before-naming.csv) · [Lookup data](https://domainhound.dev/data/2026-11-25/name-screens.json) · [USPTO clearance guidance](https://www.uspto.gov/trademarks/search/comprehensive-clearance-search-similar-trademarks) · [EUIPO and TMview](https://www.euipo.europa.eu/en/trade-marks/before-applying/availability) · [Norwegian Industrial Property Office register](https://search.patentstyret.no/)
 
-Domain Hound screens live US word marks. For the EU, run your own search in TMview. In Norway, search the Norwegian Industrial Property Office register. Check business names and real use as well.
+### How Domain Hound does it
 
-What does “no close hit” tell me? Only that this US screen returned no close mark. A related mark, an unregistered business or a name abroad may still matter.
+It screens US word marks for exact and similar spellings. For the EU, search TMview. In Norway, search the Norwegian Industrial Property Office register. Check business names and real use too.
 
-What should I do with a hit? Read the full mark record. Compare the sound, meaning, goods and buyers. A trademark lawyer can assess a close call.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-Does owning the domain give me rights to the mark? Buying a web address does not settle who may trade under the name.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+What does “no close hit” tell me?
+
+Only that this US screen returned no close mark. A related mark, an unregistered business or a mark abroad can still matter.
+
+What should I do with a hit?
+
+Open the full record. Compare sound, meaning, goods and buyers. A trademark lawyer can judge a close call.
+
+Does owning the domain give me rights to the mark?
+
+No. Buying a web address does not settle who may trade under the name.
+
+### Related guides
+
+- [Is my app name available?](https://domainhound.dev/guides/is-my-app-name-available/)
+- [How to find an available startup name](https://domainhound.dev/guides/find-an-available-startup-name/)
+
+Last updated 25 November 2026.
+
+The hound won’t play trademark lawyer.
 
 ## How to buy a taken domain
 
 https://domainhound.dev/guides/buy-a-taken-domain/
 
-Look for a sale listing or a contact form from the registrar and ask whether the owner will sell. If you wait for expiry, keep a backup name because the owner can renew.
+ICANN lists 30 days for redemption (checked 2026-11-25). To buy sooner, look for a sale listing or contact the owner through the registrar.
 
-Expiry dates from public registry records (25 November 2026 UTC)
+What happens after a .com expires · Checked 2026-11-25 UTC
 
-Domain | Registry result | Expiry shown
---- | --- | ---
-github.com | Registered | 2028-10-09
-mozilla.org | Registered | 2027-01-23
+| Stage | Days | Who can act |
+| --- | --- | --- |
+| Auto-renew grace | 0 to 45 | The registrar sets its renewal deadline and can delete the name. |
+| Redemption grace | 30 | The previous owner can ask the registrar to restore it. |
+| Pending delete | 5 | Restoration closes. The registry releases the name after this stage. |
 
-Both records gave an expiry date. Neither date tells you when you could buy the name. These domains illustrate registry records, not offers for sale.
+ICANN’s timeline covers typical generic endings. Redemption starts when the registrar deletes the name. A registrar may renew or auction it instead. On November 25, Verisign listed [October 9, 2028 as the expiry of github.com](https://rdap.verisign.com/com/v1/domain/github.com). That date can change if the owner renews.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/buy-a-taken-domain.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/buy-a-taken-domain.csv) · [Registry records](https://domainhound.dev/data/2026-11-25/registry-records.csv) · [ICANN domain life cycle](https://www.icann.org/resources/pages/gtld-lifecycle-2012-02-25-en) · [ICANN status codes](https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en) · [ICANN registration lookup](https://lookup.icann.org/en)
 
-Ask Domain Hound to check the exact domain. When it is taken, you can set a watch and confirm your email. A watch sends an alert. It cannot reserve the domain.
+### How Domain Hound does it
 
-Does a domain drop at expiry? Usually there are more steps. For many generic endings, the registrar can still renew or auction the name. After deletion, redemption gives the prior owner a chance to restore it.
+Ask it to check the exact domain. When it is taken, [set a watch](https://domainhound.dev/watch/) and confirm your email. You get an alert when the name comes loose.
 
-What does pending delete mean? After redemption ends without restoration, the registry can place the name in its final pending delete stage. Registry rules govern release. Other buyers can reach it first.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-What should I pay? Set your ceiling before contacting the owner. Verify control, agree on the transfer in writing and use an escrow service you trust. A registry result gives no resale valuation.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+Does a domain drop at expiry?
+
+No. The registrar may still allow renewal. Check its deadline. Redemption begins only if the registrar deletes the name.
+
+What does pending delete mean?
+
+The last 5 days. Nobody can restore the name. Then the registry releases it, and the first registration wins.
+
+What should I pay?
+
+Set your ceiling before you contact the owner. Agree the transfer in writing and use an escrow service you trust.
+
+### Related guides
+
+- [How to check if a domain is available](https://domainhound.dev/guides/how-to-check-domain-availability/)
+- [What does a domain cost to renew?](https://domainhound.dev/guides/domain-renewal-prices/)
+
+Last updated 25 November 2026.
+
+The hound keeps watch. It won’t place a bid.
 
 ## Use Domain Hound in Claude Code or Codex
 
 https://domainhound.dev/guides/domain-hound-claude-code-codex/
 
-Add Domain Hound as a local MCP server, then start a fresh assistant session. Ask about a full domain first so you can see whether the tool is connected.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
 
-Prompts and results from the published server (25 November 2026 UTC)
+Domain Hound answered 3 tool calls on 2026-11-25. The command above adds Domain Hound to Claude Code.
 
-Ask your assistant | Tool used | Result from our run
---- | --- | ---
-Check example.com. | check_domains | Taken. Checkout stays with you.
-Suggest names for a bookkeeping app. | naming_method | Pair a word with a familiar animal or object.
-Screen Moss Loom for a bookkeeping app. | triage_names | Check first. Similar US mark: MOSSLOO.
+For Codex, run this command.
 
-We sent the underlying tool calls to the published MCP server over standard input and output. The results here are shortened. Your assistant may phrase them differently.
+```sh
+codex mcp add domain-hound -- npx -y domain-hound
+```
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/domain-hound-claude-code-codex.csv
+Use Node.js 20 or later. Open a new session and try a prompt below.
 
-Install Node.js 20 or later. Run the command for your client in your terminal, then reopen the client. The server runs on your machine and sends the name to public sources.
+Prompts and results from the published server · Checked 2026-11-25 UTC
 
-Do I need an API key? The default domain and list price checks run without a registrar key.
+| Ask your assistant | Tool used | Result from our run |
+| --- | --- | --- |
+| Check example.com. | check_domains | Taken. Checkout stays with you. |
+| Suggest names for a bookkeeping app. | naming_method | Pair a word with a familiar animal or object. |
+| Screen Moss Loom for a bookkeeping app. | triage_names | Check first. Similar US mark: MOSSLOO. |
 
-How can I check the connection? Ask your assistant to use check_domains on example.com. Look for the tool call and a dated result.
+We sent these 3 tool calls to domain-hound 0.1.3 from npm, over standard input and output. Results are shortened. Your assistant may phrase them differently.
 
-Does it need a registrar login to buy? Domain Hound never buys. Open the registrar yourself and check the final price.
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/domain-hound-claude-code-codex.csv) · [Lookup data](https://domainhound.dev/data/2026-11-25/mcp-results.json) · [Domain Hound on npm](https://www.npmjs.com/package/domain-hound/v/0.1.3)
+
+### How Domain Hound does it
+
+The server runs on your machine. It sends the names you ask about to public sources: registries, price lists, app stores and the USPTO. It has 4 tools. The check_domains tool takes up to 20 names per call.
+
+### FAQ
+
+Do I need an API key?
+
+No. Domain checks and list prices run without a registrar key.
+
+How can I check the connection?
+
+Ask your assistant to use check_domains on example.com. Look for the tool call and a dated result.
+
+Does it need a registrar login to buy?
+
+No. Domain Hound never buys. Open the registrar yourself and check the final price.
+
+### Related guides
+
+- [How to check if a domain is available](https://domainhound.dev/guides/how-to-check-domain-availability/)
+- [Which domain name MCP server fits?](https://domainhound.dev/guides/best-domain-name-mcp-servers/)
+
+Last updated 25 November 2026.
+
+The hound won’t fetch your credit card.
 
 ## What makes a good startup name?
 
 https://domainhound.dev/guides/good-startup-name/
 
-Choose a name people can say, spell and find after hearing it once. Test the name in a sentence, then check whether buyers will land on your site or someone else’s.
+8 of 200 .com names free on 2026-11-25. Every name with five letters or fewer was taken.
 
-Name length and .com in our sample (25 November 2026 UTC)
+.com results by name length · Checked 2026-11-25 UTC
 
-Letters | Names tried | Free | Taken
---- | --- | --- | ---
-Up to 5 | 20 | 0 | 20
-6 to 8 | 114 | 4 | 110
-9 or more | 66 | 4 | 62
+| Letters | Names tried | Free | Taken |
+| --- | --- | --- | --- |
+| Up to 5 | 20 | 0 | 20 |
+| 6 to 8 | 114 | 4 | 110 |
+| 9 or more | 66 | 4 | 62 |
+| All | 200 | 8 | 192 |
 
-We paired short nature words with endings such as “dock” and “ledger”, and also tested each root alone. Longer names in this sample sometimes had a free .com. Length alone cannot tell you which name to pick.
+We paired 20 short nature words with endings such as “dock” and “ledger”, and tried each word alone. Every .com got a registry answer. Taken includes 32 resale listings. The results apply to this handpicked list.
 
-Table data: https://domainhound.dev/data/2026-11-25/tables/good-startup-name.csv
+Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/good-startup-name.csv) · [Lookup data](https://domainhound.dev/data/2026-11-25/availability.csv) · [Word list and method](https://domainhound.dev/data/2026-11-25/method.txt)
 
-Ask Domain Hound for candidates, say each one aloud and try writing it from memory. Screen the names you keep for an exact domain, similar marks and apps with the same name.
+### How Domain Hound does it
 
-How short should the name be? Try saying it over the phone. A longer word people know can be easier to spell than a short word you invented.
+Ask for candidates. Say each one aloud and write it from memory. Then screen the keepers for the exact domain, similar marks and apps with the same name.
 
-Can I just leave out a vowel? Try it on someone who has never seen the word. If you have to spell it every time, keep looking.
+Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
-What if my favorite name is free? Look at the search results first. An empty registry record tells you little about the brands your customers already know.
+```sh
+claude mcp add domain-hound -- npx -y domain-hound
+```
+
+### FAQ
+
+How short should the name be?
+
+Short enough to say over the phone once. A word people know can beat a 5 letter word you invented.
+
+Can I just leave out a vowel?
+
+Try it on someone who has never seen the word. If you spell it out every time, try another spelling.
+
+What if my favorite name is free?
+
+Search it first. An empty registry record says nothing about the brands your buyers already know.
+
+### Related guides
+
+- [How to find an available startup name](https://domainhound.dev/guides/find-an-available-startup-name/)
+- [Should you buy .com, .ai or .io?](https://domainhound.dev/guides/com-vs-ai-vs-io/)
+
+Last updated 25 November 2026.
+
+The hound won’t drop a vowel to get the .com.

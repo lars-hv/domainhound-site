@@ -9,6 +9,26 @@
     "label": "Internet Names MCP documentation",
     "checked": "2026-11-25"
   },
+  "godaddy_mcp": {
+    "url": "https://developer.godaddy.com/en/docs/api-users/mcp/tools/domains",
+    "label": "GoDaddy MCP server domain tools (shows renewal prices)",
+    "checked": "2026-11-25"
+  },
+  "domainsearch_mcp": {
+    "url": "https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/src/services/pricing-api.ts",
+    "label": "Domain Search MCP pricing code (optional backend renewal price)",
+    "checked": "2026-11-25"
+  },
+  "namelix": {
+    "url": "https://namelix.com/domain-search/",
+    "label": "Namelix domain search (shows USPTO matches)",
+    "checked": "2026-11-25"
+  },
+  "instantdomainsearch": {
+    "url": "https://instantdomainsearch.com/",
+    "label": "Instant Domain Search",
+    "checked": "2026-11-25"
+  },
   "package": {
     "url": "https://www.npmjs.com/package/domain-hound/v/0.1.3",
     "label": "Domain Hound on npm",
@@ -22,6 +42,16 @@
   "icann": {
     "url": "https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en",
     "label": "ICANN status codes",
+    "checked": "2026-11-25"
+  },
+  "icann_lifecycle": {
+    "url": "https://www.icann.org/resources/pages/gtld-lifecycle-2012-02-25-en",
+    "label": "ICANN life cycle of a generic domain: auto-renew grace up to 45 days, redemption grace 30 days, pending delete 5 days",
+    "checked": "2026-11-25"
+  },
+  "verisign_rdap_github": {
+    "url": "https://rdap.verisign.com/com/v1/domain/github.com",
+    "label": "Verisign RDAP record for github.com: expiration 2028-10-09T18:20:50Z",
     "checked": "2026-11-25"
   },
   "us": {
@@ -41,7 +71,7 @@
   },
   "apple": {
     "url": "https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/",
-    "label": "Apple’s app name rules",
+    "label": "Apple’s app name rules: “You can use an app name for one app per localization.”",
     "checked": "2026-11-25"
   },
   "android": {
@@ -49,19 +79,49 @@
     "label": "Google Play app setup",
     "checked": "2026-11-25"
   },
+  "spaceship_co": {
+    "url": "https://www.spaceship.com/domains/cctld/co/",
+    "label": "Spaceship .co page: $3.11 first year, $31.05 renewal",
+    "checked": "2026-11-25"
+  },
   "ai": {
-    "url": "https://www.dynadot.com/domain/ai",
-    "label": "Dynadot’s .ai terms",
+    "url": "https://www.spaceship.com/domains/cctld/ai/",
+    "label": "Spaceship .ai page: $79.98 per year, 2 year minimum",
+    "checked": "2026-11-25"
+  },
+  "godaddy_rechecks": {
+    "url": "https://domainhound.dev/data/2026-11-25/registrar-rechecks.csv",
+    "label": "GoDaddy availability rechecks for 261 unsettled .ai and .io names",
     "checked": "2026-11-25"
   },
   "norid": {
     "url": "https://www.norid.no/en/om-domenenavn/regelverk-for-no/",
-    "label": "Norid’s .no rules",
+    "label": "Norid’s .no rules (policy section 5: people over 18 in the Norwegian population register with a Norwegian national ID, or eligible registered organisations; both need a local postal address)",
     "checked": "2026-11-25"
   },
   "repo": {
     "url": "https://github.com/lars-hv/domain-hound",
     "label": "Source code",
+    "checked": "2026-11-25"
+  },
+  "hound_readme": {
+    "url": "https://github.com/lars-hv/domain-hound/blob/561ab480857921cd76eb4dc9ea9b1ce47d6b5635/README.md",
+    "label": "Domain Hound 0.1.3 sources, limits and installation",
+    "checked": "2026-11-25"
+  },
+  "godaddy_setup": {
+    "url": "https://developer.godaddy.com/en/docs/api-users/mcp/set-up",
+    "label": "GoDaddy hosted connector and setup",
+    "checked": "2026-11-25"
+  },
+  "domainsearch_readme": {
+    "url": "https://github.com/dorukardahan/domain-search-mcp/blob/80be3dce51564bf511295b88ad62500e6bb20a96/README.md",
+    "label": "Domain Search MCP by dorukardahan, public RDAP and WHOIS, local installation",
+    "checked": "2026-11-25"
+  },
+  "instant_mcp": {
+    "url": "https://instantdomainsearch.com/mcp",
+    "label": "Instant Domain Search MCP, free hosted server, daily index and USPTO records",
     "checked": "2026-11-25"
   }
 }

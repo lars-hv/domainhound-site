@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>How to buy a taken domain | Domain Hound</title>
-  <meta name="description" content="Look for a sale listing or a contact form from the registrar and ask whether the owner will sell. If you wait for expiry, keep a backup name because the owner can renew.">
+  <meta name="description" content="ICANN lists 30 days for redemption (checked 2026-11-25). A registrar can renew, auction or delete an expired domain.">
   <link rel="canonical" href="https://domainhound.dev/guides/buy-a-taken-domain/">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Domain Hound">
   <meta property="og:url" content="https://domainhound.dev/guides/buy-a-taken-domain/">
   <meta property="og:title" content="How to buy a taken domain | Domain Hound">
-  <meta property="og:description" content="Look for a sale listing or a contact form from the registrar and ask whether the owner will sell. If you wait for expiry, keep a backup name because the owner can renew.">
+  <meta property="og:description" content="ICANN lists 30 days for redemption (checked 2026-11-25). A registrar can renew, auction or delete an expired domain.">
   <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
   <meta property="og:image:alt" content="Domain Hound: Name it already.">
   <link rel="stylesheet" href="/assets/site.css">
@@ -21,25 +21,38 @@
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
+  "@graph": [
     {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Domain Hound",
-      "item": "https://domainhound.dev/"
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Domain Hound", "item": "https://domainhound.dev/" },
+        { "@type": "ListItem", "position": 2, "name": "Guides", "item": "https://domainhound.dev/guides/" },
+        { "@type": "ListItem", "position": 3, "name": "How to buy a taken domain", "item": "https://domainhound.dev/guides/buy-a-taken-domain/" }
+      ]
     },
     {
-      "@type": "ListItem",
-      "position": 2,
-      "name": "Guides",
-      "item": "https://domainhound.dev/guides/"
+      "@type": "Article",
+      "@id": "https://domainhound.dev/guides/buy-a-taken-domain/#article",
+      "headline": "How to buy a taken domain",
+      "description": "ICANN lists 30 days for redemption (checked 2026-11-25). A registrar can renew, auction or delete an expired domain.",
+      "url": "https://domainhound.dev/guides/buy-a-taken-domain/",
+      "mainEntityOfPage": "https://domainhound.dev/guides/buy-a-taken-domain/",
+      "image": "https://domainhound.dev/assets/social-preview.png",
+      "inLanguage": "en",
+      "datePublished": "2026-11-25",
+      "dateModified": "2026-11-25",
+      "author": { "@type": "Organization", "name": "BrightBoard AS", "url": "https://domainhound.dev/" },
+      "publisher": { "@type": "Organization", "name": "BrightBoard AS", "url": "https://domainhound.dev/" }
     },
     {
-      "@type": "ListItem",
-      "position": 3,
-      "name": "How to buy a taken domain",
-      "item": "https://domainhound.dev/guides/buy-a-taken-domain/"
+      "@type": "FAQPage",
+      "@id": "https://domainhound.dev/guides/buy-a-taken-domain/#faq",
+      "url": "https://domainhound.dev/guides/buy-a-taken-domain/",
+      "mainEntity": [
+        { "@type": "Question", "name": "Does a domain drop at expiry?", "acceptedAnswer": { "@type": "Answer", "text": "No. The registrar may still allow renewal. Check its deadline. Redemption begins only if the registrar deletes the name." } },
+        { "@type": "Question", "name": "What does pending delete mean?", "acceptedAnswer": { "@type": "Answer", "text": "The last 5 days. Nobody can restore the name. Then the registry releases it, and the first registration wins." } },
+        { "@type": "Question", "name": "What should I pay?", "acceptedAnswer": { "@type": "Answer", "text": "Set your ceiling before you contact the owner. Agree the transfer in writing and use an escrow service you trust." } }
+      ]
     }
   ]
 }
@@ -54,30 +67,31 @@
 </header>
 <main class="guide wrap">
   <h1>How to buy a taken domain</h1>
-  <p>Look for a sale listing or a contact form from the registrar and ask whether the owner will sell. If you wait for expiry, keep a backup name because the owner can renew.</p>
+  <p>ICANN lists 30 days for redemption (checked 2026-11-25). To buy sooner, look for a sale listing or contact the owner through the registrar.</p>
   <div class="table-wrap">
     <table>
-      <caption>Expiry dates from public registry records<time datetime="2026-11-25">Checked 25 November 2026 UTC</time></caption>
-      <thead><tr><th scope="col">Domain</th><th scope="col">Registry result</th><th scope="col">Expiry shown</th></tr></thead>
+      <caption>What happens after a .com expires<time datetime="2026-11-25">Checked 2026-11-25 UTC</time></caption>
+      <thead><tr><th scope="col">Stage</th><th scope="col">Days</th><th scope="col">Who can act</th></tr></thead>
       <tbody>
-        <tr><th scope="row">github.com</th><td>Registered</td><td>2028-10-09</td></tr>
-        <tr><th scope="row">mozilla.org</th><td>Registered</td><td>2027-01-23</td></tr>
+        <tr><th scope="row">Auto-renew grace</th><td>0 to 45</td><td>The registrar sets its renewal deadline and can delete the name.</td></tr>
+        <tr><th scope="row">Redemption grace</th><td>30</td><td>The previous owner can ask the registrar to restore it.</td></tr>
+        <tr><th scope="row">Pending delete</th><td>5</td><td>Restoration closes. The registry releases the name after this stage.</td></tr>
       </tbody>
     </table>
   </div>
-  <p>Both records gave an expiry date. Neither date tells you when you could buy the name. These domains illustrate registry records, not offers for sale.</p>
-  <p class="source">Domain Hound measurements · <a href="/data/2026-11-25/tables/buy-a-taken-domain.csv">Table CSV</a> · <a href="/data/2026-11-25/registry-records.csv">Lookup data</a> · <a href="https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en">ICANN status codes</a> · <a href="https://lookup.icann.org/en">ICANN registration lookup</a></p>
+  <p>ICANN’s timeline covers typical generic endings. Redemption starts when the registrar deletes the name. A registrar may renew or auction it instead. On November 25, Verisign listed <a href="https://rdap.verisign.com/com/v1/domain/github.com">October 9, 2028 as the expiry of github.com</a>. That date can change if the owner renews.</p>
+  <p class="source">Domain Hound measurements · <a href="/data/2026-11-25/tables/buy-a-taken-domain.csv">Table CSV</a> · <a href="/data/2026-11-25/registry-records.csv">Registry records</a> · <a href="https://www.icann.org/resources/pages/gtld-lifecycle-2012-02-25-en">ICANN domain life cycle</a> · <a href="https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en">ICANN status codes</a> · <a href="https://lookup.icann.org/en">ICANN registration lookup</a></p>
   <section>
     <h2>How Domain Hound does it</h2>
-    <p>Ask Domain Hound to check the exact domain. When it is taken, you can <a href="/watch/">set a watch</a> and confirm your email. A watch sends an alert. It cannot reserve the domain.</p>
+    <p>Ask it to check the exact domain. When it is taken, <a href="/watch/">set a watch</a> and confirm your email. You get an alert when the name comes loose.</p>
     <p>Install in Claude Code, or <a href="/guides/domain-hound-claude-code-codex/">use Codex</a>.</p><pre><code>claude mcp add domain-hound -- npx -y domain-hound</code></pre>
   </section>
   <section>
     <h2>FAQ</h2>
     <dl>
-      <dt>Does a domain drop at expiry?</dt><dd>Usually there are more steps. For many generic endings, the registrar can still renew or auction the name. After deletion, redemption gives the prior owner a chance to restore it.</dd>
-      <dt>What does pending delete mean?</dt><dd>After redemption ends without restoration, the registry can place the name in its final pending delete stage. Registry rules govern release. Other buyers can reach it first.</dd>
-      <dt>What should I pay?</dt><dd>Set your ceiling before contacting the owner. Verify control, agree on the transfer in writing and use an escrow service you trust. A registry result gives no resale valuation.</dd>
+      <dt>Does a domain drop at expiry?</dt><dd>No. The registrar may still allow renewal. Check its deadline. Redemption begins only if the registrar deletes the name.</dd>
+      <dt>What does pending delete mean?</dt><dd>The last 5 days. Nobody can restore the name. Then the registry releases it, and the first registration wins.</dd>
+      <dt>What should I pay?</dt><dd>Set your ceiling before you contact the owner. Agree the transfer in writing and use an escrow service you trust.</dd>
     </dl>
   </section>
   <section>
@@ -88,6 +102,7 @@
     </ul>
   </section>
   <p class="updated">Last updated <time datetime="2026-11-25">25 November 2026</time>.</p>
+  <p>The hound keeps watch. It won’t place a bid.</p>
 </main>
 <footer><div class="wrap foot"><a href="/">domainhound.dev</a><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a></div></footer>
 </body>

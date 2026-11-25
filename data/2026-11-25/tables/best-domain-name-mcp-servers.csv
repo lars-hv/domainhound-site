@@ -1,4 +1,8 @@
-checked_utc,Server,Checks and price access,Run locally
-2026-11-25,Domain Hound,Our run found example.com taken. Standard renewal estimates are free.,npx -y domain-hound
-2026-11-25,Domain Check MCP,"RDAP and selected WHOIS lookups. Its MIT licensed server documents lookups, with no shop quotes listed.",uvx domain-check-mcp
-2026-11-25,Internet Names MCP,Free RDAP and social handle checks. An optional free NameSilo API key adds domain prices.,uvx internet-names-mcp
+checked_utc,Tool,Registry-confirmed availability,Renewal price shown,iOS + Android app names,US trademarks,Google / SEO signals,Free + runs locally,Install
+2026-11-25,Domain Hound,RDAP or WHOIS,Dated list prices,Both US stores,USPTO word marks,Google Search and Trends,"Yes, MIT license",npx -y domain-hound
+2026-11-25,GoDaddy MCP server,Registrar lookup (registry source not documented),First year and renewal,not documented,not documented,not documented,Hosted,Add GoDaddy in connectors
+2026-11-25,Domain Search MCP,RDAP with fallbacks,With pricing backend,not documented,not documented,not documented,"Yes, local stdio",npx -y domain-search-mcp@latest
+2026-11-25,Namelix,not documented,not documented,not documented,USPTO matches,not documented,Free website,Open in browser
+2026-11-25,Instant Domain Search,Daily registry and DNS index,not documented,not documented,Indexed USPTO records,not documented,"Free, hosted",Add Instant in connectors
+2026-11-25,Domain Check MCP,RDAP or WHOIS,not documented,not documented,not documented,not documented,"Yes, MIT license",uvx domain-check-mcp
+2026-11-25,Internet Names MCP,RDAP,not documented,not documented,not documented,not documented,"Yes, local RDAP",uvx internet-names-mcp
