@@ -133,20 +133,15 @@
         <p class="subline">Search domains right here for free. Or ask Claude or Codex to check domains, app names and Google.</p>
       </div>
       <div class="hunt-box" id="search">
-        <form class="hunt-form" data-mode="name">
-          <label for="name">Name or domain</label>
-          <input id="name" type="text" required maxlength="253" autocapitalize="none" spellcheck="false" placeholder="Mapfern or mapfern.com">
-          <button class="hunt-submit action" type="submit" disabled>Check availability</button>
+        <form class="hunt-form" data-mode="auto">
+          <label for="name">Name or idea</label>
+          <input id="name" type="text" required maxlength="400" autocapitalize="none" spellcheck="false" aria-describedby="search-hint-text" placeholder="A name, or what you're building">
+          <button class="hunt-submit action" type="submit" disabled>Sniff it</button>
+          <p class="search-hint" hidden><span id="search-hint-text" aria-live="polite"></span> <button type="button" class="hint-switch"></button></p>
         </form>
         <div class="search-paths">
-          <a href="#panel-idea" aria-controls="panel-idea" aria-expanded="false">Need name ideas?</a>
           <a href="#panel-personal" aria-controls="panel-personal" aria-expanded="false">Use my own name</a>
         </div>
-        <form class="hunt-form inline-search" id="panel-idea" data-mode="idea" hidden>
-          <label for="idea">What are you building?</label>
-          <textarea id="idea" rows="2" minlength="3" maxlength="400" required placeholder="A trip planner for people who travel by train"></textarea>
-          <button class="hunt-submit action" type="submit" disabled>Find available names</button>
-        </form>
         <form class="hunt-form inline-search" id="panel-personal" data-mode="personal" hidden>
           <label for="personal">What’s your full name?</label>
           <input id="personal" type="text" autocomplete="name" required maxlength="80" placeholder="First and last name">

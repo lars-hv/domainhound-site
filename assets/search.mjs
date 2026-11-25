@@ -1,10 +1,10 @@
+import { guessMode, normalize } from './search-mode.mjs';
+
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 const rateLimit = 'The hound needs a breather. Try again in a few minutes.';
 const region = document.getElementById('search-results');
 const pages = document.getElementById('result-pages');
 const paths = [...document.querySelectorAll('.search-paths a')];
-const startupCheck = el('button', 'action', 'Check as a startup name');
-startupCheck.type = 'button';
 let currentSearch;
 
 function el(tag, className, text) {
@@ -35,7 +35,6 @@ function cancelSearch() {
 }
 
 function clearResults() {
-  startupCheck.remove();
   region.hidden = true;
   pages.replaceChildren();
 }
@@ -54,12 +53,10 @@ function payment(label, amount) {
   return pair;
 }
 
-function addPrice(card, actions, offer) {
-  const quote = el('dl', 'hunt-quote');
-  const years = offer.minimumYears;
-  quote.append(payment('First year', offer.firstYearUsd), payment('Renewal per year', offer.renewalUsd));
-  card.append(quote);
+// Term, renewal, DNS and date disclosures that travel with every shown price.
+function priceNotes(offer) {
   const notes = el('div', 'price-notes');
+  const years = offer.minimumYears;
   if (years > 1) {
     notes.append(el('p', 'price-note', years + '-year minimum. ' + usd.format(offer.firstPaymentUsd) +
       ' upfront, then ' + usd.format(offer.renewalPaymentUsd) + ' per ' + years + ' years.'));
@@ -71,8 +68,18 @@ function addPrice(card, actions, offer) {
   if (offer.checkedAt) checked = ' · Checked ' + offer.checkedAt.slice(0, 10);
   else if (offer.snapshotDate) checked = ' · Price snapshot ' + offer.snapshotDate.slice(0, 10);
   notes.append(el('p', 'price-note', 'USD before tax' + checked));
-  card.append(notes);
-  actions.append(link('Book it at ' + offer.shop + ' for ' + usd.format(offer.firstPaymentUsd), offer.buyUrl, 'action'));
+  return notes;
+}
+
+function bookLink(offer) {
+  return link('Book it at ' + offer.shop + ' for ' + usd.format(offer.firstPaymentUsd), offer.buyUrl, 'action');
+}
+
+function addPrice(card, actions, offer) {
+  const quote = el('dl', 'hunt-quote');
+  quote.append(payment('First year', offer.firstYearUsd), payment('Renewal per year', offer.renewalUsd));
+  card.append(quote, priceNotes(offer));
+  actions.append(bookLink(offer));
 }
 
 function resultCard(mode, item, shortlistUrl) {
@@ -111,6 +118,26 @@ function resultCard(mode, item, shortlistUrl) {
   if (actions.childElementCount) card.append(actions);
   row.append(card);
   return row;
+}
+
+function cardList(mode, items, shortlistUrl) {
+  const list = el('ul', 'hunt-list ' + (mode === 'idea' ? 'idea-list' : 'ending-list'));
+  for (const item of items) list.append(resultCard(mode, item, shortlistUrl));
+  return list;
+}
+
+// The server's validated pick: real first-year and renewal amounts, with the same disclosures.
+function bestDomain(item) {
+  const box = el('section', 'best-domain');
+  const title = el('h3', '', 'Best domain: ');
+  title.append(el('span', 'domain-title', item.domain));
+  box.append(title, el('p', 'best-price', usd.format(item.offer.firstYearUsd) + ' first year, ' +
+    usd.format(item.offer.renewalUsd) + ' renewal'), priceNotes(item.offer));
+  if (item.note) box.append(el('p', '', item.note));
+  const actions = el('div', 'result-actions');
+  actions.append(bookLink(item.offer));
+  box.append(actions);
+  return box;
 }
 
 // Details are raw API records. Only the expected source may supply each outbound link.
@@ -237,6 +264,115 @@ function steering(items, idea) {
   return form;
 }
 
+const nameKey = name => String(name).toLowerCase().replace(/[\s-]/g, '');
+
+// Close names for a taken name: same-name variants and generated names, each
+// registry-confirmed and priced. The two sources fail independently.
+async function recover(query, signal, box, seenDomains) {
+  const api = await import('./search-api.mjs');
+  if (signal.aborted) return;
+  const owner = query.exactDomain || query.ascii + '.com';
+  const status = statusLine();
+  const heading = el('h3', '', 'Taken. Here are free names close to yours');
+  const variantList = cardList('idea', []);
+  const ideaList = cardList('idea', []);
+  variantList.hidden = ideaList.hidden = true;
+  box.append(heading, status,
+    link('Who owns ' + owner + '? See if it can be bought', '/land/?d=' + encodeURIComponent(owner)), variantList, ideaList);
+  box.hidden = false;
+  status.textContent = 'Sniffing free names close to yours…';
+  const seenNames = new Set([nameKey(query.ascii), nameKey(query.name)]);
+  const fresh = item => !seenDomains.has(item.domain) && !seenNames.has(nameKey(item.name));
+  const show = (list, mode, items, limit = Infinity) => {
+    let count = 0;
+    for (const item of items) {
+      if (count >= limit || !fresh(item)) continue;
+      seenDomains.add(item.domain);
+      seenNames.add(nameKey(item.name));
+      list.append(resultCard(mode, item));
+      count += 1;
+    }
+    list.hidden = !list.childElementCount;
+  };
+  const labels = api.variantLabels(query);
+  const variants = Promise.allSettled(labels.map(label => api.closeVariant(label, signal))).then(results => {
+    if (signal.aborted) return;
+    show(variantList, 'name', results.filter(result => result.status === 'fulfilled' && result.value).map(result => result.value));
+    const failed = results.filter(result => result.status === 'rejected');
+    if (labels.length && failed.length === labels.length) throw failed[0].reason;
+  });
+  // Variants claim their domains first, so deduplication never depends on which reply lands first.
+  const ideas = api.closeIdeas(query.name, signal);
+  const [variantOutcome, ideaOutcome] = await Promise.allSettled([variants, ideas]);
+  if (signal.aborted) return;
+  if (ideaOutcome.status === 'fulfilled') show(ideaList, 'idea', ideaOutcome.value, 6);
+  const notes = [];
+  const failure = (outcome, text) => {
+    if (outcome.status !== 'rejected') return;
+    notes.push(outcome.reason?.status === 429 ? rateLimit : text);
+  };
+  failure(variantOutcome, 'Couldn’t check close versions of this name.');
+  failure(ideaOutcome, 'Couldn’t load name ideas.');
+  if (!variantList.childElementCount && !ideaList.childElementCount) {
+    heading.textContent = 'Taken.';
+    if (!notes.length) notes.push('No free names close to yours confirmed yet.');
+  }
+  status.textContent = [...new Set(notes)].join(' ');
+}
+
+function nameSlots(response, exact) {
+  const items = response.items;
+  const best = response.best;
+  const query = response.query;
+  const fallback = !!query && !query.exactDomain && response.leadingTaken;
+  const lead = best && !fallback ? bestDomain(best) : null;
+  const rest = lead ? items.filter(item => item.domain !== best.domain) : items;
+  const recovery = el('section', 'recovery');
+  recovery.setAttribute('aria-label', 'Free names close to yours');
+  recovery.hidden = true;
+  const more = el('section', 'more-endings');
+  more.hidden = true;
+  const list = rest.length ? cardList('name', rest, response.shareUrl) : null;
+  const parts = [lead, ...(exact ? [list, recovery] : [recovery, list]), more].filter(Boolean);
+  return { parts, fallback, recovery, more, empty: !lead && !list };
+}
+
+async function followUp(response, signal, slots) {
+  const query = response.query;
+  if (!query) return;
+  const seen = new Set(response.items.map(item => item.domain));
+  if (!query.exactDomain) {
+    if (slots.fallback) await recover(query, signal, slots.recovery, seen);
+    return;
+  }
+  const exact = response.items.find(item => item.domain === query.exactDomain);
+  if (!query.exactDomain.endsWith('.com') || exact?.status !== 'taken') return;
+  // Learn the other endings from the bare label; the exact answer above stays as it is.
+  const status = statusLine();
+  slots.more.append(el('h3', '', 'Other endings for ' + query.ascii), status);
+  slots.more.hidden = false;
+  status.textContent = 'Checking other endings…';
+  let bare;
+  try {
+    const api = await import('./search-api.mjs');
+    bare = await api.runSearch('name', { name: query.ascii }, signal);
+  } catch (error) {
+    if (!signal.aborted) status.textContent = error.status === 429 ? rateLimit : 'Couldn’t check other endings. The result above stands.';
+    return;
+  }
+  if (signal.aborted) return;
+  status.textContent = '';
+  const others = bare.items.filter(item => item.domain !== query.exactDomain);
+  for (const item of others) seen.add(item.domain);
+  const fallback = bare.leadingTaken;
+  const best = !fallback && bare.best?.domain !== query.exactDomain ? bare.best : null;
+  if (best) slots.more.append(bestDomain(best));
+  const rest = best ? others.filter(item => item.domain !== best.domain) : others;
+  if (rest.length) slots.more.append(cardList('name', rest, bare.shareUrl));
+  if (!best && !rest.length) status.textContent = 'No other endings could be verified.';
+  if (fallback) await recover(query, signal, slots.recovery, seen);
+}
+
 function renderPage(mode, input, response, signal) {
   const items = mode === 'idea' ? response.items.filter(item => item.status === 'available') : response.items;
   const head = el('header', 'results-head');
@@ -247,18 +383,21 @@ function renderPage(mode, input, response, signal) {
   if (response.shareUrl) head.append(link('Share shortlist', response.shareUrl));
   const page = document.createDocumentFragment();
   page.append(head);
-  if (items.length) {
-    const list = el('ul', 'hunt-list ' + (mode === 'idea' ? 'idea-list' : 'ending-list'));
-    for (const item of items) list.append(resultCard(mode, item, response.shareUrl));
-    page.append(list);
+  let slots = null;
+  if (mode === 'name') {
+    slots = nameSlots(response, !!response.query?.exactDomain);
+    page.append(...slots.parts);
+  } else if (items.length) {
+    page.append(cardList(mode, items, response.shareUrl));
     if (mode === 'idea' && input.round !== 2) page.append(steering(items, input.idea));
-  } else {
+  }
+  if (mode === 'name' ? slots.empty : !items.length) {
     const empty = {
       idea: 'No available names confirmed within $60 over three years. Try a different description.',
       name: 'No endings could be verified. Try again or check at a registrar.',
       personal: 'No personal domains found for this spelling. Try another version of your name.'
     };
-    page.append(el('p', 'results-intro', empty[mode]));
+    head.after(el('p', 'results-intro', empty[mode]));
   }
   if (response.complete === false) page.append(el('p', 'results-intro', 'Some checks didn’t finish. Availability is unknown for the unchecked names.'));
   if (mode === 'idea' && response.generationSource === 'deterministic') {
@@ -270,6 +409,7 @@ function renderPage(mode, input, response, signal) {
   page.append(install);
   pages.replaceChildren(page);
   region.hidden = false;
+  if (slots) followUp(response, signal, slots).catch(() => {});
   return heading;
 }
 
@@ -316,45 +456,84 @@ async function search(mode, input, status, submit) {
   }
 }
 
-// A single word or exact domain uses the registry check. A full name uses the
-// personal endpoint, which accepts the name in the request body.
-const fullName = /^[\p{L}\p{M}][\p{L}\p{M}'’.-]*(?:\s+[\p{L}\p{M}][\p{L}\p{M}'’.-]*)+$/u;
+const hints = {
+  name: ['Checking a name', 'Use this as an idea instead'],
+  idea: ['Finding free names for your idea', 'Search this as a name instead']
+};
 
 for (const form of document.querySelectorAll('.hunt-form')) {
-  const field = form.querySelector('input, textarea');
+  const field = form.querySelector('input');
   const submit = form.querySelector('.hunt-submit');
+  const hint = form.querySelector('.search-hint');
+  const switcher = hint?.querySelector('.hint-switch');
   const status = statusLine();
   form.append(status);
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    const value = field.value.trim();
-    const ambiguous = form.dataset.mode === 'name' && fullName.test(value);
-    const mode = ambiguous ? 'personal' : form.dataset.mode;
-    let anchor = status;
-    if (!value || (mode === 'personal' && value.length > 80)) {
-      field.setCustomValidity(mode === 'personal' ? 'Enter your full name using up to 80 characters.' :
-        mode === 'idea' ? 'Describe your idea.' : 'Enter a name or a domain.');
-      field.reportValidity();
-    } else {
-      if (form.dataset.mode === 'name') showPath(null);
-      const input = mode === 'personal' ? { fullName: value.replace(/’/g, "'").replace(/\s+/g, ' ') } : { [mode]: value };
-      anchor = await search(mode, input, status, submit);
+  // A one-click switch overrides the guess until the text changes.
+  let override = null;
+  let submitted = null;
+  const modeNow = () => form.dataset.mode === 'personal' ? 'personal' : override || guessMode(field.value);
+
+  function updateHint() {
+    if (!hint) return;
+    const mode = modeNow();
+    hint.hidden = !mode;
+    if (!mode) {
+      hint.firstElementChild.textContent = '';
+      return;
     }
-    if (ambiguous && anchor) {
-      anchor.after(startupCheck);
-      startupCheck.onclick = async () => {
-        submit.focus();
-        const outcome = await search('name', { name: value }, status, submit);
-        if (outcome === status) status.after(startupCheck);
-      };
+    const [description, switchLabel] = hints[mode];
+    if (hint.firstElementChild.textContent !== description) {
+      hint.firstElementChild.textContent = description;
+      switcher.textContent = switchLabel;
+    }
+  }
+
+  async function run(mode) {
+    const value = field.value.trim();
+    let problem = '';
+    if (!value) problem = mode === 'personal' ? 'Enter your full name using up to 80 characters.' : 'Enter a name or describe your idea.';
+    else if (mode === 'personal' && value.length > 80) problem = 'Enter your full name using up to 80 characters.';
+    else if (mode === 'idea' && normalize(value).length < 3) problem = 'Describe your idea in at least 3 characters.';
+    if (problem) {
+      field.setCustomValidity(problem);
+      field.reportValidity();
+      return;
+    }
+    if (form.dataset.mode === 'auto') {
+      submitted = field.value;
+      showPath(null);
+    }
+    const input = mode === 'personal' ? { fullName: value.replace(/’/g, "'").replace(/\s+/g, ' ') } :
+      { [mode]: mode === 'name' ? normalize(value) : value };
+    await search(mode, input, status, submit);
+  }
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    run(modeNow());
+  });
+  switcher?.addEventListener('click', () => {
+    override = modeNow() === 'name' ? 'idea' : 'name';
+    updateHint();
+    field.setCustomValidity('');
+    // Already searched this text: run it the other way now and drop the old answer.
+    if (submitted !== null && submitted === field.value) {
+      cancelSearch();
+      run(override);
     }
   });
   field.addEventListener('input', () => {
     field.setCustomValidity('');
-    startupCheck.remove();
-    if (currentSearch?.submit.hasAttribute('aria-disabled')) cancelSearch();
+    override = null;
+    submitted = null;
+    updateHint();
+    if (currentSearch?.submit === submit) {
+      cancelSearch();
+      clearResults();
+    } else if (currentSearch?.submit.hasAttribute('aria-disabled')) cancelSearch();
     status.textContent = '';
   });
+  updateHint();
   submit.disabled = false;
 }
 
@@ -367,7 +546,7 @@ for (const path of paths) {
     cancelSearch();
     clearResults();
     showPath(opening ? path : null);
-    if (opening) panel.querySelector('input, textarea').focus();
+    if (opening) panel.querySelector('input').focus();
   });
   panel.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
@@ -385,7 +564,7 @@ function openLinkedPath() {
     cancelSearch();
     clearResults();
     showPath(path);
-    document.getElementById(path.getAttribute('aria-controls')).querySelector('input, textarea').focus();
+    document.getElementById(path.getAttribute('aria-controls')).querySelector('input').focus();
   }
 }
 openLinkedPath();

@@ -69,7 +69,7 @@ function compactOffer(offer) {
 function ideaItem(entry, snapshotDate) {
   const pick = entry?.domain;
   const row = entry?.domains?.find(candidate => candidate.domain === pick?.domain);
-  if (!row || !entry.name) return null;
+  if (!row || typeof entry.name !== 'string' || !entry.name) return null;
   const prices = pick.prices ?? compactOffer({ ...pick, checkedAt: null, snapshotDate });
   const item = domainItem({ ...row, priceShown: true, prices }, 60);
   if (!item?.offer) return null;
@@ -87,6 +87,40 @@ function personalItem(row) {
 
 const detailsPath = /^\/v1\/check\/details\?id=[A-Za-z0-9_-]+$/;
 
+// The server's pick is shown only when it names a registry-confirmed row and
+// matches one of that row's bookable registrar offers to the cent.
+const pickTerms = ['firstPaymentUsd', 'renewalUsd', 'renewalPaymentUsd', 'minimumYears', 'threeYearUsd'];
+
+function bestItem(data) {
+  const pick = data.choice?.pick;
+  if (typeof pick?.domain !== 'string') return null;
+  const row = data.domains.find(candidate => candidate?.domain === pick.domain);
+  const item = row && !row.eligibility ? domainItem(row) : null;
+  if (item?.status !== 'available' || item.premium || !row.priceShown || !Array.isArray(row.prices)) return null;
+  const offer = row.prices.find(offer => bookable(offer, row.domain) && offer.shop === pick.shop &&
+    offer.buyUrl === pick.buyUrl && pickTerms.every(key => offer[key] === pick[key]) &&
+    Boolean(offer.needsCloudflareDns) === Boolean(pick.needsCloudflareDns));
+  return offer ? { ...item, offer } : null;
+}
+
+const asciiLabel = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+
+function checkedQuery(query) {
+  if (typeof query?.ascii !== 'string' || !asciiLabel.test(query.ascii)) return null;
+  const exactDomain = typeof query.exactDomain === 'string' && shareDomain.test(query.exactDomain) &&
+    query.exactDomain.startsWith(query.ascii + '.') ?
+    query.exactDomain : null;
+  return { name: typeof query.name === 'string' && query.name ? query.name : query.ascii, ascii: query.ascii, exactDomain };
+}
+
+// .ai is never an automatic pick for a bare name, so the leading endings skip it.
+const leadingEndings = ['com', 'io', 'dev', 'app'];
+
+// True only when every leading ending is confirmed taken. Unknown or missing rows never count.
+function leadingTaken(items, ascii) {
+  return leadingEndings.every(ending => items.some(item => item.domain === ascii + '.' + ending && item.status === 'taken'));
+}
+
 export async function runSearch(mode, input, signal) {
   let data;
   if (mode === 'idea') data = await request('/v1/generate', signal, { ...input, idea: input.idea.replace(/\s+/g, ' ').trim() });
@@ -98,11 +132,38 @@ export async function runSearch(mode, input, signal) {
   if (mode === 'idea') items = data.names.map(entry => ideaItem(entry, data.priceSnapshot?.checkedAt));
   else if (mode === 'personal') items = data.results.map(personalItem);
   else items = data.domains.map(row => domainItem(row));
-  return {
+  const result = {
     items: items.filter(Boolean), complete: data.complete,
     shareUrl: shareUrl(data.share), generationSource: data.path,
     detailsPath: mode === 'name' && detailsPath.test(data.details?.path) ? data.details.path : null
   };
+  if (mode === 'idea') result.items.sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
+  if (mode === 'name') {
+    result.best = bestItem(data);
+    result.query = checkedQuery(data.query);
+    result.leadingTaken = !!result.query && leadingTaken(result.items, result.query.ascii);
+  }
+  return result;
+}
+
+// Close names for a taken name: prefixed and suffixed forms without hyphens.
+export function variantLabels({ ascii, name }) {
+  const stem = (ascii.startsWith('xn--') ? name : ascii).toLowerCase().replace(/[\s-]/g, '');
+  if (!/^[\p{L}\p{M}\p{N}]+$/u.test(stem)) return [];
+  return ['get' + stem, 'try' + stem, stem + 'hq', stem + 'app'].filter(label => label.length <= 63);
+}
+
+export async function closeVariant(label, signal) {
+  const response = await runSearch('name', { name: label }, signal);
+  return response.best ? { ...response.best, name: label, shareUrl: response.shareUrl } : null;
+}
+
+// The Worker caps steering names at 40 characters. The idea can still carry the full name.
+export async function closeIdeas(name, signal) {
+  const input = { idea: 'names like ' + name };
+  if (name.length <= 40) input.wanted = [name];
+  const response = await runSearch('idea', input, signal);
+  return response.items;
 }
 
 export function loadDetails(path, signal) {
