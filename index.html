@@ -1,655 +1,169 @@
 <!doctype html>
-<html lang="en" data-skena-preview-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Domain Hound | A bloodhound for domain names</title>
-<link rel="icon" type="image/svg+xml" href="assets/hound-mark.svg">
-<meta name="description" content="Find available domains, compare renewal prices and check trademark conflicts from Claude or Codex.">
-<style>/* @shared */
-@font-face {
-  font-family: Mulish;
-  src: url("./assets/mulish-latin-wght-normal.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 200 1000;
-  font-display: swap;
-}
-:root,
-:root[data-skena-preview-theme="dark"] {
-  color-scheme: dark;
-  --sk-ink: #05070d;
-  --sk-charcoal: #11141b;
-  --sk-slate: #282f3d;
-  --sk-graphite: #353d4d;
-  --sk-olive-gray: #55574f;
-  --sk-stone: #b6b4ad;
-  --sk-parchment: #d8cbb5;
-  --sk-linen: #e8e1d4;
-  --sk-ivory: #f4f1e9;
-  --sk-bg: var(--sk-ink);
-  --sk-surface-base: var(--sk-charcoal);
-  --sk-surface: var(--sk-surface-base);
-  --sk-raised-base: var(--sk-slate);
-  --sk-raised: var(--sk-raised-base);
-  --sk-rule-base: var(--sk-graphite);
-  --sk-rule: var(--sk-rule-base);
-  --sk-text-base: var(--sk-linen);
-  --sk-text: var(--sk-text-base);
-  --sk-muted-base: var(--sk-stone);
-  --sk-muted: var(--sk-muted-base);
-  --sk-accent: #f4c64f;
-  --sk-action-fill: #f4c64f;
-  --sk-active-ink: #f4c64f;
-  --sk-action-ink: var(--sk-ink);
-  --sk-shadow: 0 16px 42px rgb(0 0 0 / .16);
-  --sk-font: Mulish, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --sk-body: 1rem;
-  --sk-lead: 1.125rem;
-  --sk-subtitle: 1.375rem;
-  --sk-title: 2.5rem;
-  --sk-space-1: .25rem;
-  --sk-space-2: .5rem;
-  --sk-space-3: .75rem;
-  --sk-space-4: 1rem;
-  --sk-space-5: 1.5rem;
-  --sk-space-6: 2rem;
-  --sk-space-7: 3rem;
-  --sk-frame-max: 896px;
-  --sk-gutter: var(--sk-space-6);
-  --sk-panel-pad: var(--sk-space-6);
-  --sk-header-gap: var(--sk-space-6);
-  --sk-section-gap: var(--sk-space-7);
-  --sk-header-min: 64px;
-  --sk-field-min: 52px;
-  --sk-target: 44px;
-  --sk-control-line: var(--sk-muted);
-  --sk-backdrop: rgb(5 7 13 / .68);
-  --sk-tabs-clearance: 0px;
-  --sk-radius: 12px;
-  --sk-panel-radius: 22px;
-  --sk-pill: 999px;
-}
-:root[data-servant-theme="light"]:not([data-skena-preview-theme]),
-:root[data-skena-preview-theme="light"] {
-  color-scheme: light;
-  --sk-bg: var(--sk-ivory);
-  --sk-surface-base: #fbf9f3;
-  --sk-raised-base: #e9e5db;
-  --sk-rule-base: #d1cdc2;
-  --sk-text-base: var(--sk-charcoal);
-  --sk-muted-base: var(--sk-olive-gray);
-  --sk-accent: #d9a514;
-  --sk-action-fill: #d9a514;
-  --sk-active-ink: #674d08;
-  --sk-shadow: 0 16px 42px rgb(38 33 21 / .07);
-}
-
-*{box-sizing:border-box}
-body{margin:0;background:var(--sk-ivory);color:var(--sk-charcoal);font:400 1rem/1.55 var(--sk-font);-webkit-font-smoothing:antialiased}
-h1,h2,h3,p,figure,dl,dd,ol{margin:0}
-button{cursor:pointer;font:inherit;color:inherit}
-button:focus-visible{outline:3px solid currentColor;outline-offset:4px}
-.shell{width:min(100% - 7rem,88rem);margin-inline:auto}
-.mono,code,pre{font-family:ui-monospace,Menlo,SFMono-Regular,Consolas,monospace;font-variant-ligatures:none;font-feature-settings:"liga" 0,"clig" 0,"calt" 0}
-.top{min-height:100svh;display:flex;flex-direction:column}
-nav,.proof,.signature{display:flex;align-items:center;justify-content:space-between;gap:1rem}
-nav{min-height:5.5rem;border-bottom:1px solid var(--line)}
-.brand{font-weight:880;letter-spacing:-.075em;font-size:1.6rem;line-height:1.1}
-h1,h2,h3{text-wrap:balance}
-h1{font-size:4.55rem;line-height:1.01;font-weight:620;letter-spacing:-.075em}
-.intro{max-width:34em;margin-top:1.55rem;font-size:1.125rem;line-height:1.52}
-.proof{padding:1.25rem 0 1.55rem;border-top:1px solid var(--line);font-size:.94rem}
-.proof p{text-wrap:balance}.proof p span{display:inline-block}
-.domain{font-size:.81rem;letter-spacing:.015em}
-.visual {position:relative; isolation:isolate; min-width:0}
-.terminal {min-width:0; color:var(--sk-ivory); background:#12161e; border:1px solid #414956; border-radius:12px; box-shadow:0 18px 44px rgb(0 0 0 / .24); font-size:.875rem; line-height:1.5}
-.termbar {display:flex; align-items:center; gap:.8rem; padding:.65rem 1.1rem; border-bottom:1px solid #343b48; color:#dddcd8; font-size:.8125rem}
-.lights {display:flex; align-items:center; gap:5px}
-.lights i {width:6px; height:6px; border-radius:50%; background:#606673}
-
-
-
-/* Package marks retain their original shapes. Tint only the monochrome pixels. */
-.brand-mark,.line-mark {display:block; flex:none; width:1.375rem; height:1.375rem; object-fit:contain}
-img.brand-mark {filter:invert(90%)}
-.window-name,.tabs button {display:inline-flex; align-items:center; gap:.45rem}
-.window-name .brand-mark,.tabs .brand-mark {width:1rem; height:1rem}
-.sources {background:var(--sk-linen); border-bottom:1px solid #c8c6bd}
-.sources-inner {display:flex; align-items:center; gap:2rem; padding-block:1.65rem}
-.sources p {flex:0 0 11.5rem; font-size:1.13rem; font-weight:750; line-height:1.3; letter-spacing:-.025em; text-wrap:balance}
-.source-list {list-style:none; padding:0; margin:0; flex:1; display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:.5rem; color:#51534e}
-.source-list li {display:flex; flex-direction:column; align-items:center; gap:.45rem; font-size:.8125rem; font-weight:700; text-align:center; line-height:1.25}
-.source-list .brand-mark {filter:invert(32%)}
-@media (max-width:1150px) {
-  .sources-inner {flex-direction:column; align-items:stretch; gap:1.25rem}
-  .sources p {flex:auto; text-align:center}
-}
-@media (max-width:700px) {
-  .source-list {grid-template-columns:repeat(4,minmax(0,1fr)); row-gap:1.1rem}
-  .sources-inner {padding-block:1.4rem}
-  .tabs button {gap:.3rem}
-}
-.reading{padding-block:6.5rem;border-bottom:1px solid #c8c6bd}.reading h2,.end h2{font-size:2.95rem;line-height:1.09;letter-spacing:-.055em;font-weight:570}
-.readgrid{display:grid;grid-template-columns:1fr 1.15fr;gap:9%}
-h3,dt{font-size:1.25rem;line-height:1.35;letter-spacing:-.03em;font-weight:780}
-dd{margin-top:.4rem}
-.ranking {list-style:none; padding:0; margin-top:2.3rem}
-.ranking li {display:grid; grid-template-columns:2rem minmax(12rem,.7fr) minmax(0,1.5fr); column-gap:2rem; align-items:start; padding:1.55rem 0; border-top:1px solid #c8c6bd}
-.ranking li:last-child {padding-bottom:0}
-.rank {font-size:1rem; line-height:1; font-weight:800; color:var(--sk-active-ink); padding-top:.55rem}
-.measure small {display:block; max-width:20rem; margin-top:.35rem; color:#4d4f48; font-size:.8125rem}
-.stat {font-size:3.2rem; line-height:1; letter-spacing:-.07em; font-weight:650}
-.ranking h3 {margin-bottom:.3rem}
-.citation {display:inline-flex; align-items:center; min-height:44px; text-underline-offset:3px; font-size:.75rem; color:#64665f}
-.faq dl>div{border-top:1px solid #c8c6bd;padding:1.1rem 0}
-.end{padding-top:5.5rem}.end .shell>div:first-child{display:flex;justify-content:space-between;align-items:center;gap:2rem}.end h2{max-width:18em}.end .cta{flex:none}.signature{padding-block:1.25rem;border-top:1px solid var(--line);margin-top:4.5rem}
-.a{--button:#f4c64f;--line:var(--sk-graphite)}.a .top,.a .end{background:var(--sk-ink);color:var(--sk-ivory)}.a .intro,.a .clients,.a .proof{color:var(--sk-linen)}
-.a .hero{flex:1;display:grid;grid-template-columns:minmax(0, .98fr) minmax(0,1.12fr);gap:4%;align-items:center;padding-block:4rem}
-.a .intro,.a .clients{max-width:30rem}
-.brand {display:inline-flex; gap:.6rem; align-items:center}
-.brand img {width:42px; height:42px}
-nav a {display:inline-flex; align-items:center; justify-content:center; min-width:60px; min-height:44px; color:inherit; font-size:.94rem; font-weight:750; text-underline-offset:5px}
-:focus-visible {outline:2px solid currentColor; outline-offset:3px}
-.copygroup, .summary, .installer {min-width:0}
-.installer {width:100%; scroll-margin:1rem}
-.summary .installer {margin-top:1.35rem}
-.tabs {display:flex; gap:1.1rem; border-bottom:1px solid var(--sk-graphite)}
-.tabs button {padding:0; background:transparent; border:0; border-bottom:2px solid transparent; min-height:44px; font-size:.875rem; font-weight:700; color:var(--sk-stone)}
-.tabs button[aria-selected="true"] {border-bottom-color:var(--button); color:var(--sk-ivory)}
-.tabs button:hover {color:white}
-.command {display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin:.65rem 0 .55rem; padding:.35rem; padding-left:.8rem; background:var(--sk-charcoal); border:1px solid var(--sk-graphite); border-radius:8px}
-.command code {white-space:nowrap; overflow-x:auto; min-width:0; font-size:.8125rem; line-height:1.5}
-.separator {white-space:nowrap; display:inline-block}
-.copy {flex:none; display:flex; align-items:center; justify-content:center; gap:.4rem; min-height:44px; padding:.45rem .8rem; background:var(--button); color:var(--sk-ink); border:0; border-radius:5px; font-size:.875rem; font-weight:800}
-.copy:hover {background:var(--sk-ivory)}
-.copy svg {width:15px; height:15px}
-.hint, .feedback {color:var(--sk-stone); font-size:.875rem}
-.case {background:var(--sk-linen); padding-block:4.5rem}
-.case h2 {font-size:1.125rem; font-weight:750; letter-spacing:-.02em}
-.case p {font-size:2.125rem; line-height:1.22; letter-spacing:-.045em; text-wrap:pretty}
-.case strong {font-weight:750}
-.end .shell>div:first-child {display:grid; grid-template-columns:1fr 1.15fr; gap:9%}
-.end h2 {max-width:13em}
-.before-after {display:flex; align-items:center; gap:1rem}
-.before-after {margin-top:1rem; flex-wrap:wrap}
-.before-after s,.before-after strong {font-size:1.5rem; letter-spacing:-.045em}
-.before-after small {display:block; font-size:.8125rem; color:var(--sk-muted)}
-.before-after s,.arrow {color:var(--sk-muted)}
-.signature a {display:inline-flex; align-items:center; min-height:44px; color:inherit; text-underline-offset:4px}
-.signature .brand {text-decoration:none}
-@media (min-width:701px) and (max-width:1150px) {
-  .end .shell>div:first-child {grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:5%}
-  .closing-brand {align-items:flex-start; flex-direction:column}
-}
-@media (min-width:1550px) {
-  .a h1 {font-size:5rem}
-}
-@media (min-width:701px) and (max-width:1150px) {
-  .shell {width:calc(100% - 4.5rem)}
-  .a .hero {display:flex; flex-direction:column; justify-content:center; align-items:stretch; gap:2.5rem; padding-block:2.4rem}
-  .a h1 {font-size:3.5rem}
-  .a .intro {margin-top:0}
-  .a .visual {width:min(100%,870px); margin-inline:auto}
-}
-@media (max-width:700px) {
-  .shell {width:calc(100% - 2.5rem)}
-  nav {min-height:3.65rem}
-  .brand {font-size:1.35rem}
-  .brand img {width:34px; height:34px}
-  .a .hero {display:flex; flex-direction:column; justify-content:center; align-items:stretch; gap:.85rem; padding-block:.75rem}
-  .a h1 {font-size:2.85rem}
-  .intro {font-size:1rem; line-height:1.45; margin-top:.75rem}
-  .summary .installer {margin-top:.55rem}
-  .tabs {gap:.75rem; flex-wrap:wrap}
-  .tabs button {min-width:44px}
-  .command code {display:block; flex:1 1 auto; overscroll-behavior-x:contain; padding-block:.65rem}
-  .closing-brand {gap:.8rem}
-  .closing-brand h2 {font-size:clamp(1.5rem,6.8vw,2.05rem)}
-  .signature {flex-wrap:wrap}
-  .a .visual {display:block; width:100%; min-height:0}
-  .termbar {padding:.5rem .8rem}
-
-  .terminal {font-size:.8125rem}
-
-  .proof {padding-block:.55rem; font-size:.81rem; line-height:1.4}
-  .proof .domain {display:none}
-  .reading {padding-block:3.2rem}
-  .ranking {margin-top:0}
-  .ranking li {grid-template-columns:1.1rem 1fr; gap:.85rem .8rem; padding-block:1.35rem}
-  .rank {padding-top:.34rem}
-  .stat {font-size:2.5rem}
-  .problem {grid-column:2}
-  .readgrid {display:block}
-  .reading h2,.end h2 {font-size:2.05rem}
-  .reading h2 {margin-bottom:1.6rem}
-  .case h2 {font-size:1rem; margin-bottom:.9rem}
-  .case p {font-size:1.75rem; margin-top:1.5rem}
-  .end {padding-top:3.2rem}
-  .end .shell>div:first-child {grid-template-columns:minmax(0,1fr); gap:1.25rem}
-  .signature {margin-top:2.5rem}
-}
-
-/* Footer links: domain and privacy grouped on the right, together on their own line on phones. */
-footer .footer-links {display:inline-flex; align-items:center; gap:1.5rem}
-footer .footer-privacy {font-size:.875rem; font-weight:700}
-@media (max-width:700px) {
-  footer .footer-links {flex-basis:100%}
-}
-
-@media (max-width:355px) {
-  .shell {width:calc(100% - 1.6rem)}
-  .a h1 {font-size:2.4rem}
-}
-
-/* A single completed search, shared by the install tabs. */
-.a .hero {
-  display:grid; grid-template-areas:". demo" "headline demo" "setup demo" ". demo";
-  grid-template-rows:1fr auto auto 1fr; align-items:start; row-gap:0;
-}
-.hero h1 {grid-area:headline}
-.hero .summary {grid-area:setup}
-.hero .visual {grid-area:demo; align-self:center}
-.terminal {overflow:hidden; background:#13171f; container-type:inline-size}
-.termbar {padding:.22rem 1.25rem; min-height:42px; background:#191e26}
-.termbar .window-name {font-weight:600}
-.terminal .brand-mark[hidden] {display:none}
-/* Keep the recorded conversation readable at the width of its own window. */
-.session {display:grid; gap:.95rem; padding:1.1rem 1.25rem 1.3rem; font-size:1rem; line-height:1.45}
-.user-turn {justify-self:end; max-width:92%; padding:.52rem .9rem; background:#262d37;
-  color:#f1f0ec; border-radius:12px 12px 3px 12px}
-.speaker {font-size:.8125rem; font-weight:800}
-.user-turn .speaker {display:block; color:#c4cbd6}
-.hound-turn .speaker {display:flex; gap:.35rem; align-items:center; margin-bottom:.25rem; color:#f4c64f}
-.speaker .brand-mark {width:1rem; height:1rem}
-.tool-pill {display:inline-flex; align-items:center; gap:.35rem; max-width:100%;
-  margin-bottom:.4rem; padding:.2rem .6rem; border:1px solid #343a43; border-radius:1rem;
-  background:#1b2028; color:#b7bec9; font-size:.75rem; line-height:1.4}
-.tool-pill span {min-width:0; overflow-wrap:anywhere}
-.tool-pill img,.tool-pill svg {flex:none}
-.tool-pill svg {color:#9ab4a4; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round}
-.tool-pill {border-color:#554933; background:#25231d; color:#e9d6a1}
-.tool-pill svg {color:#dfbd69}
-.endings {display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px;
-  margin:.65rem 0 .5rem; padding:0; list-style:none}
-.endings li {padding:.45rem .5rem; border:1px solid #39414d; border-radius:6px;
-  background:#1c222b; line-height:1.25; font-variant-numeric:tabular-nums}
-.ending {display:flex; align-items:center; justify-content:space-between; gap:2px; font-weight:800}
-.ending svg {width:.78rem; height:.78rem; flex:none; color:#99c3a8;
-  fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
-.endings .price {display:block; margin-top:.2rem; color:#d4d8de; font-size:.8125rem}
-.endings .taken {background:transparent; border-color:#303640}
-.taken .ending,.taken .price,.taken svg {color:#9ba3ae}
-.endings .pick {background:#332d1f; border-color:#a98a43}
-.pick .ending,.pick .price,.pick svg,.endings small,.renewal svg {color:#f4c64f}
-.endings small {display:block; margin-top:.2rem; font-size:.65rem; font-weight:800; white-space:nowrap}
-.renewal small {color:#d9be83; font-weight:600}
-.name-checks,.more-names {color:#bec5cf; font-size:.8125rem; line-height:1.5}
-.name-checks img {margin-right:.12em; width:.85em; height:.85em; filter:invert(82%); vertical-align:-.04em}
-.more-names {margin-top:.24rem; color:#a1aab7}
-@container (max-width:40rem) {
-  .endings {grid-template-columns:repeat(4,minmax(0,1fr))}
-}
-@container (max-width:33rem) {
-  .session {padding:.85rem; gap:.85rem}
-  .endings li {padding:.4rem .32rem}
-  .ending {font-size:.9rem}
-  .user-turn {max-width:100%; font-size:.9375rem}
-  .tool-pill {gap:.25rem; padding-inline:.45rem; font-size:.6875rem}
-  .tool-pill img {width:16px; height:16px}
-  .name-checks,.more-names {font-size:.72rem}
-  .name-checks {font-size:.69rem; letter-spacing:-.012em}
-}
-@media (min-width:701px) and (max-width:1150px) {
-  .a .hero {grid-template-areas:"headline setup" "demo demo"; grid-template-columns:minmax(0,.94fr) minmax(0,1fr); grid-template-rows:auto auto; align-items:center; gap:2rem}
-}
-@media (max-width:700px) {
-  .a .hero {grid-template-areas:"headline" "demo" "setup"; grid-template-columns:minmax(0,1fr); grid-template-rows:auto; gap:.85rem; padding-block:1.15rem}
-  .hero .summary {display:flex; flex-direction:column}
-  .hero .summary .installer {order:-1; margin-top:0}
-  .termbar {padding:.1rem .8rem; gap:.6rem}
-}
-
-/* Domain watch: its own row under the footer installer, aligned to the installer column. */
-.watch-row {display:grid; grid-template-columns:1fr 1.15fr; column-gap:9%; margin-top:24px}
-.watch {grid-column:2; min-width:0; display:grid; gap:12px}
-.watch h3 {font-family:var(--sk-font); font-size:1.25rem; line-height:1.35}
-.watch-controls {display:grid; grid-template-columns:minmax(0,1fr); gap:12px}
-.watch-field {display:grid; gap:6px; min-width:0}
-.watch-field label {color:var(--sk-linen); font-size:.875rem; font-weight:700; line-height:1.3}
-.watch input {width:100%; min-width:0; min-height:44px; margin:0; padding:0 12px; background:var(--sk-charcoal); color:var(--sk-ivory); border:1px solid var(--sk-stone); border-radius:8px; font:400 1rem/1.3 var(--sk-font)}
-.watch input::placeholder {color:var(--sk-stone); opacity:.8}
-.watch input:focus-visible {outline:2px solid var(--button); outline-offset:2px; border-color:var(--button)}
-.watch input[aria-invalid="true"] {border-color:#f5a99b}
-.watch-submit {min-height:44px; padding:0 20px; background:var(--button); color:var(--sk-ink); border:0; border-radius:8px; font-size:1rem; font-weight:800; white-space:nowrap}
-.watch-submit:not(:disabled):not([aria-disabled="true"]):hover {background:var(--sk-ivory)}
-.watch-submit:focus-visible {outline:3px solid var(--sk-ivory); outline-offset:3px}
-.watch-submit:disabled {opacity:.6; cursor:default}
-.watch-submit[aria-disabled="true"] {opacity:.75; cursor:progress}
-.watch-note {color:var(--sk-stone); font-size:.875rem; line-height:1.45}
-.watch-note a {display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; vertical-align:middle; color:var(--sk-ivory); font-weight:700; text-underline-offset:4px}
-.watch-note a:focus-visible {outline:2px solid var(--sk-ivory); outline-offset:0}
-/* Room for the longest message (three lines here, two in the wide row) so nothing below moves. */
-.watch-status {min-height:calc(3 * 1.45em); color:var(--sk-linen); font-size:.875rem; font-weight:700; line-height:1.45}
-.watch-status[data-state="error"] {color:#f5a99b}
-.watch-status[data-state="success"] {color:var(--button)}
-@media (min-width:701px) and (max-width:1150px) {
-  .watch-row {grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); column-gap:5%}
-}
-@media (min-width:1151px) {
-  .watch-controls {grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto; align-items:end}
-  .watch-status {min-height:calc(2 * 1.45em)}
-}
-@media (max-width:700px) {
-  .watch-row {grid-template-columns:minmax(0,1fr)}
-  .watch {grid-column:auto}
-}
-</style>
+<html lang="en" data-skena-preview-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Domain Hound | Name it already.</title>
+  <meta name="description" content="Find a startup name you can actually buy. Ask Claude or Codex. Get free names, trademark-checked, cheapest price first.">
+  <link rel="canonical" href="https://domainhound.dev/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Domain Hound">
+  <meta property="og:url" content="https://domainhound.dev/">
+  <meta property="og:title" content="Domain Hound | Name it already.">
+  <meta property="og:description" content="Find a startup name you can actually buy. Ask Claude or Codex. Get free names, trademark-checked, cheapest price first.">
+  <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
+  <meta property="og:image:alt" content="Domain Hound: Name it already.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Domain Hound | Name it already.">
+  <meta name="twitter:description" content="Find a startup name you can actually buy. Ask Claude or Codex. Get free names, trademark-checked, cheapest price first.">
+  <meta name="twitter:image" content="https://domainhound.dev/assets/social-preview.png">
+  <link rel="icon" href="assets/hound-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/brand-b.css">
 </head>
-<body class="a"><main>
-<section class="top" id="top">
-<nav class="shell" aria-label="Main navigation"><span class="brand"><img src="assets/hound-mark.svg" width="42" height="42" alt="">Domain Hound</span><a href="#install">Install</a></nav>
-<div class="hero shell">
-<h1>A bloodhound for domain names.</h1>
-<figure class="visual" aria-label="Recorded search for a trip planning app">
-<section class="terminal" aria-label="Claude Code example">
-<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
-<symbol id="claude-spark" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></symbol>
-</defs></svg>
-<div class="termbar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="window-name"><svg class="brand-mark claude-spark" aria-hidden="true"><use href="#claude-spark"/></svg><img class="brand-mark" src="assets/brands/openai.svg" width="16" height="16" alt="" hidden><span>Claude Code</span></span>
-</div>
-<div class="session">
-<p class="user-turn"><span class="speaker">You</span>Trip planning app. Thinking Concierge?</p>
-<div class="hound-turn">
-<span class="tool-pill"><img src="assets/hound-mark.svg" width="20" height="20" alt=""><span><strong>Domain Hound</strong> · 36 names × 10 endings checked</span><svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg></span>
-<span class="speaker"><svg class="brand-mark claude-spark" aria-hidden="true"><use href="#claude-spark"/></svg><img class="brand-mark" src="assets/brands/openai.svg" width="16" height="16" alt="" hidden><span>Claude</span></span>
-<p>Concierge is taken. Best free name: <strong>tripfixer</strong></p>
-<ul class="endings" role="list" aria-label="Tripfixer endings in value order, first-year prices on 24 November 2026">
-<li class="taken" aria-label=".com, taken"><span class="ending">.com<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8"/></svg></span><span class="price">Taken</span></li>
-<li class="taken" aria-label=".ai, taken"><span class="ending">.ai<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8"/></svg></span><span class="price">Taken</span></li>
-<li class="pick" aria-label=".app, free, $8.28 first year, Best pick"><span class="ending">.app<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m2.5 8 3.5 3.5 7.5-7.5"/></svg></span><span class="price">$8.28</span><small>Best pick</small></li>
-<li aria-label=".dev, free, $8.00 first year"><span class="ending">.dev<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m2.5 8 3.5 3.5 7.5-7.5"/></svg></span><span class="price">$8.00</span></li>
-<li aria-label=".io, free, $20.91 first year"><span class="ending">.io<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m2.5 8 3.5 3.5 7.5-7.5"/></svg></span><span class="price">$20.91</span></li>
-<li aria-label=".si, free, $10.98 first year"><span class="ending">.si<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m2.5 8 3.5 3.5 7.5-7.5"/></svg></span><span class="price">$10.98</span></li>
-<li aria-label=".me, free, $8.70 first year"><span class="ending">.me<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m2.5 8 3.5 3.5 7.5-7.5"/></svg></span><span class="price">$8.70</span></li>
-<li class="renewal" aria-label=".co, free, renewal warning, $3.11 first year, then $31"><span class="ending">.co<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1Zm0 4.2v3.4m0 1.9v.2"/></svg></span><span class="price">$3.11</span><small>then $31</small></li>
-</ul>
-<p class="name-checks">No trademark · <img src="assets/brands/appstore.svg" alt="">App Store and <img src="assets/brands/googleplay.svg" alt="">Google Play free · <img src="assets/brands/x.svg" alt="">X free</p>
-<p class="more-names">2 more free names · tripvalet skipped (trademarked)</p>
-</div>
-<p class="user-turn"><span class="speaker">You</span>tripfixer.app</p>
-<div class="hound-turn">
-<span class="tool-pill"><img src="assets/hound-mark.svg" width="20" height="20" alt=""><span><strong>Domain Hound</strong> · price confirmed</span><svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg></span>
-<span class="speaker"><svg class="brand-mark claude-spark" aria-hidden="true"><use href="#claude-spark"/></svg><img class="brand-mark" src="assets/brands/openai.svg" width="16" height="16" alt="" hidden><span>Claude</span></span>
-<p>Spaceship, $8.28 (then $14.49/yr). Opening checkout.</p>
-</div>
-</div></section></figure>
-<div class="summary"><p class="intro">Brainstorm names all day. If they’re not available, it’s pointless. Domain Hound only brings back names you can actually get, at the best price.</p>
-<div class="installer" id="install" tabindex="-1">
-<div class="tabs" role="tablist" aria-label="Install for your client">
-<button type="button" role="tab" id="install-claude" aria-controls="install-claude-panel" aria-selected="true" tabindex="0"><svg class="brand-mark claude-spark" aria-hidden="true"><use href="#claude-spark"/></svg>Claude Code</button>
-<button type="button" role="tab" id="install-codex" aria-controls="install-codex-panel" aria-selected="false" tabindex="-1"><img class="brand-mark" src="assets/brands/openai.svg" width="22" height="22" alt="">Codex</button>
-<button type="button" role="tab" id="install-other" aria-controls="install-other-panel" aria-selected="false" tabindex="-1">Other MCP clients</button>
-</div>
-<div role="tabpanel" id="install-claude-panel" aria-labelledby="install-claude">
-<div class="command"><code tabindex="0">claude mcp add domain-hound <span class="separator">--</span> npx -y domain-hound</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy command</span></button></div>
-<p class="hint">Free and open source. Run this in your terminal, then ask: find a name and a domain for my project.</p></div>
-<div role="tabpanel" id="install-codex-panel" aria-labelledby="install-codex" hidden>
-<div class="command"><code tabindex="0">codex mcp add domain-hound <span class="separator">--</span> npx -y domain-hound</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy command</span></button></div>
-<p class="hint">Free and open source. Run this in your terminal, then ask: find a name and a domain for my project.</p></div>
-<div role="tabpanel" id="install-other-panel" aria-labelledby="install-other" hidden>
-<div class="command"><code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy config</span></button></div>
-<p class="hint">Free and open source. Add this JSON to your client's MCP configuration.</p></div>
-<p class="feedback" role="status"></p></div></div></div>
-<div class="proof shell"><p><span>Free · open source</span> <span>· Claude Code</span> <span>· Codex · any MCP client</span></p><span class="domain mono">domainhound.dev</span></div></section>
-
-<section class="sources" aria-labelledby="sources-lead"><div class="shell sources-inner">
-<p id="sources-lead">Every name is checked against</p>
-<ul class="source-list" role="list">
-<li><svg class="line-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>Official registries</span></li>
-<li><svg class="line-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v17m-5 1h10M3 7l9-2 9 2M5 7l-3 7h6L5 7Zm14 0-3 7h6l-3-7Z"/><path d="M2 14a3 3 0 0 0 6 0m8 0a3 3 0 0 0 6 0"/></svg><span>USPTO</span></li>
-<li><img class="brand-mark" src="assets/brands/google.svg" width="22" height="22" alt=""><span>Google</span></li>
-<li><img class="brand-mark" src="assets/brands/appstore.svg" width="22" height="22" alt=""><span>App Store</span></li>
-<li><img class="brand-mark" src="assets/brands/googleplay.svg" width="22" height="22" alt=""><span>Google Play</span></li>
-<li><svg class="line-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h8l10 10-7 7L3 10V4Z"/><circle cx="7.5" cy="7.5" r="1"/></svg><span>Shop prices</span></li>
-<li><img class="brand-mark" src="assets/brands/x.svg" width="22" height="22" alt=""><span>X</span></li>
-<li><img class="brand-mark" src="assets/brands/github.svg" width="22" height="22" alt=""><span>GitHub</span></li>
-</ul></div></section>
-
-<section class="reading" aria-labelledby="why-naming"><div class="shell">
-<h2 id="why-naming">Why naming is hard</h2>
-<ol class="ranking" role="list">
-  <li>
-    <span class="rank" aria-hidden="true">1</span><div class="measure"><strong class="stat">169 million</strong><small>.com names already registered</small>
-      <a class="citation" href="https://investor.verisign.com/news-releases/news-release-details/dnibcom-reports-internet-has-4116-million-domain-name">Verisign, Sep 2026.</a></div>
-    <div class="problem"><h3>Every good name is taken.</h3>
-      <p>It checks the official registries, not a shop's guess, and only brings back names you can get.</p>
+<body>
+<header class="mast" id="top">
+  <div class="wrap mast-inner">
+    <a class="brand" href="#top"><span>domainhound.dev</span></a>
+    <nav aria-label="Main"><a href="#real-search">Example</a><a href="#watch">Watch</a></nav>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="paper-art" aria-hidden="true">
+        <span class="paper-word first">Domain</span>
+        <span class="paper-word second">Hound</span>
+        <span class="paper-dog"><img src="assets/hound-mark.svg" width="180" height="180" alt=""></span>
+      </div>
+      <div class="lead">
+        <p class="stamp">Name it already.</p>
+        <h1>Find a startup name you can actually buy.</h1>
+        <p class="subline">Ask Claude or Codex. Get free names, trademark-checked, cheapest price first.</p>
+      </div>
+      <div class="installer" id="install">
+        <div class="install-heading"><h2>Install</h2><p>Free · open source</p></div>
+        <div class="tabs" role="tablist" aria-label="Install for">
+          <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
+          <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
+          <button type="button" role="tab" id="tab-other" aria-selected="false" aria-controls="panel-other" tabindex="-1">Other MCP</button>
+        </div>
+        <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude">
+          <p class="hint">In your terminal</p>
+          <code tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
+          <button type="button" class="copy action"><span>Copy command</span></button>
+        </div>
+        <div role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
+          <p class="hint">In your terminal</p>
+          <code tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
+          <button type="button" class="copy action"><span>Copy command</span></button>
+        </div>
+        <div role="tabpanel" id="panel-other" aria-labelledby="tab-other" hidden>
+          <p class="hint">MCP configuration</p>
+          <code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
+          <button type="button" class="copy action"><span>Copy config</span></button>
+        </div>
+        <p class="feedback" role="status"></p>
+      </div>
     </div>
-  </li>
-  <li>
-    <span class="rank" aria-hidden="true">2</span><div class="measure"><strong class="stat">$1,311</strong><small>average resale price of a taken name</small>
-      <a class="citation" href="https://www.namepros.com/threads/domain-name-sales-semi-annual-report-2025.1356912/">93,100 sales, NamePros sales report, H1 2025.</a></div>
-    <div class="problem"><h3>The name you want costs four figures.</h3>
-      <p>Taken names show as possible resale, with cheaper free alternatives next to them.</p>
+  </section>
+  <section class="facts">
+    <div class="wrap">
+      <h2>Every good name is taken.</h2>
+      <ul class="fact-list" role="list">
+        <li><strong class="number">169.8</strong><p>million .com names registered</p></li>
+        <li><strong class="number">$1,311</strong><p>Average resale price</p></li>
+        <li><strong class="number">81%</strong><p>of 1,000 common English words had a US trademark</p></li>
+      </ul>
+      <p class="sources">
+        <a href="https://investor.verisign.com/news-releases/news-release-details/dnibcom-reports-internet-has-4116-million-domain-name" title="Verisign, .com registrations as of 30 September 2026" aria-label="Verisign, .com registrations as of 30 September 2026">Verisign Q3 ’26</a> ·
+        <a href="https://www.namepros.com/threads/domain-name-sales-semi-annual-report-2025.1356912/" title="NamePros, average resale price across 93,100 reported domain sales in the first half of 2025" aria-label="NamePros, average resale price across 93,100 reported domain sales in the first half of 2025">NamePros H1 ’25</a> ·
+        <a href="https://harvardlawreview.org/print/vol-131/are-we-running-out-of-trademarks/" title="Harvard Law Review, Are We Running Out of Trademarks? (2018), US trademark data for the 1,000 most common English words in 2016" aria-label="Harvard Law Review, Are We Running Out of Trademarks? (2018), US trademark data for the 1,000 most common English words in 2016">HLR ’18</a>
+      </p>
     </div>
-  </li>
-  <li>
-    <span class="rank" aria-hidden="true">3</span><div class="measure"><strong class="stat">10x</strong><small>one .co example: $3.11, then $31.05</small>
-      <a class="citation" href="https://www.spaceship.com/domain-search/pricing/">.co at Spaceship, 24 Nov 2026.</a></div>
-    <div class="problem"><h3>$3 today, $31 next year.</h3>
-      <p>Every price shows the renewal. Cheapest and best value, side by side.</p>
+  </section>
+  <section class="steps">
+    <div class="wrap">
+      <h2>How it works</h2>
+      <ol class="step-list">
+        <li><h3>Install</h3><p>One command.</p></li>
+        <li><h3>Ask</h3><p>“Find a name for my trip app.”</p></li>
+        <li><h3>Get names you can buy</h3><p>Registry, trademark and app-store checks. First-year and renewal prices. Checkout link. Good&nbsp;dog.</p></li>
+      </ol>
     </div>
-  </li>
-  <li>
-    <span class="rank" aria-hidden="true">4</span><div class="measure"><strong class="stat">81%</strong><small>of the 1,000 most common English words are US trademarks</small>
-      <a class="citation" href="https://harvardlawreview.org/print/vol-131/are-we-running-out-of-trademarks/">Harvard Law Review study, 2018.</a></div>
-    <div class="problem"><h3>The trademark shows up after launch.</h3>
-      <p>US trademarks, same-name apps and sites, one verdict: No conflict found, Check first or Avoid.</p>
+  </section>
+  <section class="demo" id="real-search">
+    <div class="wrap demo-grid">
+      <div class="demo-summary">
+        <header class="demo-heading"><h2>A real search.</h2><p>360 checked. 1 winner.</p></header>
+        <div class="receipt">
+          <ul class="checks" role="list">
+            <li>Free at the registry</li>
+            <li>No trademark conflict</li>
+            <li>No same-name app</li>
+          </ul>
+          <del>concierge.com &nbsp;taken</del>
+        </div>
+      </div>
+      <div class="terminal" aria-label="Claude Code example">
+        <div class="term-bar"><span class="window-name"><span>Claude Code</span></span><time datetime="2026-11-24">24 Nov 2026</time></div>
+        <div class="turn"><b class="speaker">You</b><p>Trip planning app. Thinking Concierge?</p></div>
+        <div class="turn hound-turn"><b class="speaker"><span>Claude</span></b><p>Try Tripfixer.</p></div>
+        <div class="result"><strong>tripfixer.app</strong>
+          <div class="prices"><div><small>First year</small><b>$8.28</b></div><div><small>Renewal</small><b>$14.49<small>/yr</small></b></div></div>
+          <p>Bought at Spaceship. USD before tax.</p>
+        </div>
+      </div>
     </div>
-  </li>
-</ol></div></section>
-<section class="reading case"><div class="shell readgrid"><div><h2>A real search</h2>
-<div class="before-after"><div><s>Concierge</s><small>taken everywhere</small></div>
-<span class="arrow" aria-hidden="true">&rarr;</span><div><strong>Tripfixer</strong><small>No conflict found</small></div></div></div><p>Concierge became Tripfixer: 36 names sniffed, <strong>tripfixer.app</strong> bought for <strong>$8.28.</strong> Good dog.</p></div></section>
-<section class="reading faq"><div class="shell readgrid"><h2>FAQ</h2><dl>
-<div><dt>Is it free?</dt><dd>Yes. Free and open source. No treats required.</dd></div>
-<div><dt>Does it buy for me?</dt><dd>No. It opens the cheapest checkout. You hold the leash.</dd></div>
-<div><dt>Does it work with Claude and Codex?</dt><dd>Yes, and with any agent that speaks MCP.</dd></div>
-</dl></div></section>
-<section class="end"><div class="shell"><div><div class="closing-brand">
-<h2>Open source. Runs on your machine. Never buys without you.</h2></div>
-<div class="installer" id="install-footer" tabindex="-1">
-<div class="tabs" role="tablist" aria-label="Install for your client">
-<button type="button" role="tab" id="install-footer-claude" aria-controls="install-footer-claude-panel" aria-selected="true" tabindex="0"><svg class="brand-mark claude-spark" aria-hidden="true"><use href="#claude-spark"/></svg>Claude Code</button>
-<button type="button" role="tab" id="install-footer-codex" aria-controls="install-footer-codex-panel" aria-selected="false" tabindex="-1"><img class="brand-mark" src="assets/brands/openai.svg" width="22" height="22" alt="">Codex</button>
-<button type="button" role="tab" id="install-footer-other" aria-controls="install-footer-other-panel" aria-selected="false" tabindex="-1">Other MCP clients</button>
-</div>
-<div role="tabpanel" id="install-footer-claude-panel" aria-labelledby="install-footer-claude">
-<div class="command"><code tabindex="0">claude mcp add domain-hound <span class="separator">--</span> npx -y domain-hound</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy command</span></button></div>
-<p class="hint">Run in your terminal.</p></div>
-<div role="tabpanel" id="install-footer-codex-panel" aria-labelledby="install-footer-codex" hidden>
-<div class="command"><code tabindex="0">codex mcp add domain-hound <span class="separator">--</span> npx -y domain-hound</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy command</span></button></div>
-<p class="hint">Run in your terminal.</p></div>
-<div role="tabpanel" id="install-footer-other-panel" aria-labelledby="install-footer-other" hidden>
-<div class="command"><code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code><button class="copy" type="button"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="11" rx="2"/><path d="M12.5 4V3a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v8a1 1 0 0 0 1 1h1"/></svg><span>Copy config</span></button></div>
-<p class="hint">Add this JSON to your client's MCP configuration.</p></div>
-<p class="feedback" role="status"></p></div></div>
-<div class="watch-row"><form class="watch" id="watch" novalidate aria-labelledby="watch-title">
-<h3 id="watch-title">Alert me when the domain frees up</h3>
+  </section>
+  <aside class="trust"><p class="wrap">Open source. Runs on your machine. <strong>Never buys without you.</strong> You hold the leash.</p></aside>
+  <section class="watch-section">
+    <div class="wrap"><form class="watch" id="watch" novalidate aria-labelledby="watch-title">
+<h2 id="watch-title">Want a taken name? We’ll email you when it frees up.</h2>
 <div class="watch-controls">
 <div class="watch-field"><label for="watch-domain">Domain</label><input id="watch-domain" required type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="brightname.com"></div>
 <div class="watch-field"><label for="watch-email">Email</label><input id="watch-email" required type="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="you@example.com"></div>
-<button class="watch-submit" type="submit" disabled>Watch it</button>
+<button class="watch-submit action" type="submit" disabled>Watch it</button>
 </div>
 <div hidden><label for="watch-website">Website</label><input id="watch-website" type="text" tabindex="-1" autocomplete="off"></div>
-<p class="watch-note">We email you once when it frees up. One click erases you. <a href="privacy/#watch">Privacy</a></p>
+<p class="watch-note">Erase anytime. <a href="privacy/#watch">Privacy</a></p>
 <p class="watch-status" id="watch-status" role="status" aria-live="polite"></p>
 </form></div>
-<footer><div class="signature"><a class="brand" href="#top" aria-label="Domain Hound, back to top"><img src="assets/hound-mark.svg" width="42" height="42" alt="">Domain Hound</a><span class="footer-links"><a class="mono domain" href="https://domainhound.dev/">domainhound.dev</a><a class="footer-privacy" href="privacy/">Privacy</a></span></div>
-</footer>
-</div></section></main>
+  </section>
+  <section class="faq">
+    <div class="wrap faq-grid">
+      <h2>FAQ</h2>
+      <dl>
+        <div><dt>Search cost?</dt><dd>Free.</dd></div>
+        <div><dt>Who sells it?</dt><dd>The registrar.</dd></div>
+        <div><dt>Trademark clearance?</dt><dd>US screening only.</dd></div>
+      </dl>
+    </div>
+  </section>
+  <aside class="install-close" aria-label="Install">
+    <div class="wrap">
+      <button type="button" class="copy action"><span>Copy command</span></button>
+      <span class="close-feedback" aria-hidden="true"></span>
+    </div>
+  </aside>
+</main>
+<footer><div class="wrap foot"><a href="https://domainhound.dev/">domainhound.dev</a><a href="privacy/">Privacy</a></div></footer>
+<script src="assets/site.js"></script>
 <script>
-const installers = document.querySelectorAll('.installer');
+  const installer = document.getElementById('install');
+  const closingCopy = document.querySelector('.install-close .copy');
+  const closingLabel = closingCopy.querySelector('span');
+  const closingFeedback = document.querySelector('.close-feedback');
+  const installFeedback = installer.querySelector('.feedback');
+  const activeCopy = () => installer.querySelector('[role="tabpanel"]:not([hidden]) .copy');
 
-function selectClient(index) {
-  const terminal = document.querySelector('.terminal');
-  const client = ['Claude Code', 'Codex', 'MCP client'][index];
-  for (const mark of terminal.querySelectorAll('.brand-mark')) {
-    mark.toggleAttribute('hidden', index !== (mark.matches('.claude-spark') ? 0 : 1));
-  }
-  for (const label of terminal.querySelectorAll('.hound-turn .speaker span')) {
-    label.textContent = index === 0 ? 'Claude' : client;
-  }
-  terminal.querySelector('.window-name span').textContent = client;
-  terminal.setAttribute('aria-label', client + ' example');
-  for (const installer of installers) {
-    installer.querySelectorAll('[role="tab"]').forEach((tab, position) => {
-      const selected = position === index;
-      tab.setAttribute('aria-selected', String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-      const panel = document.getElementById(tab.getAttribute('aria-controls'));
-      panel.hidden = !selected;
-      const button = panel.querySelector('.copy');
-      button.querySelector('span').textContent = button.dataset.label;
-    });
-    installer.querySelector('.feedback').textContent = '';
-  }
-}
-
-async function copyLine(panel, feedback) {
-  const code = panel.querySelector('code');
-  try {
-    await navigator.clipboard.writeText(code.textContent);
-  } catch {
-    const range = document.createRange();
-    range.selectNodeContents(code);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    if (!document.execCommand('copy')) {
-      feedback.textContent = 'Text selected. Use your device’s Copy action.';
-      return;
-    }
-    selection.removeAllRanges();
-  }
-  if (panel.hidden) return;
-  panel.querySelector('.copy span').textContent = 'Copied';
-  const client = document.getElementById(panel.getAttribute('aria-labelledby'));
-  feedback.textContent = client.textContent + ' setup copied.';
-}
-
-for (const installer of installers) {
-  const tabs = [...installer.querySelectorAll('[role="tab"]')];
-  tabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => selectClient(index));
-    tab.addEventListener('keydown', event => {
-      const positions = {
-        ArrowRight: (index + 1) % tabs.length,
-        ArrowLeft: (index + tabs.length - 1) % tabs.length,
-        Home: 0,
-        End: tabs.length - 1
-      };
-      if (!(event.key in positions)) return;
-      event.preventDefault();
-      const position = positions[event.key];
-      selectClient(position);
-      tabs[position].focus();
-    });
-  });
-  for (const panel of installer.querySelectorAll('[role="tabpanel"]')) {
-    const button = panel.querySelector('.copy');
-    button.dataset.label = button.querySelector('span').textContent;
-    button.addEventListener('click', () => copyLine(panel, installer.querySelector('.feedback')));
-  }
-}
+  closingCopy.addEventListener('click', () => activeCopy().click());
+  // Mirror the installer. Its status region announces the result for both buttons.
+  new MutationObserver(() => {
+    closingLabel.textContent = activeCopy().textContent;
+    closingFeedback.textContent = installFeedback.textContent;
+  }).observe(installer, {subtree: true, childList: true, attributes: true, attributeFilter: ['hidden']});
 </script>
-<script>
-/* Domain watch form. Fields carry no name, so a native submit could never send the email anywhere. */
-(() => {
-  const form = document.getElementById('watch');
-  if (!form || !window.fetch || !window.AbortController) return;
-  const endpoint = 'https://domainhound-alerts.domainhound.workers.dev/watch';
-  const domainInput = document.getElementById('watch-domain');
-  const emailInput = document.getElementById('watch-email');
-  const trap = document.getElementById('watch-website');
-  const button = form.querySelector('.watch-submit');
-  const status = document.getElementById('watch-status');
-  /* Same rules as the alerts service, so most mistakes are caught before sending. */
-  function watchHostname(value) {
-    const raw = value.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/\.$/, '');
-    if (!raw || raw.length > 253 || /[\s@:/?#]/.test(raw)) return null;
-    try {
-      const host = new URL('http://' + raw).hostname;
-      return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,63}$/.test(host) ? host : null;
-    } catch {
-      return null;
-    }
-  }
-  function validEmail(value) {
-    const email = value.toLowerCase();
-    return email.length <= 254 && /^[^\s@<>()[\]",;:\\]{1,64}@(?:[a-z0-9-]+\.)+[a-z]{2,63}$/.test(email);
-  }
-
-  function showStatus(message, state, invalidInput) {
-    status.textContent = message;
-    status.dataset.state = state;
-    if (invalidInput) {
-      invalidInput.setAttribute('aria-invalid', 'true');
-      invalidInput.setAttribute('aria-describedby', status.id);
-      invalidInput.focus();
-    }
-  }
-
-  function clearStatus() {
-    for (const input of [domainInput, emailInput]) {
-      input.removeAttribute('aria-invalid');
-      input.removeAttribute('aria-describedby');
-    }
-    showStatus('', '');
-  }
-
-  form.addEventListener('input', clearStatus);
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    if (button.getAttribute('aria-disabled') === 'true') return;
-    clearStatus();
-    const domain = watchHostname(domainInput.value.trim());
-    const email = emailInput.value.trim();
-    if (!domain) return showStatus('Enter a domain like brightname.com.', 'error', domainInput);
-    if (!validEmail(email)) return showStatus('Enter a valid email address.', 'error', emailInput);
-
-    button.setAttribute('aria-disabled', 'true');
-    domainInput.readOnly = emailInput.readOnly = true;
-    showStatus('Sending…', 'sending');
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email, domain, website: trap.value }),
-        credentials: 'omit',
-        redirect: 'error',
-        signal: controller.signal
-      });
-      if (response.status === 429) {
-        showStatus('Too many tries. Wait a minute and try again.', 'error');
-        return;
-      }
-      const result = await response.json().catch(() => null);
-      if (response.status === 202 && result?.ok === true) {
-        form.reset();
-        showStatus('Check your inbox to confirm.', 'success');
-      } else if ([400, 422].includes(response.status) && typeof result?.message === 'string' && result.message) {
-        const field = response.status === 422 || /domain/i.test(result.message) ? domainInput : emailInput;
-        showStatus(result.message, 'error', field);
-      } else {
-        showStatus('The watch service is unavailable. Try again later.', 'error');
-      }
-    } catch {
-      showStatus('Couldn’t reach the server. Try again later.', 'error');
-    } finally {
-      clearTimeout(timer);
-      domainInput.readOnly = emailInput.readOnly = false;
-      button.removeAttribute('aria-disabled');
-    }
-  });
-
-  button.disabled = false;
-})();
-</script></body></html>
+</body>
+</html>

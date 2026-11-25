@@ -1,0 +1,32 @@
+.privacy-panel {
+  width: min(calc(100% - 2 * var(--gutter)), 76ch);
+  margin: clamp(1.5rem, 5vw, 4rem) auto;
+  padding: clamp(1rem, 4vw, 3rem);
+  border: 2px solid var(--blue);
+  border-radius: 0 25px 0 0;
+  background: var(--cream);
+  color: var(--blue);
+  box-shadow: 5px 5px 0 var(--gold);
+  font-size: max(18px, 1.125rem);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.privacy-panel .updated { margin-top: .75rem; }
+.privacy-panel .privacy-intro { margin-top: 1.5rem; }
+
+.privacy-panel section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid currentColor;
+}
+
+.privacy-panel h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.15;
+}
+
+.privacy-panel section p,
+.privacy-panel ul { margin-top: .8rem; }
+.privacy-panel ul { padding-inline-start: 1.3em; }
+.privacy-panel li + li { margin-top: .5rem; }

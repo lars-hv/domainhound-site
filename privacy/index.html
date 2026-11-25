@@ -1,79 +1,27 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Privacy | Domain Hound</title>
-<link rel="icon" type="image/svg+xml" href="../assets/hound-mark.svg">
-<meta name="description" content="What Domain Hound sees, what it sends and who receives it. It runs on your own computer, and we receive none of your searches.">
-<style>
-@font-face {
-  font-family: Mulish;
-  src: url("../assets/mulish-latin-wght-normal.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 200 1000;
-  font-display: swap;
-}
-:root {
-  --ink: #05070d;
-  --charcoal: #11141b;
-  --graphite: #353d4d;
-  --olive-gray: #55574f;
-  --ivory: #f4f1e9;
-  --link-ink: #674d08;
-  --rule: #c8c6bd;
-  --font: Mulish, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  color-scheme: light;
-}
-* {box-sizing:border-box}
-body {margin:0; background:var(--ivory); color:var(--charcoal); font:400 1rem/1.55 var(--font); -webkit-font-smoothing:antialiased}
-h1,h2,p,ul {margin:0}
-.mono {font-family:ui-monospace,Menlo,SFMono-Regular,Consolas,monospace}
-:focus-visible {outline:2px solid currentColor; outline-offset:3px}
-
-/* Ink header and footer, as on the homepage. */
-.top,.end {background:var(--ink); color:var(--ivory)}
-.shell {width:min(100% - 7rem,88rem); margin-inline:auto}
-nav,.signature {display:flex; align-items:center; justify-content:space-between; gap:1rem}
-nav {min-height:5.5rem}
-.brand {display:inline-flex; gap:.6rem; align-items:center; min-height:44px; color:inherit; text-decoration:none; font-weight:880; letter-spacing:-.075em; font-size:1.6rem; line-height:1.1}
-.brand img {width:42px; height:42px}
-.signature {padding-block:1.25rem}
-.signature a {display:inline-flex; align-items:center; min-height:44px; color:inherit; text-underline-offset:4px}
-.signature .home {font-size:.875rem; font-weight:700}
-
-/* Reading column. */
-.page {width:min(100% - 3rem,680px); margin-inline:auto; padding-block:5rem 6rem}
-h1 {font-size:2.95rem; line-height:1.09; letter-spacing:-.055em; font-weight:570; text-wrap:balance}
-.updated {margin-top:.75rem; color:var(--olive-gray); font-size:1rem}
-.lead {margin-top:2.25rem; font-size:1.125rem; line-height:1.55}
-section {margin-top:2.75rem; padding-top:2rem; border-top:1px solid var(--rule)}
-h2 {font-size:1.25rem; line-height:1.35; letter-spacing:-.03em; font-weight:780; text-wrap:balance}
-section p,section ul {margin-top:.8rem}
-ul {padding-left:1.25rem}
-li + li {margin-top:.5rem}
-strong {font-weight:750}
-.page a {color:var(--link-ink); text-underline-offset:3px; overflow-wrap:anywhere}
-
-@media (min-width:701px) and (max-width:1150px) {
-  .shell {width:calc(100% - 4.5rem)}
-}
-@media (max-width:700px) {
-  .shell {width:calc(100% - 2.5rem)}
-  nav {min-height:3.65rem}
-  .brand {font-size:1.35rem}
-  .brand img {width:34px; height:34px}
-  .page {width:calc(100% - 2.5rem); padding-block:3.2rem 4rem}
-  h1 {font-size:2.05rem}
-  .lead {margin-top:1.75rem}
-  section {margin-top:2.25rem; padding-top:1.75rem}
-}
-</style>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy | Domain Hound</title>
+  <meta name="description" content="What Domain Hound sees, what it sends and who receives it. It runs on your own computer, and we receive none of your searches.">
+  <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
+  <link rel="icon" type="image/svg+xml" href="../assets/hound-mark.svg">
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/brand-b.css">
+  <link rel="stylesheet" href="../assets/privacy.css">
 </head>
 <body>
-<header class="top">
-<nav class="shell" aria-label="Main navigation"><a class="brand" href="../" aria-label="Domain Hound home"><img src="../assets/hound-mark.svg" width="42" height="42" alt="">Domain Hound</a></nav>
+<header class="mast" id="top">
+  <div class="wrap mast-inner">
+    <a class="brand" href="../"><span>domainhound.dev</span></a>
+    <nav aria-label="Main"><a href="../#real-search">Example</a><a href="../#watch">Watch</a></nav>
+  </div>
 </header>
-<main class="page">
+<main class="privacy-panel">
 <h1>Privacy</h1>
 <p class="updated">Last updated 24 November 2026</p>
-<p class="lead">Domain Hound runs on your own computer as an MCP server. We run no search server, so we never receive your searches, the names you check or your results. We use no analytics, telemetry or cookies.</p>
+<p class="privacy-intro">Domain Hound runs on your own computer as an MCP server. We run no search server, so we never receive your searches, the names you check or your results. We use no analytics, telemetry or cookies.</p>
 
 <section aria-labelledby="sources">
 <h2 id="sources">Who sees the names you check?</h2>
@@ -115,7 +63,6 @@ strong {font-weight:750}
 <p>If you have a privacy question, <a href="https://github.com/lars-hv/domain-hound/issues">open a GitHub issue</a>.</p>
 </section>
 </main>
-<footer class="end">
-<div class="shell signature"><a class="brand" href="../" aria-label="Domain Hound home"><img src="../assets/hound-mark.svg" width="42" height="42" alt="">Domain Hound</a><a class="home" href="../">Home</a></div>
-</footer>
-</body></html>
+<footer><div class="wrap foot"><a href="../">domainhound.dev</a><a href="./" aria-current="page">Privacy</a></div></footer>
+</body>
+</html>
