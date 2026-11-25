@@ -5,6 +5,7 @@
   const endpoint = 'https://domainhound-alerts.domainhound.workers.dev/watch';
   const domainInput = document.getElementById('watch-domain');
   const emailInput = document.getElementById('watch-email');
+  const nameInput = document.getElementById('watch-name');
   const news = document.getElementById('watch-news');
   const trap = document.getElementById('watch-website');
   const button = form.querySelector('.watch-submit');
@@ -39,7 +40,7 @@
   }
 
   function clearStatus() {
-    for (const input of [domainInput, emailInput]) {
+    for (const input of [domainInput, emailInput, nameInput]) {
       input.removeAttribute('aria-invalid');
       input.removeAttribute('aria-describedby');
     }
@@ -53,11 +54,17 @@
     clearStatus();
     const domain = watchHostname(domainInput.value.trim());
     const email = emailInput.value.trim();
+    const name = nameInput.value.trim();
     if (!domain) return showStatus('Enter a domain like brightname.com.', 'error', domainInput);
     if (!validEmail(email)) return showStatus('Enter a valid email address.', 'error', emailInput);
+    if (name.length > nameInput.maxLength) return showStatus('Use 80 characters or fewer for your name.', 'error', nameInput);
+
+    const payload = { email, domain, source: 'site', website: trap.value };
+    if (name) payload.name = name;
+    if (news.checked) payload.news = 'yes';
 
     button.setAttribute('aria-disabled', 'true');
-    domainInput.readOnly = emailInput.readOnly = true;
+    domainInput.readOnly = emailInput.readOnly = nameInput.readOnly = true;
     news.disabled = true;
     showStatus('Sending…', 'sending');
     const controller = new AbortController();
@@ -66,7 +73,7 @@
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email, domain, newsConsent: news.checked, website: trap.value }),
+        body: JSON.stringify(payload),
         credentials: 'omit',
         redirect: 'error',
         signal: controller.signal
@@ -89,7 +96,7 @@
       showStatus('Couldn’t reach the server. Try again later.', 'error');
     } finally {
       clearTimeout(timer);
-      domainInput.readOnly = emailInput.readOnly = false;
+      domainInput.readOnly = emailInput.readOnly = nameInput.readOnly = false;
       news.disabled = false;
       button.removeAttribute('aria-disabled');
     }

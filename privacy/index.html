@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Privacy | Domain Hound</title>
-  <meta name="description" content="What Domain Hound sees, what it sends and who receives it. It runs on your own computer, and we receive none of your searches.">
+  <meta name="description" content="How Domain Hound handles local searches, domain watch alerts and optional news, how long we keep your data, and how to exercise your rights.">
   <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
   <link rel="icon" type="image/svg+xml" href="../assets/hound-mark.svg">
   <link rel="stylesheet" href="../assets/site.css">
@@ -20,8 +20,16 @@
 </header>
 <main class="privacy-panel">
 <h1>Privacy</h1>
-<p class="updated">Last updated 25 November 2026</p>
-<p class="privacy-intro">Domain searches run on your own computer. We run no search server and receive none of your searches or results. We receive a domain name and your email when you submit a watch on this site. We use no analytics, telemetry or cookies.</p>
+
+<section aria-labelledby="who-we-are">
+<h2 id="who-we-are">Who we are</h2>
+<p>Domain Hound is made by BrightBoard AS, org. no. 935 969 034, Middelthuns gate 13C, 0368 Oslo, Norway. We are responsible for the personal data described here. For privacy questions and requests, write to <a href="mailto:privacy@domainhound.dev">privacy@domainhound.dev</a>.</p>
+</section>
+
+<section aria-labelledby="tool">
+<h2 id="tool">The tool on your computer</h2>
+<p>Domain Hound runs on your own computer as an MCP server. We run no search server, so we never receive the names you check or your results. The tool uses no analytics, telemetry or cookies.</p>
+</section>
 
 <section aria-labelledby="sources">
 <h2 id="sources">Who sees the names you check?</h2>
@@ -46,30 +54,70 @@
 </section>
 
 <section aria-labelledby="watch">
-<h2 id="watch">Optional domain watch alerts</h2>
-<p>Enter your email on this site. Your assistant only needs the domain. We store your email, the domains you ask us to watch, when you confirm and your news preference. We record the time and wording of your news choice.</p>
-<p>Watching starts after you confirm by email. Each watch can send up to four emails, including confirmation. There are no scheduled digests.</p>
-<ol>
-  <li><strong>Confirm your watch.</strong> We include the registry status and expiry date when available. Our estimate of whether the name might come free is a guess.</li>
-  <li><strong>Expired.</strong> If the registry reports expiry or redemption, we let you know. The owner may still renew.</li>
-  <li><strong>About five days left.</strong> This alert goes out if the registry marks the name for deletion. The timing is approximate.</li>
-  <li><strong>Free to register.</strong> We double-check availability before sending this alert. We never buy or reserve the domain.</li>
-</ol>
-<p>Rare Domain Hound news is optional. We use your address for watch emails only unless you opt in to news. You can unsubscribe from news and keep your watches.</p>
-<p>Every watch email includes a signed manage link. It opens your watches without a password. You can turn off news, stop one watch or erase your address, news preference and all watches from our live records. Each watch email also has an erase link.</p>
-<p>Cloudflare stores your watch details. The registry and the watched site receive the domain name when we check it. Resend delivers the emails. We never sell your details or share them for other purposes.</p>
+<h2 id="watch">Domain watch alerts</h2>
+<ul>
+<li>We store your email address, your name if you give it, the domains you ask us to watch, and when you signed up and confirmed.</li>
+<li>You can sign up on domainhound.dev or ask your AI assistant, such as Claude or Codex, to sign you up. Your assistant sends us what you ask it to send. Either way, your watch starts when you click the confirmation link we email you.</li>
+<li>We send a confirmation email. After that, we email you when a domain you watch expires, when it is about to be released, and when it is free. We send at most four watch emails per domain, including confirmation.</li>
+<li>We use your data to provide the watch you asked for (GDPR Art. 6(1)(b)).</li>
+<li>We delete unconfirmed sign-ups after 7 days. We remove watches when they end or when you erase them. A backup copy can remain for up to 30 days. Every watch email has a link to see and stop your watches and a one-click link to erase your address, watches and news subscription.</li>
+<li>We do not track opens or clicks in our emails.</li>
+</ul>
+</section>
+
+<section aria-labelledby="news">
+<h2 id="news">Domain Hound news (optional)</h2>
+<ul>
+<li>If you say yes, we email you news about Domain Hound and other developer tools from BrightBoard AS. At most twice a month.</li>
+<li>You can tick the empty box on our site and then confirm your watch by email. You can also choose “Confirm watch + news” in your confirmation email. If your AI assistant asks about news, your answer only chooses which button we highlight. Your click in the email is what counts. Saying no does not affect your watches.</li>
+<li>We send news with your consent (GDPR Art. 6(1)(a) and the Norwegian Marketing Control Act section 15).</li>
+<li>We keep a record of when you said yes, where you signed up (site or assistant) and the exact words you agreed to.</li>
+<li>Every news email has our postal address and a one-click unsubscribe link. You can also write to us. We stop at once, at the latest within 10 days.</li>
+<li>When you unsubscribe from news or erase your data, we keep an address hash on our do-not-send list. This lets us check whether an address should receive news without storing the email address itself on that list (our legitimate interest, GDPR Art. 6(1)(f)). We keep the record of your consent for 3 years after you withdraw it to show what you agreed to. After erasure, that record contains only the address hash, the version of the consent text and the dates and times.</li>
+<li>If we ever want to send a wider kind of email, we will ask you again.</li>
+</ul>
+</section>
+
+<section aria-labelledby="providers">
+<h2 id="providers">Who helps us</h2>
+<ul>
+<li>Cloudflare runs the alert service and stores our records under a data processing agreement that covers US transfers through the EU-US Data Privacy Framework and uses EU standard contract clauses where needed.</li>
+<li>Resend sends our emails through Amazon SES in Ireland and stores message data in the US under EU standard contract clauses and the EU-US Data Privacy Framework.</li>
+<li>GitHub independently hosts this free Pages site, logs visitor IP addresses for security, and describes EU standard contract clauses and the EU-US Data Privacy Framework in its privacy policy for transfers to the US.</li>
+</ul>
+<p>We never sell your data or share it with anyone for their own marketing.</p>
+</section>
+
+<section aria-labelledby="children">
+<h2 id="children">Children</h2>
+<p>Domain Hound is not meant for children under 16, and we do not knowingly store their data.</p>
+</section>
+
+<section aria-labelledby="decisions">
+<h2 id="decisions">No automated decisions</h2>
+<p>We make no decisions about you by automated means that have legal or similar effects.</p>
+</section>
+
+<section aria-labelledby="changes">
+<h2 id="changes">Changes</h2>
+<p>If we change this policy we update the date below. If a change affects what you agreed to, we ask you again.</p>
+</section>
+
+<section aria-labelledby="rights">
+<h2 id="rights">Your rights</h2>
+<p>You can ask to see, correct, export or erase your data, and object to or limit how we use it. Write to <a href="mailto:privacy@domainhound.dev">privacy@domainhound.dev</a>. You can also complain to <a href="https://www.datatilsynet.no/">Datatilsynet, the Norwegian Data Protection Authority</a>.</p>
 </section>
 
 <section aria-labelledby="website">
-<h2 id="website">When you visit this site</h2>
-<p>GitHub Pages hosts this website. GitHub logs visitors’ IP addresses for security. The fonts and images load directly from this site.</p>
+<h2 id="website">This website</h2>
+<p>GitHub Pages hosts this website. Fonts and images load from this site. The watch form sends what you type to our alert service only when you press the button.</p>
 </section>
 
 <section aria-labelledby="contact">
-<h2 id="contact">Source code and questions</h2>
-<p>Domain Hound is open source under the MIT license. You can <a href="https://github.com/lars-hv/domain-hound">read the code on GitHub</a> to see every request the tool makes.</p>
-<p>If you have a privacy question, <a href="https://github.com/lars-hv/domain-hound/issues">open a GitHub issue</a>.</p>
+<h2 id="contact">Source code</h2>
+<p>Domain Hound is open source under the MIT license. You can <a href="https://github.com/lars-hv/domain-hound">read the code on GitHub</a>.</p>
 </section>
+<p class="updated">Last updated <time datetime="2026-11-25">25 November 2026</time></p>
 </main>
 <footer><div class="wrap foot"><a href="../">domainhound.dev</a><a href="./" aria-current="page">Privacy</a></div></footer>
 </body>
