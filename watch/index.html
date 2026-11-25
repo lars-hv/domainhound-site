@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Watch a taken domain | Domain Hound</title>
+  <meta name="description" content="Watch a taken domain for free. Confirm by email and hear when the name comes free.">
+  <link rel="canonical" href="https://domainhound.dev/watch/">
+  <link rel="icon" href="../assets/hound-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/brand-b.css">
+</head>
+<body class="watch-page">
+<header class="mast">
+  <div class="wrap mast-inner">
+    <a class="brand" href="../"><span>domainhound.dev</span></a>
+    <nav aria-label="Main"><a href="../#real-search">Example</a><a href="./" aria-current="page">Watch</a></nav>
+  </div>
+</header>
+<main class="hero">
+  <div class="wrap hero-grid">
+      <div class="paper-art" aria-hidden="true">
+        <span class="paper-word first">Domain</span>
+        <span class="paper-word second">Hound</span>
+        <span class="paper-dog"><img src="../assets/hound-mark.svg" width="180" height="180" alt=""></span>
+      </div>
+      <div class="lead">
+        <h1 id="watch-title">Watch a taken domain.</h1>
+        <p class="subline">We’ll email you when it comes free.</p>
+      </div>
+      <form class="watch" id="watch" novalidate aria-labelledby="watch-title" autocomplete="off">
+        <p class="watch-intro">Confirm by email to start your free watch.</p>
+        <div class="watch-controls">
+          <div class="watch-field">
+            <label for="watch-domain">Domain</label>
+            <input id="watch-domain" required type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="brightname.com">
+          </div>
+          <div class="watch-field">
+            <label for="watch-email">Email</label>
+            <input id="watch-email" required type="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="you@example.com">
+          </div>
+        </div>
+        <label class="watch-news"><input id="watch-news" type="checkbox" autocomplete="off"> <span>Send me rare Domain Hound news. Unsubscribe anytime.</span></label>
+        <div hidden><label for="watch-website">Website</label><input id="watch-website" type="text" tabindex="-1" autocomplete="off"></div>
+        <button class="watch-submit action" type="submit" disabled>Watch it</button>
+        <noscript><p>Turn on JavaScript to request a watch.</p></noscript>
+        <p class="watch-status" id="watch-status" role="status"></p>
+        <div class="watch-help">
+          <details>
+            <summary>What emails will I get?</summary>
+            <p>Up to four per watch, including confirmation. We’ll email if the registry reports expiry or pending deletion (about five days left), and when we find the domain free to register. No scheduled digests.</p>
+            <p>News is optional. Each watch email has a private manage link. Turn off news, stop one watch or erase everything.</p>
+          </details>
+          <a href="../privacy/#watch">Privacy</a>
+        </div>
+      </form>
+  </div>
+</main>
+<footer><div class="wrap foot"><a href="../">domainhound.dev</a><a href="../privacy/">Privacy</a></div></footer>
+<script src="../assets/watch.js"></script>
+</body>
+</html>
