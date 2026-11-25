@@ -1,0 +1,59 @@
+name: Site check
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  site-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { persist-credentials: false }
+      - name: Check HTML characters
+        run: |
+          find . -name .git -prune -o -type f -name '*.html' -exec perl -CSD -ne '
+            if (/[\x{2014}\x{2013}\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{2190}-\x{21FF}]/) {
+              warn "$ARGV:$.: disallowed character\n"; $bad = 1;
+            }
+            close ARGV if eof;
+            END { exit 1 if $bad }
+          ' {} +
+      - name: Check local HTML links
+        run: |
+          node <<'NODE'
+          const { execFileSync } = require('node:child_process');
+          const { readFileSync, statSync } = require('node:fs');
+          const { normalize } = require('node:path').posix;
+          const origin = 'https://site.invalid';
+          const files = execFileSync('find', ['.', '-name', '.git', '-prune', '-o', '-type', 'f', '-name', '*.html', '-print0'], { encoding: 'utf8' });
+          for (const file of files.split('\0').filter(Boolean)) {
+            const html = readFileSync(file, 'utf8');
+            const base = new URL(file.split('/').map(encodeURIComponent).join('/'), origin);
+            const tags = /<!--[\s\S]*?(?:-->|$)|<([a-z][\w:-]*)((?:[^"'<>]|"[^"]*"|'[^']*')*)>/gi;
+            for (let tag; (tag = tags.exec(html));) {
+              if (!tag[1]) continue;
+              if (/^(script|style|title|textarea)$/i.test(tag[1])) {
+                const end = new RegExp(`</${tag[1]}\\s*>`, 'gi');
+                end.lastIndex = tags.lastIndex;
+                tags.lastIndex = end.test(html) ? end.lastIndex : html.length;
+              }
+              const attributes = /([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+              for (const [, name, quoted, single, bare] of tag[2].matchAll(attributes)) {
+                if (!/^(href|src)$/i.test(name)) continue;
+                const ref = (quoted ?? single ?? bare ?? '').replace(/&amp;/gi, '&').trim();
+                if (/^(?:#|\/\/|[a-z][a-z\d+.-]*:)/i.test(ref)) continue;
+                const url = new URL(ref, base);
+                if (url.origin !== origin) continue;
+                const path = '.' + normalize(decodeURIComponent(url.pathname));
+                const stat = p => statSync(p, { throwIfNoEntry: false });
+                let target = stat(path);
+                if (target?.isDirectory()) target = stat(`${path.replace(/\/$/, '')}/index.html`);
+                if (target?.isFile()) continue;
+                console.error(`${file}: missing file for ${name}="${ref}"`);
+                process.exitCode = 1;
+              }
+            }
+          }
+          NODE
