@@ -109,9 +109,49 @@ h2 { font-size: 2.25rem; line-height: 1.05; }
 .trust { padding-block: 20px; }
 .trust strong { color: var(--lime); }
 .watch-section { background: var(--cream); }
-.watch { max-width: 1000px; }
-.watch h2 { max-width: 24ch; text-wrap: balance; overflow-wrap: anywhere; }
-.watch-submit { background: var(--cream); }
+.watch {
+  grid-area: watch;
+  min-width: 0;
+  padding: clamp(16px, 3vw, 32px);
+  border-radius: 0 25px 0 0;
+  background: var(--cream);
+  color: var(--blue);
+}
+.paper-art { grid-area: art; }
+.lead { grid-area: lead; }
+.installer { grid-area: install; }
+.watch h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+.watch-intro { font-weight: 750; }
+.watch h2 + .watch-intro { margin-top: 6px; }
+.watch-controls { grid-template-columns: minmax(0, 1fr); margin-top: 14px; }
+.watch-field input { font-family: var(--mono); }
+.watch-field input::placeholder { color: #565d76; }
+.watch-field input[aria-invalid="true"] { border: 2px solid currentColor; }
+.watch-news {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin-block: 10px;
+  cursor: pointer;
+}
+.watch-news input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--blue); }
+.watch-submit { width: 100%; }
+.watch-help {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  border-top: 1px solid var(--blue);
+  font-size: .9375rem;
+}
+.watch-help summary, .watch-help > a { padding-block: 12px; cursor: pointer; }
+.watch-help p { max-width: 57ch; margin-bottom: 10px; }
+.watch-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--blue); }
+.watch-page main { flex: 1; }
+.watch-page .hero-grid { grid-template-areas: "art" "lead" "watch"; }
+.watch-page footer { background: var(--gold); color: var(--blue); }
 .faq { background: var(--gold); }
 .faq dl { margin: 0; padding-inline: 20px; background: var(--cream); }
 .faq dl > div:first-child { border-top: 0; }
@@ -130,6 +170,12 @@ h2 { font-size: 2.25rem; line-height: 1.05; }
   .paper-word { font-size: clamp(3.75rem, 7.7vw, 7.4rem); }
   .lead { grid-area: lead; padding: 0; }
   .installer { grid-area: install; padding: clamp(20px, 3vw, 44px); }
+  .watch-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .watch-submit { width: auto; min-width: 10rem; }
+  .watch-page .hero-grid { grid-template-areas: "art watch" "lead watch"; padding-block: clamp(24px, 5vw, 80px); }
+  .watch-page .watch { margin: 0; }
+  .watch-page .watch-controls { grid-template-columns: minmax(0, 1fr); }
+  .watch-page .watch-submit { width: 100%; }
   .step-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .step-list li { display: block; }
   .step-list li::before { display: block; margin-bottom: 16px; font-size: 3.5rem; }
