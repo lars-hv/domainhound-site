@@ -1,6 +1,6 @@
 # Domain Hound
 
-> Domain Hound is a free, MIT licensed MCP server for checking domain availability, comparing registration and renewal prices, and screening startup names. It runs on your machine. The registrar handles checkout.
+> Domain Hound 0.1.6 is a free, MIT licensed MCP server that runs locally. It helps your agent find a name, compare registration and renewal prices, draft a message to an owner, or buy an available domain through your own Spaceship account.
 
 ## Install
 
@@ -12,10 +12,19 @@ Use Node.js 20 or later. Add the server in your terminal and start a fresh clien
 
 ## Tools
 
-- `check_domains`: Check an exact domain or a batch of up to 20 names. A bare name covers fourteen default endings. Registry status, premium signals, list prices and confirmed shop quotes are distinct.
-- `triage_names`: Screen a shortlist for similar US word marks, public iOS and Android listings, company names, social handles and search results. Results can be incomplete. Review other markets separately.
-- `naming_method`: Get a recipe for the assistant to generate names, check domains and screen the shortlist.
+- `check_domains`: Check one domain or up to 20 names for availability and prices. Bare names cover fourteen default endings. Results label list prices and confirmed quotes separately.
+- `triage_names`: Screen candidates for domains, similar trademarks, apps, companies, handles, search results and rude words in 14 languages. US trademark checks run automatically. EU and Norwegian checks use free keys, with search links otherwise.
+- `naming_method`: Give the assistant a recipe for generating candidates and screening the shortlist.
 - `broker_find`: Legacy alias for `check_domains`.
+- `watch_domain`: Check the registry, expiry and website for a domain. Request free alerts with an email address and confirm in your inbox.
+- `taken_domain_dossier`: Check owner clues, active or parked sites, resale listings and expiry. Look for a public asking price and up to three available alternatives screened for trademarks. It can draft an inquiry for you to send.
+- `quote_domain`: Get a live Spaceship quote for registration and renewal, including the term and premium status. The quote expires in ten minutes.
+- `buy_domain`: Recheck the quote against your limit and the $30 default cap. Spaceship’s connector previews the price for your approval. You must enable direct orders and approve each purchase. An uncertain order blocks a repeat.
+- `setup_domain`: Verify ownership in your Spaceship account or preview website and email DNS changes and apply them with approval.
+
+Share up to five shortlisted names from the results page. The shortlist travels after the # in a domainhound.dev/r/ link. The viewer reads it in the browser. Anyone with the full link can read it.
+
+Website DNS presets cover GitHub Pages, Vercel, Netlify and Cloudflare Pages (www only). Mail presets cover Google Workspace, Microsoft 365, Fastmail, Proton and iCloud.
 
 ## Reference
 
@@ -202,7 +211,7 @@ No. They are dated list prices. The shop’s checkout has the final price, and p
 
 Will it clear a trademark or buy a domain?
 
-Neither. It screens US marks. You handle clearance and checkout.
+It screens marks for possible conflicts. You handle clearance. Your agent can buy an available domain through your Spaceship account after you approve the price.
 
 ### Related guides
 
@@ -211,7 +220,7 @@ Neither. It screens US marks. You handle clearance and checkout.
 
 Last updated 25 November 2026.
 
-The hound won’t buy a domain for you.
+You hold the leash.
 
 ## Is my app name available?
 
@@ -398,7 +407,7 @@ Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25
 
 ### How Domain Hound does it
 
-It screens US word marks for exact and similar spellings. For the EU, search TMview. In Norway, search the Norwegian Industrial Property Office register. Check business names and real use too.
+It screens US word marks for exact and similar spellings. With free keys it also screens EU and Norwegian marks. Without keys, use the search links. Check business names and real use too.
 
 Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
@@ -449,7 +458,7 @@ Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25
 
 ### How Domain Hound does it
 
-Ask it to check the exact domain. When it is taken, [set a watch](https://domainhound.dev/watch/) and confirm your email. You get an alert when the name comes loose.
+Ask for a dossier on the exact domain to see owner clues, any public asking price and screened alternatives. To wait for it, [set a watch](https://domainhound.dev/watch/) and confirm your email. You get an alert when the name comes loose.
 
 Install in Claude Code, or [use Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/).
 
@@ -512,7 +521,7 @@ Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25
 
 ### How Domain Hound does it
 
-The server runs on your machine. It sends the names you ask about to public sources: registries, price lists, app stores and the USPTO. It has 4 tools. The check_domains tool takes up to 20 names per call.
+The server runs on your machine. It sends the names you ask about to public sources: registries, price lists, app stores and the USPTO. Version 0.1.6 has nine tools. The check_domains tool takes up to 20 names per call.
 
 ### FAQ
 
@@ -526,7 +535,7 @@ Ask your assistant to use check_domains on example.com. Look for the tool call a
 
 Does it need a registrar login to buy?
 
-No. Domain Hound never buys. Open the registrar yourself and check the final price.
+Yes. Connect your Spaceship account and approve the price to buy.
 
 ### Related guides
 
