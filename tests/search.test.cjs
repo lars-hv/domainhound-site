@@ -76,10 +76,10 @@ function bareReply(ascii, statuses = {}, name = ascii) {
     choice: choiceFor(first), share: null, details: { id: null, status: 'unavailable', pending: [] } };
 }
 
-async function openPage(t, handler, { width = 390, javaScriptEnabled = true } = {}) {
+async function openPage(t, handler, { width = 390, javaScriptEnabled = true, reducedMotion = 'no-preference' } = {}) {
   const context = await browser.newContext({
     viewport: { width, height: width === 390 ? 844 : 900 },
-    javaScriptEnabled, serviceWorkers: 'block'
+    javaScriptEnabled, reducedMotion, serviceWorkers: 'block'
   });
   const calls = [];
   const unexpected = [];
@@ -135,12 +135,12 @@ async function search(page, mode, value) {
   await page.getByRole('button', { name: 'Sniff it', exact: true }).click();
 }
 
-async function screenshot(page, filename) {
+async function screenshot(page, filename, target = page) {
   const dir = process.env.SEARCH_SCREENSHOTS;
   if (!dir) return;
   mkdirSync(dir, { recursive: true });
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: path.join(dir, filename + '.png'), animations: 'disabled' });
+  await target.screenshot({ path: path.join(dir, filename + '.png'), animations: 'disabled' });
 }
 
 for (const width of [390, 1440]) {
@@ -352,8 +352,9 @@ function ideas(names) {
     complete: true, path: 'qwen', names: names.map(([name, domain, status = 'available', total]) => {
       const row = domainRow(domain, status);
       const pick = { domain, ...row.prices[0], prices: row.prices, evidence: row.evidence, checkedAt };
-      const score = { total: total ?? (name === 'Trailfin' ? 68 : name === 'Mossfold' ? 56 : 74),
-        band: name === 'Mossfold' ? 'Risky' : 'Workable',
+      const scoreTotal = total ?? (name === 'Trailfin' ? 68 : name === 'Mossfold' ? 56 : 74);
+      const score = { total: scoreTotal,
+        band: scoreTotal >= 80 ? 'Strong' : scoreTotal >= 60 ? 'Workable' : 'Risky',
         reasons: ['.' + row.ending + ' is available.', 'US trademarks not checked.',
           name === 'Trailfin' ? 'The GitHub handle is taken.' : name === 'Mossfold' ? 'The .com is taken.' : 'One obvious spelling.'] };
       return { name, score, domain: pick, domains: [
@@ -365,6 +366,163 @@ function ideas(names) {
 const ideaText = 'A field notebook for people who map forest trails';
 const shortlist = [['Mapfern', 'mapfern.com'], ['Trailfin', 'trailfin.com'], ['Mossfold', 'mossfold.app'],
   ['Takenname', 'takenname.dev', 'taken'], ['Unverified', 'unverified.dev', 'unknown']];
+const generationId = 'opaque-synthetic-generation-token';
+const collectingNames = 'Sniffing out more names...';
+
+function initialIdeas(names) {
+  return { ...ideas(names), version: 2, stage: 'initial', complete: false,
+    details: { id: generationId, path: '/v1/generate/details', pollAfterMs: 25,
+      expiresAt: new Date(Date.now() + 60_000).toISOString() } };
+}
+
+function finalIdeas(names) {
+  return { ...ideas(names), version: 2, stage: 'final', complete: false, details: null };
+}
+
+for (const width of [390, 1440]) {
+  test('idea names stay in place until the final scores arrive at ' + width + 'px', async t => {
+    const first = [['Trailfin', 'trailfin.com', 'available', 68], ['Notepad', 'notepad.example'], ['Mapfern', 'mapfern.com']];
+    const initial = initialIdeas(first);
+    initial.names[1].banned = true;
+    const final = finalIdeas([
+      ['Trailfin', 'trailfin.com', 'available', 63], first[1], ['Mapfern', 'mapfern.com', 'available', 88],
+      ['Mossfold', 'mossfold.app'], ['Cedarink', 'cedarink.com', 'available', 92], ['Paperclip', 'paperclip.dev'],
+      ['Driftpen', 'driftpen.com', 'available', 84], ['Notebook', 'notebook.dev']
+    ]);
+    final.names[1].banned = true;
+    final.names[7].generic = true;
+    let releaseFinal;
+    const held = new Promise(resolve => { releaseFinal = resolve; });
+    t.after(() => releaseFinal());
+    const pollTimes = [];
+    const { page, calls } = await openPage(t, async call => {
+      if (call.path === '/v1/generate') return { json: initial };
+      assert.equal(call.path, '/v1/generate/details');
+      assert.equal(call.method, 'POST');
+      assert.equal(call.query.size, 0);
+      assert.deepEqual(call.body, { id: generationId });
+      pollTimes.push(performance.now());
+      if (pollTimes.length === 1) return { status: 202, json: { version: 2, stage: 'pending', retryAfterMs: 70 } };
+      await held;
+      return { json: final };
+    }, { width, reducedMotion: width === 390 ? 'reduce' : 'no-preference' });
+    const firstPoll = page.waitForResponse(reply => reply.url() === api + '/v1/generate/details' && reply.status() === 202);
+    await search(page, 'idea', ideaText);
+    const results = page.locator('#search-results');
+    const cardNames = results.locator('article h3');
+    const progress = results.getByRole('status').filter({ hasText: collectingNames });
+    await progress.waitFor();
+    assert.deepEqual(await cardNames.allTextContents(), ['Trailfin', 'Mapfern']);
+    assert.equal(await results.getByRole('combobox').count(), 0);
+    assert.doesNotMatch(await results.innerText(), /Some checks didn’t finish/);
+    const previewRow = results.locator('.idea-list > li').first();
+    const before = await previewRow.elementHandle();
+    const position = await previewRow.evaluate(row => row.offsetTop);
+    await firstPoll;
+    await screenshot(page, 'initial-' + width, results);
+    assert.equal(await previewRow.evaluate(row => row.offsetTop), position);
+    assert.equal(await progress.isVisible(), true);
+    const booking = previewRow.getByRole('link', { name: /Book it/ });
+    await booking.focus();
+    await page.evaluate(() => {
+      const animate = Element.prototype.animate;
+      document.documentElement.dataset.cardAnimations = '0';
+      Element.prototype.animate = function (...args) {
+        if (this.matches('.idea-list > li')) document.documentElement.dataset.cardAnimations++;
+        return animate.apply(this, args);
+      };
+    });
+    releaseFinal();
+    await results.getByRole('heading', { name: 'Cedarink', exact: true }).waitFor();
+    assert.deepEqual(await cardNames.allTextContents(), ['Cedarink', 'Mapfern', 'Driftpen', 'Paperclip', 'Trailfin', 'Mossfold']);
+    assert.equal(await results.locator('.idea-progress').textContent(), '');
+    assert.match(await results.innerText(), /Some checks didn’t finish/);
+    assert.equal(await results.getByText('Name score 63/100', { exact: false }).count(), 1);
+    assert.equal(await before.evaluate(row => row.contains(document.activeElement)), true);
+    assert.equal(await page.evaluate(() => Number(document.documentElement.dataset.cardAnimations)), width === 390 ? 0 : 1);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await screenshot(page, 'final-' + width, results);
+    await page.waitForLoadState('networkidle');
+    assert.equal(calls.length, 3);
+    assert.ok(pollTimes[1] - pollTimes[0] >= 65);
+  });
+}
+
+test('a zero-name preview waits for the continuation before showing the empty state', async t => {
+  let release;
+  const held = new Promise(resolve => { release = resolve; });
+  t.after(() => release());
+  const { page } = await openPage(t, async call => {
+    if (call.path === '/v1/generate') return { json: initialIdeas([]) };
+    assert.equal(call.path, '/v1/generate/details');
+    await held;
+    return { json: { ...finalIdeas([]), complete: true } };
+  });
+  await search(page, 'idea', ideaText);
+  await page.getByText(collectingNames, { exact: true }).waitFor();
+  assert.equal(await page.getByText(/No available names confirmed/).count(), 0);
+  release();
+  await page.getByText(/No available names confirmed/).waitFor();
+});
+
+test('a failed continuation keeps the first cards and ends polling', async t => {
+  const { page, calls } = await openPage(t, call => {
+    if (call.path === '/v1/generate') return { json: initialIdeas([['Mapfern', 'mapfern.com']]) };
+    assert.equal(call.path, '/v1/generate/details');
+    return { status: 410, json: { error: 'expired' } };
+  });
+  await search(page, 'idea', ideaText);
+  const results = page.locator('#search-results');
+  await results.getByText('Couldn’t load more names.', { exact: true }).waitFor();
+  assert.deepEqual(await results.locator('article h3').allTextContents(), ['Mapfern']);
+  assert.equal(await results.getByRole('combobox').count(), 3);
+  await page.waitForLoadState('networkidle');
+  assert.equal(calls.length, 2);
+});
+
+test('editing the idea cancels an in-flight continuation and ignores a late final list', async t => {
+  let release;
+  const held = new Promise(resolve => { release = resolve; });
+  t.after(() => release());
+  const { page } = await openPage(t, async call => {
+    if (call.path === '/v1/generate') return { json: initialIdeas([['Mapfern', 'mapfern.com']]) };
+    if (call.path === '/v1/check') return { json: bareReply('trailfin', { com: 'available' }) };
+    assert.equal(call.path, '/v1/generate/details');
+    await held;
+    return { json: finalIdeas([['Cedarink', 'cedarink.com']]) };
+  });
+  const started = page.waitForRequest(request => request.url() === api + '/v1/generate/details');
+  await search(page, 'idea', ideaText);
+  await started;
+  await search(page, 'name', 'Trailfin');
+  await page.locator('.best-domain').getByText('trailfin.com', { exact: true }).waitFor();
+  release();
+  await page.waitForLoadState('networkidle');
+  assert.equal(await page.getByRole('heading', { name: 'Cedarink', exact: true }).count(), 0);
+});
+
+test('editing the main field stops a pending second shortlist', async t => {
+  let release;
+  const held = new Promise(resolve => { release = resolve; });
+  t.after(() => release());
+  const { page } = await openPage(t, async call => {
+    if (call.path === '/v1/generate') return { json: call.body.round === 2
+      ? initialIdeas([['Trailfin', 'trailfin.com']]) : ideas([['Mapfern', 'mapfern.com']]) };
+    assert.equal(call.path, '/v1/generate/details');
+    await held;
+    return { json: finalIdeas([['Cedarink', 'cedarink.com']]) };
+  });
+  await search(page, 'idea', ideaText);
+  await page.getByRole('combobox').first().selectOption('Mapfern');
+  await page.getByRole('button', { name: 'Find more names' }).click();
+  const results = page.locator('#search-results');
+  await results.getByText(collectingNames, { exact: true }).waitFor();
+  await page.getByRole('textbox', { name: 'Name or idea', exact: true }).fill('Cedar');
+  assert.equal(await results.getByText(collectingNames, { exact: true }).count(), 0);
+  release();
+  await page.waitForLoadState('networkidle');
+  assert.deepEqual(await results.locator('article h3').allTextContents(), ['Trailfin']);
+});
 
 for (const width of [390, 1440]) {
   test('idea search filters names and uses steering for the second round at ' + width + 'px', async t => {
@@ -625,6 +783,32 @@ function takenHandler({ generate, seed = 'Mapfern' } = {}) {
     assert.fail('Unexpected check ' + name);
   };
 }
+
+test('a taken name shows the idea preview while close variants are still being checked', async t => {
+  let release;
+  const held = new Promise(resolve => { release = resolve; });
+  t.after(() => release());
+  const prefix = ['Getmapfern', 'getmapfern.com', 'available', 90];
+  const fernly = ['Fernly', 'fernly.com', 'available', 61];
+  const fallback = takenHandler({ generate: () => ({ json: initialIdeas([fernly]) }) });
+  const { page } = await openPage(t, async call => {
+    if (call.path === '/v1/generate/details') {
+      await held;
+      return { json: finalIdeas([fernly, prefix, ['Mapwise', 'mapwise.dev', 'available', 80]]) };
+    }
+    if (call.path === '/v1/check' && call.query.get('name') === 'getmapfern') await held;
+    return fallback(call);
+  });
+  await search(page, 'name', 'Mapfern');
+  const recovery = page.getByRole('region', { name: 'Free names close to yours' });
+  await recovery.getByText(collectingNames, { exact: true }).waitFor();
+  assert.deepEqual(await recovery.locator('article h3').allTextContents(), ['Fernly']);
+  release();
+  await recovery.getByRole('heading', { name: 'Mapwise' }).waitFor();
+  assert.deepEqual(await recovery.locator('article h3').allTextContents(),
+    ['getmapfern.com', 'mapfernhq.dev', 'Mapwise', 'Fernly']);
+  assert.equal(await recovery.getByRole('status').textContent(), '');
+});
 
 for (const width of [390, 1440]) {
   test('a taken name brings back close free names without another click at ' + width + 'px', async t => {

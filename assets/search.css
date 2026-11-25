@@ -116,6 +116,7 @@
 }
 .results-head h2 { overflow-wrap: anywhere; scroll-margin-block: 20px; }
 .results-intro { margin-top: 8px; max-width: 68ch; }
+.idea-progress:not(:empty) { margin-top: 16px; }
 .hunt-list { margin: 20px 0 0; list-style: none; padding: 0; }
 .hunt-list li { min-width: 0; }
 .hunt-card {

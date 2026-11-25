@@ -2,6 +2,7 @@ import { guessMode, normalize } from './search-mode.mjs';
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 const rateLimit = 'The hound needs a breather. Try again in a few minutes.';
+const moreNames = 'Sniffing out more names...';
 const region = document.getElementById('search-results');
 const pages = document.getElementById('result-pages');
 const paths = [...document.querySelectorAll('.search-paths a')];
@@ -266,6 +267,42 @@ function steering(items, idea) {
 
 const nameKey = name => String(name).toLowerCase().replace(/[\s-]/g, '');
 
+function updateIdeaCards(list, items, settling = false) {
+  const existing = new Map([...list.children].map(row => [row.dataset.name, row]));
+  const focused = document.activeElement;
+  const focusedRow = focused?.closest('li');
+  const linkIndex = focusedRow?.parentElement === list ? [...focusedRow.querySelectorAll('a')].indexOf(focused) : -1;
+  const motion = settling && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const before = new Map(motion ? [...existing.values()].map(row => [row, row.getBoundingClientRect()]) : []);
+  let next = list.firstElementChild;
+  for (const item of items) {
+    const key = nameKey(item.name);
+    const card = resultCard('idea', item);
+    const row = existing.get(key) || card;
+    existing.delete(key);
+    row.dataset.name = key;
+    if (row !== card && !row.firstElementChild.isEqualNode(card.firstElementChild)) {
+      row.replaceChildren(card.firstElementChild);
+    }
+    if (row === next) next = next.nextElementSibling;
+    else list.insertBefore(row, next);
+  }
+  for (const row of existing.values()) row.remove();
+  list.hidden = !list.childElementCount;
+  if (linkIndex !== -1 && document.activeElement !== focused && focusedRow.parentElement === list) {
+    focusedRow.querySelectorAll('a')[linkIndex]?.focus({ preventScroll: true });
+  }
+  const nudge = value => Math.max(-8, Math.min(8, value));
+  for (const [row, start] of before) {
+    if (row.parentElement !== list) continue;
+    const end = row.getBoundingClientRect();
+    const x = nudge(start.x - end.x);
+    const y = nudge(start.y - end.y);
+    if (x || y) row.animate([{ transform: `translate(${x}px, ${y}px)` }, { transform: 'none' }],
+      { duration: 160, easing: 'ease-out' });
+  }
+}
+
 // Close names for a taken name: same-name variants and generated names, each
 // registry-confirmed and priced. The two sources fail independently.
 async function recover(query, signal, box, seenDomains) {
@@ -277,47 +314,63 @@ async function recover(query, signal, box, seenDomains) {
   const variantList = cardList('idea', []);
   const ideaList = cardList('idea', []);
   variantList.hidden = ideaList.hidden = true;
-  box.append(heading, status,
-    link('Who owns ' + owner + '? See if it can be bought', '/land/?d=' + encodeURIComponent(owner)), variantList, ideaList);
+  box.append(heading, link('Who owns ' + owner + '? See if it can be bought', '/land/?d=' + encodeURIComponent(owner)),
+    variantList, ideaList, status);
   box.hidden = false;
   status.textContent = 'Sniffing free names close to yours…';
-  const seenNames = new Set([nameKey(query.ascii), nameKey(query.name)]);
-  const fresh = item => !seenDomains.has(item.domain) && !seenNames.has(nameKey(item.name));
-  const show = (list, mode, items, limit = Infinity) => {
-    let count = 0;
-    for (const item of items) {
-      if (count >= limit || !fresh(item)) continue;
-      seenDomains.add(item.domain);
-      seenNames.add(nameKey(item.name));
-      list.append(resultCard(mode, item));
-      count += 1;
-    }
-    list.hidden = !list.childElementCount;
+  let variantItems = [];
+  const showVariants = () => {
+    variantList.replaceChildren(...variantItems.map(item => resultCard('name', item)));
+    variantList.hidden = !variantItems.length;
   };
   const labels = api.variantLabels(query);
   const variants = Promise.allSettled(labels.map(label => api.closeVariant(label, signal))).then(results => {
     if (signal.aborted) return;
-    show(variantList, 'name', results.filter(result => result.status === 'fulfilled' && result.value).map(result => result.value));
+    variantItems = uniqueIdeas(results.map(result => result.value).filter(Boolean), seenDomains, [query.ascii, query.name]);
+    if (ideaList.hidden) showVariants();
     const failed = results.filter(result => result.status === 'rejected');
     if (labels.length && failed.length === labels.length) throw failed[0].reason;
   });
-  // Variants claim their domains first, so deduplication never depends on which reply lands first.
-  const ideas = api.closeIdeas(query.name, signal);
+  // On completion, variants claim their domains first, even when the preview arrived first.
+  const closeItems = items => uniqueIdeas(items, [...seenDomains, ...variantItems.map(item => item.domain)],
+    [query.ascii, query.name, ...variantItems.map(item => item.name)]).slice(0, 6);
+  let preview;
+  const ideas = api.closeIdeas(query.name, signal).then(response => {
+    if (signal.aborted || !response.generationDetails) return response;
+    preview = response;
+    updateIdeaCards(ideaList, closeItems(response.items));
+    status.textContent = moreNames;
+    return api.finishIdeas(response, signal);
+  });
   const [variantOutcome, ideaOutcome] = await Promise.allSettled([variants, ideas]);
   if (signal.aborted) return;
-  if (ideaOutcome.status === 'fulfilled') show(ideaList, 'idea', ideaOutcome.value, 6);
+  if (variantList.hidden) showVariants();
+  const result = ideaOutcome.value ?? preview;
+  if (result) updateIdeaCards(ideaList, closeItems(result.items), ideaOutcome.status === 'fulfilled' && !!preview);
   const notes = [];
   const failure = (outcome, text) => {
     if (outcome.status !== 'rejected') return;
     notes.push(outcome.reason?.status === 429 ? rateLimit : text);
   };
   failure(variantOutcome, 'Couldn’t check close versions of this name.');
-  failure(ideaOutcome, 'Couldn’t load name ideas.');
+  failure(ideaOutcome, preview && !ideaList.hidden ? 'Couldn’t load more names.' : 'Couldn’t load name ideas.');
   if (!variantList.childElementCount && !ideaList.childElementCount) {
     heading.textContent = 'Taken.';
     if (!notes.length) notes.push('No free names close to yours confirmed yet.');
   }
   status.textContent = [...new Set(notes)].join(' ');
+}
+
+function uniqueIdeas(items, excludedDomains = [], excludedNames = []) {
+  const domains = new Set(excludedDomains);
+  const names = new Set(excludedNames.map(nameKey));
+  return items.filter(item => {
+    const name = nameKey(item.name);
+    if (domains.has(item.domain) || names.has(name)) return false;
+    domains.add(item.domain);
+    names.add(name);
+    return true;
+  });
 }
 
 function nameSlots(response, exact) {
@@ -373,8 +426,55 @@ async function followUp(response, signal, slots) {
   if (fallback) await recover(query, signal, slots.recovery, seen);
 }
 
+const incomplete = 'Some checks didn’t finish. Availability is unknown for the unchecked names.';
+
+function renderIdeas(page, head, input, response, signal) {
+  const list = cardList('idea', []);
+  const status = statusLine();
+  status.classList.add('idea-progress');
+  const followUp = el('div');
+  const pending = !!response.generationDetails;
+  const share = head.querySelector('a');
+  page.append(list, status, followUp);
+
+  function render(result, settled, error) {
+    const items = uniqueIdeas(result.items);
+    updateIdeaCards(list, items, settled && pending && !error);
+    if (result.shareUrl) {
+      if (share) share.href = result.shareUrl;
+      else head.append(link('Share shortlist', result.shareUrl));
+    } else share?.remove();
+    if (!settled) {
+      status.textContent = moreNames;
+      return;
+    }
+    status.textContent = error ? (items.length ? 'Couldn’t load more names.' : 'Couldn’t finish finding names. Try again in a moment.') : '';
+    if (items.length && input.round !== 2) followUp.append(steering(items, input.idea));
+    if (!items.length && !error) status.textContent = 'No available names confirmed within $60 over three years. Try a different description.';
+    if (!error && result.complete === false) followUp.append(el('p', 'results-intro', incomplete));
+    if (result.generationSource === 'deterministic') {
+      followUp.append(el('p', 'results-intro', 'These suggestions use word pairs from your idea.'));
+    }
+  }
+
+  render(response, !pending);
+  if (!pending) return null;
+  const clearProgress = () => { status.textContent = ''; };
+  signal.addEventListener('abort', clearProgress, { once: true });
+  return async function finish(loadFinal) {
+    try {
+      const final = await loadFinal(response, signal);
+      if (!signal.aborted) render(final, true);
+    } catch {
+      if (!signal.aborted) render(response, true, true);
+    } finally {
+      signal.removeEventListener('abort', clearProgress);
+    }
+  };
+}
+
 function renderPage(mode, input, response, signal) {
-  const items = mode === 'idea' ? response.items.filter(item => item.status === 'available') : response.items;
+  const items = response.items;
   const head = el('header', 'results-head');
   const titles = { idea: input.round === 2 ? 'Your second shortlist.' : 'Your shortlist.', name: input.name, personal: 'Domains for ' + input.fullName };
   const heading = el('h2', '', titles[mode]);
@@ -384,25 +484,23 @@ function renderPage(mode, input, response, signal) {
   const page = document.createDocumentFragment();
   page.append(head);
   let slots = null;
-  if (mode === 'name') {
+  let finish = null;
+  if (mode === 'idea') {
+    finish = renderIdeas(page, head, input, response, signal);
+  } else if (mode === 'name') {
     slots = nameSlots(response, !!response.query?.exactDomain);
     page.append(...slots.parts);
   } else if (items.length) {
     page.append(cardList(mode, items, response.shareUrl));
-    if (mode === 'idea' && input.round !== 2) page.append(steering(items, input.idea));
   }
-  if (mode === 'name' ? slots.empty : !items.length) {
+  if (mode === 'name' ? slots.empty : mode === 'personal' && !items.length) {
     const empty = {
-      idea: 'No available names confirmed within $60 over three years. Try a different description.',
       name: 'No endings could be verified. Try again or check at a registrar.',
       personal: 'No personal domains found for this spelling. Try another version of your name.'
     };
     head.after(el('p', 'results-intro', empty[mode]));
   }
-  if (response.complete === false) page.append(el('p', 'results-intro', 'Some checks didn’t finish. Availability is unknown for the unchecked names.'));
-  if (mode === 'idea' && response.generationSource === 'deterministic') {
-    page.append(el('p', 'results-intro', 'These suggestions use word pairs from your idea.'));
-  }
+  if (mode !== 'idea' && response.complete === false) page.append(el('p', 'results-intro', incomplete));
   if (mode === 'name' && response.detailsPath) page.append(detailsPanel(response.detailsPath, signal));
   const install = el('aside', 'results-install');
   install.append(el('h3', '', 'Let your agent buy and watch it'), link('Install', '#install', 'action'));
@@ -410,7 +508,7 @@ function renderPage(mode, input, response, signal) {
   pages.replaceChildren(page);
   region.hidden = false;
   if (slots) followUp(response, signal, slots).catch(() => {});
-  return heading;
+  return { heading, finish };
 }
 
 const loading = {
@@ -428,14 +526,15 @@ async function search(mode, input, status, submit) {
   status.textContent = loading[mode];
   submit.setAttribute('aria-disabled', 'true');
   try {
-    const { runSearch } = await import('./search-api.mjs');
+    const { runSearch, finishIdeas } = await import('./search-api.mjs');
     if (controller.signal.aborted) return;
     const response = await runSearch(mode, input, controller.signal);
     if (controller.signal.aborted) return;
     const focusResult = submit.form.contains(document.activeElement) || document.activeElement === document.body;
-    const heading = renderPage(mode, input, response, controller.signal);
+    const { heading, finish } = renderPage(mode, input, response, controller.signal);
     status.textContent = '';
     if (focusResult) heading.focus();
+    await finish?.(finishIdeas);
     return heading;
   } catch (error) {
     if (controller.signal.aborted) return;

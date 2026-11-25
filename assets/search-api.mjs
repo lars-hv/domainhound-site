@@ -121,23 +121,89 @@ function leadingTaken(items, ascii) {
   return leadingEndings.every(ending => items.some(item => item.domain === ascii + '.' + ending && item.status === 'taken'));
 }
 
+// Generator version 2 answers first with stage "initial" and a details handle,
+// then finishIdeas polls /v1/generate/details until stage "final". A response
+// without a stage is the version 1 single answer and counts as final.
+const generationPath = '/v1/generate/details';
+const defaultPollMs = 1_500;
+
+function pollDelay(value, fallback = null) {
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function generationDetails(details) {
+  const id = details?.id;
+  const expiresAt = typeof details?.expiresAt === 'number' ? details.expiresAt : Date.parse(details?.expiresAt);
+  const pollAfterMs = pollDelay(details?.pollAfterMs);
+  if (details?.path !== generationPath || typeof id !== 'string' || !id || id.length > 512 ||
+    !Number.isFinite(expiresAt) || pollAfterMs === null) return null;
+  return { id, path: generationPath, expiresAt, pollAfterMs };
+}
+
+// The contract has no per-name ban or generic marker today; banned words are
+// dropped by the generator. Only an explicit boolean flag hides a name here.
+function flagged(entry) {
+  return entry?.banned === true || entry?.generic === true;
+}
+
+function ideaResult(data) {
+  if (!Array.isArray(data?.names)) throw new Error('Invalid generator response');
+  const initial = data.stage === 'initial';
+  const items = data.names.filter(entry => !flagged(entry))
+    .map(entry => ideaItem(entry, data.priceSnapshot?.checkedAt))
+    .filter(Boolean);
+  // The initial list keeps the generator's order so early cards stay put.
+  if (!initial) items.sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
+  return {
+    items, complete: data.complete, shareUrl: shareUrl(data.share), generationSource: data.path,
+    generationDetails: initial ? generationDetails(data.details) : null
+  };
+}
+
+function pause(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const stop = () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', stop);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', stop, { once: true });
+  });
+}
+
+export async function finishIdeas(result, signal) {
+  const details = result?.generationDetails;
+  if (!details) throw new Error('Nothing to finish');
+  let wait = details.pollAfterMs;
+  for (;;) {
+    if (Date.now() + wait >= details.expiresAt) throw new Error('Search expired');
+    await pause(wait, signal);
+    if (Date.now() >= details.expiresAt) throw new Error('Search expired');
+    const data = await request(details.path, signal, { id: details.id });
+    if (data?.stage === 'final') return ideaResult(data);
+    if (data?.stage !== 'pending') throw new Error('Invalid generator response');
+    wait = pollDelay(data.retryAfterMs, defaultPollMs);
+  }
+}
+
 export async function runSearch(mode, input, signal) {
   let data;
   if (mode === 'idea') data = await request('/v1/generate', signal, { ...input, idea: input.idea.replace(/\s+/g, ' ').trim() });
   else if (mode === 'personal') data = await request('/v1/personal', signal, input);
   else if (mode === 'name') data = await request('/v1/check?' + new URLSearchParams({ name: input.name }), signal);
   else throw new Error('Unknown search mode');
+  if (mode === 'idea') return ideaResult(data);
 
-  let items;
-  if (mode === 'idea') items = data.names.map(entry => ideaItem(entry, data.priceSnapshot?.checkedAt));
-  else if (mode === 'personal') items = data.results.map(personalItem);
-  else items = data.domains.map(row => domainItem(row));
+  const items = mode === 'personal' ? data.results.map(personalItem) : data.domains.map(row => domainItem(row));
   const result = {
     items: items.filter(Boolean), complete: data.complete,
     shareUrl: shareUrl(data.share), generationSource: data.path,
     detailsPath: mode === 'name' && detailsPath.test(data.details?.path) ? data.details.path : null
   };
-  if (mode === 'idea') result.items.sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
   if (mode === 'name') {
     result.best = bestItem(data);
     result.query = checkedQuery(data.query);
@@ -159,11 +225,11 @@ export async function closeVariant(label, signal) {
 }
 
 // The Worker caps steering names at 40 characters. The idea can still carry the full name.
-export async function closeIdeas(name, signal) {
+// Returns the whole idea result so the page can show the preview and call finishIdeas.
+export function closeIdeas(name, signal) {
   const input = { idea: 'names like ' + name };
   if (name.length <= 40) input.wanted = [name];
-  const response = await runSearch('idea', input, signal);
-  return response.items;
+  return runSearch('idea', input, signal);
 }
 
 export function loadDetails(path, signal) {
