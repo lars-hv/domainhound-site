@@ -25,7 +25,7 @@
   <meta name="domain-hound-api" content="https://domainhound-mcp.domainhound.workers.dev">
   <noscript>
     <style>
-      .hunt-tabs, .hunt-form, .installer .tabs, .installer .copy, .install-close { display: none; }
+      .search-paths, .hunt-form, .installer .tabs, .installer .copy, .install-close { display: none; }
       .installer [role="tabpanel"][hidden] { display: block !important; }
     </style>
   </noscript>
@@ -116,7 +116,7 @@
 <header class="mast" id="top">
   <div class="wrap mast-inner">
     <a class="brand" href="#top"><span>domainhound.dev</span></a>
-    <nav aria-label="Main"><a href="#real-search">Example</a><a href="watch/">Watch</a></nav>
+    <nav aria-label="Main"><a href="#search">Search</a><a href="watch/">Watch</a></nav>
   </div>
 </header>
 <main>
@@ -129,48 +129,35 @@
       </div>
       <div class="lead">
         <p class="stamp">Name it already.</p>
-        <h1><span>One search</span> instead of ten tabs.</h1>
-        <p class="subline">Search for free. See what a domain costs to buy and keep.</p>
+        <h1>Find a startup name you can actually buy.</h1>
+        <p class="subline">Search domains right here for free. Or ask Claude or Codex to check domains, app names and Google.</p>
       </div>
       <div class="hunt-box" id="search">
-        <div class="hunt-tabs" role="tablist" aria-label="Search by">
-          <button type="button" role="tab" id="tab-idea" aria-controls="panel-idea" aria-selected="true">I have an idea</button>
-          <button type="button" role="tab" id="tab-name" aria-controls="panel-name" aria-selected="false" tabindex="-1">I have a name</button>
-          <button type="button" role="tab" id="tab-personal" aria-controls="panel-personal" aria-selected="false" tabindex="-1">My own name</button>
+        <form class="hunt-form" data-mode="name">
+          <label for="name">Name or domain</label>
+          <input id="name" type="text" required maxlength="253" autocapitalize="none" spellcheck="false" placeholder="Mapfern or mapfern.com">
+          <button class="hunt-submit action" type="submit" disabled>Check availability</button>
+        </form>
+        <div class="search-paths">
+          <a href="#panel-idea" aria-controls="panel-idea" aria-expanded="false">Need name ideas?</a>
+          <a href="#panel-personal" aria-controls="panel-personal" aria-expanded="false">Use my own name</a>
         </div>
-        <div role="tabpanel" id="panel-idea" aria-labelledby="tab-idea">
-          <form class="hunt-form" data-mode="idea">
-            <label for="idea">What are you building?</label>
-            <textarea id="idea" rows="2" minlength="3" maxlength="400" required placeholder="A trip planner for people who travel by train"></textarea>
-            <button class="hunt-submit action" type="submit" disabled>Find available names</button>
-          </form>
-        </div>
-        <div role="tabpanel" id="panel-name" aria-labelledby="tab-name" hidden>
-          <form class="hunt-form" data-mode="name">
-            <label for="name">What name do you have in mind?</label>
-            <input id="name" type="text" required maxlength="253" autocapitalize="none" spellcheck="false" placeholder="A name or an exact domain">
-            <button class="hunt-submit action" type="submit" disabled>Check availability</button>
-          </form>
-        </div>
-        <div role="tabpanel" id="panel-personal" aria-labelledby="tab-personal" hidden>
-          <form class="hunt-form" data-mode="personal">
-            <label for="personal">What’s your full name?</label>
-            <input id="personal" type="text" autocomplete="name" required maxlength="80" placeholder="First and last name">
-            <button class="hunt-submit action" type="submit" disabled>Find my domain</button>
-          </form>
-        </div>
-        <noscript><p class="hunt-notice">Turn on JavaScript to search here, or open the agent setup below.</p></noscript>
+        <form class="hunt-form inline-search" id="panel-idea" data-mode="idea" hidden>
+          <label for="idea">What are you building?</label>
+          <textarea id="idea" rows="2" minlength="3" maxlength="400" required placeholder="A trip planner for people who travel by train"></textarea>
+          <button class="hunt-submit action" type="submit" disabled>Find available names</button>
+        </form>
+        <form class="hunt-form inline-search" id="panel-personal" data-mode="personal" hidden>
+          <label for="personal">What’s your full name?</label>
+          <input id="personal" type="text" autocomplete="name" required maxlength="80" placeholder="First and last name">
+          <button class="hunt-submit action" type="submit" disabled>Find my domain</button>
+        </form>
+        <noscript><p class="hunt-notice">Turn on JavaScript to search here, or <a href="#install">open the agent setup</a>.</p></noscript>
       </div>
-    </div>
-  </section>
-  <section class="hunt-results" id="search-results" aria-label="Search results" hidden>
-    <div class="wrap" id="result-pages"></div>
-  </section>
-  <aside class="agent-strip" aria-label="Agent setup">
-    <div class="wrap">
-      <details id="install">
-        <summary>Do the rest in your agent</summary>
+      <details id="install" open>
+        <summary>Install for Claude or Codex</summary>
         <div class="installer">
+          <div class="install-heading"><h2>Install</h2><p>Free · open source</p></div>
           <div class="tabs" role="tablist" aria-label="Install for">
             <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
             <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
@@ -205,7 +192,10 @@
         </div>
       </details>
     </div>
-  </aside>
+  </section>
+  <section class="hunt-results" id="search-results" aria-label="Search results" hidden>
+    <div class="wrap" id="result-pages"></div>
+  </section>
   <section class="facts">
     <div class="wrap">
       <h2>Every good name is taken.</h2>
@@ -266,30 +256,6 @@
           <dd>TikTok</dd><dd>GitHub</dd><dd>npm</dd><dd>Bluesky</dd>
         </div>
       </dl>
-    </div>
-  </section>
-  <section class="demo" id="real-search">
-    <div class="wrap demo-grid">
-      <div class="demo-summary">
-        <header class="demo-heading"><h2>A real search.</h2><p>360 checked. 1 winner.</p></header>
-        <div class="receipt">
-          <ul class="checks" role="list">
-            <li>Free at the registry</li>
-            <li>No close US mark found</li>
-            <li>No matching app found</li>
-          </ul>
-          <del>concierge.com &nbsp;taken</del>
-        </div>
-      </div>
-      <div class="terminal" aria-label="Claude Code example">
-        <div class="term-bar"><span class="window-name"><span>Claude Code</span></span><time datetime="2026-11-24">24 Nov 2026</time></div>
-        <div class="turn"><b class="speaker">You</b><p>Trip planning app. Thinking Concierge?</p></div>
-        <div class="turn hound-turn"><b class="speaker"><span>Claude</span></b><p>Try Tripfixer.</p></div>
-        <div class="result"><strong>tripfixer.app</strong>
-          <div class="prices"><div><small>First year</small><b>$8.28</b></div><div><small>Renewal</small><b>$14.49<small>/yr</small></b></div></div>
-          <p>Bought at Spaceship. USD before tax.</p>
-        </div>
-      </div>
     </div>
   </section>
   <aside class="trust"><p class="wrap">Open source. Run it in your own agent. <strong>Never buys without you.</strong> You hold the leash.</p></aside>

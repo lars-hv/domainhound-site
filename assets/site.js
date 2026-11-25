@@ -1,17 +1,6 @@
 const installers = document.querySelectorAll('.installer');
 
 function selectClient(index) {
-  const terminal = document.querySelector('.terminal');
-  const selectedTab = installers[0].querySelectorAll('[role="tab"]')[index];
-  const client = selectedTab.id === 'tab-other' ? 'MCP client' : selectedTab.textContent;
-  for (const mark of terminal.querySelectorAll('.brand-mark')) {
-    mark.toggleAttribute('hidden', index !== (mark.matches('.claude-spark') ? 0 : 1));
-  }
-  for (const label of terminal.querySelectorAll('.hound-turn .speaker span')) {
-    label.textContent = index === 0 ? 'Claude' : client;
-  }
-  terminal.querySelector('.window-name span').textContent = client;
-  terminal.setAttribute('aria-label', client + ' example');
   for (const installer of installers) {
     installer.querySelectorAll('[role="tab"]').forEach((tab, position) => {
       const selected = position === index;
@@ -50,11 +39,28 @@ async function copyLine(panel, feedback) {
   feedback.textContent = client.textContent + ' setup copied.';
 }
 
-function openLinkedInstaller() {
-  if (location.hash === '#install') document.getElementById('install').open = true;
+const setup = document.getElementById('install');
+const desktop = window.matchMedia('(min-width: 760px)');
+
+function fitInstaller() {
+  setup.open = desktop.matches || location.hash === '#install';
 }
-openLinkedInstaller();
+
+function openLinkedInstaller() {
+  if (location.hash === '#install') setup.open = true;
+}
+
+fitInstaller();
+desktop.addEventListener('change', fitInstaller);
 window.addEventListener('hashchange', openLinkedInstaller);
+window.addEventListener('pageshow', openLinkedInstaller);
+document.addEventListener('click', event => {
+  if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (!event.target.closest('a[href="#install"]')) return;
+  setup.open = true;
+  const target = desktop.matches ? setup.querySelector('[aria-selected="true"]') : setup.querySelector('summary');
+  target.focus({ preventScroll: true });
+});
 
 for (const installer of installers) {
   const tabs = [...installer.querySelectorAll('[role="tab"]')];

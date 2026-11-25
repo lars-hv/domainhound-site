@@ -2,9 +2,10 @@ const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' 
 const rateLimit = 'The hound needs a breather. Try again in a few minutes.';
 const region = document.getElementById('search-results');
 const pages = document.getElementById('result-pages');
-const tabs = [...document.querySelectorAll('.hunt-tabs [role="tab"]')];
-const states = new Map();
-let activeMode = 'idea';
+const paths = [...document.querySelectorAll('.search-paths a')];
+const startupCheck = el('button', 'action', 'Check as a startup name');
+startupCheck.type = 'button';
+let currentSearch;
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -25,21 +26,26 @@ function statusLine() {
   return node;
 }
 
-function setVisiblePage() {
-  for (const [mode, state] of states) state.page.hidden = mode !== activeMode;
-  region.hidden = !states.get(activeMode).page.hasChildNodes();
+function cancelSearch() {
+  if (!currentSearch) return;
+  currentSearch.controller.abort();
+  currentSearch.status.textContent = '';
+  currentSearch.submit.removeAttribute('aria-disabled');
+  currentSearch = null;
 }
 
-function selectTab(index) {
-  tabs.forEach((tab, i) => {
-    const selected = i === index;
-    const panel = document.getElementById(tab.getAttribute('aria-controls'));
-    tab.setAttribute('aria-selected', String(selected));
-    tab.tabIndex = selected ? 0 : -1;
-    panel.hidden = !selected;
-    if (selected) activeMode = panel.querySelector('form').dataset.mode;
-  });
-  setVisiblePage();
+function clearResults() {
+  startupCheck.remove();
+  region.hidden = true;
+  pages.replaceChildren();
+}
+
+function showPath(selected) {
+  for (const path of paths) {
+    const open = path === selected;
+    path.setAttribute('aria-expanded', String(open));
+    document.getElementById(path.getAttribute('aria-controls')).hidden = !open;
+  }
 }
 
 function payment(label, amount) {
@@ -154,7 +160,7 @@ function renderDetails(body, data) {
   if (data.complete === false) body.append(el('p', '', 'Some checks are still unknown.'));
 }
 
-function detailsPanel(path, state) {
+function detailsPanel(path, signal) {
   const box = el('details', 'detail-checks');
   const body = el('div');
   const status = statusLine();
@@ -162,26 +168,26 @@ function detailsPanel(path, state) {
   retry.type = 'button';
   retry.hidden = true;
   let loaded = false;
+  let pending = false;
   async function load() {
-    if (loaded || state.detailsRequest) return;
-    const request = new AbortController();
-    state.detailsRequest = request;
+    if (loaded || pending || signal.aborted) return;
+    pending = true;
     retry.hidden = true;
     status.textContent = 'Checking apps, trademarks and handles…';
     try {
       const { loadDetails } = await import('./search-api.mjs');
-      const data = await loadDetails(path, request.signal);
-      if (!box.isConnected) return;
+      const data = await loadDetails(path, signal);
+      if (signal.aborted) return;
       renderDetails(body, data);
       status.textContent = '';
       loaded = true;
     } catch (error) {
-      if (!box.isConnected) return;
+      if (signal.aborted) return;
       status.textContent = error.status === 410 ? 'These checks expired. Search the name again.' :
         error.status === 429 ? rateLimit : 'Couldn’t load these checks. Your domain results are above.';
       retry.hidden = error.status === 410;
     } finally {
-      if (state.detailsRequest === request) state.detailsRequest = null;
+      pending = false;
     }
   }
   box.append(el('summary', '', 'Check apps, trademarks and handles'), status, body, retry);
@@ -190,7 +196,7 @@ function detailsPanel(path, state) {
   return box;
 }
 
-function steering(state, items, idea) {
+function steering(items, idea) {
   const form = el('form', 'steer-form');
   const title = el('h3', '', 'Which two do you love, and which one do you hate?');
   const choices = el('div', 'steer-choices');
@@ -209,6 +215,7 @@ function steering(state, items, idea) {
   submit.type = 'submit';
   form.append(title, choices, submit, status);
   form.addEventListener('change', () => {
+    if (currentSearch?.submit === submit) cancelSearch();
     const selected = selects.map(select => select.value).filter(Boolean);
     for (const select of selects) {
       for (const option of select.options) {
@@ -225,13 +232,12 @@ function steering(state, items, idea) {
       selects[0].focus();
       return;
     }
-    search(state, { idea, round: 2, wanted: [first, second].filter(Boolean), avoid: disliked ? [disliked] : [] }, status, submit);
+    search('idea', { idea, round: 2, wanted: [first, second].filter(Boolean), avoid: disliked ? [disliked] : [] }, status, submit);
   });
   return form;
 }
 
-function renderPage(state, input, response) {
-  const { mode } = state;
+function renderPage(mode, input, response, signal) {
   const items = mode === 'idea' ? response.items.filter(item => item.status === 'available') : response.items;
   const head = el('header', 'results-head');
   const titles = { idea: input.round === 2 ? 'Your second shortlist.' : 'Your shortlist.', name: input.name, personal: 'Domains for ' + input.fullName };
@@ -245,7 +251,7 @@ function renderPage(state, input, response) {
     const list = el('ul', 'hunt-list ' + (mode === 'idea' ? 'idea-list' : 'ending-list'));
     for (const item of items) list.append(resultCard(mode, item, response.shareUrl));
     page.append(list);
-    if (mode === 'idea' && input.round !== 2) page.append(steering(state, items, input.idea));
+    if (mode === 'idea' && input.round !== 2) page.append(steering(items, input.idea));
   } else {
     const empty = {
       idea: 'No available names confirmed within $60 over three years. Try a different description.',
@@ -258,9 +264,12 @@ function renderPage(state, input, response) {
   if (mode === 'idea' && response.generationSource === 'deterministic') {
     page.append(el('p', 'results-intro', 'These suggestions use word pairs from your idea.'));
   }
-  if (mode === 'name' && response.detailsPath) page.append(detailsPanel(response.detailsPath, state));
-  state.page.replaceChildren(page);
-  setVisiblePage();
+  if (mode === 'name' && response.detailsPath) page.append(detailsPanel(response.detailsPath, signal));
+  const install = el('aside', 'results-install');
+  install.append(el('h3', '', 'Let your agent buy and watch it'), link('Install', '#install', 'action'));
+  page.append(install);
+  pages.replaceChildren(page);
+  region.hidden = false;
   return heading;
 }
 
@@ -270,81 +279,114 @@ const loading = {
   personal: 'Checking domains for your name…'
 };
 
-async function search(state, input, status, submit) {
-  if (state.pending) return;
-  state.pending = true;
-  state.detailsRequest?.abort();
-  state.detailsRequest = null;
-  const refining = input.round === 2;
-  if (!refining) state.page.replaceChildren();
-  setVisiblePage();
-  state.status.textContent = '';
-  status.textContent = loading[state.mode];
-  state.submit.setAttribute('aria-disabled', 'true');
+async function search(mode, input, status, submit) {
+  if (submit.hasAttribute('aria-disabled')) return;
+  cancelSearch();
+  const controller = new AbortController();
+  currentSearch = { controller, status, submit };
+  if (input.round !== 2) clearResults();
+  status.textContent = loading[mode];
   submit.setAttribute('aria-disabled', 'true');
-  state.field.readOnly = true;
   try {
     const { runSearch } = await import('./search-api.mjs');
-    const response = await runSearch(state.mode, input);
-    const focusResult = state.mode === activeMode &&
-      (state.form.contains(document.activeElement) || state.page.contains(document.activeElement) || document.activeElement === document.body);
-    const heading = renderPage(state, input, response);
+    if (controller.signal.aborted) return;
+    const response = await runSearch(mode, input, controller.signal);
+    if (controller.signal.aborted) return;
+    const focusResult = submit.form.contains(document.activeElement) || document.activeElement === document.body;
+    const heading = renderPage(mode, input, response, controller.signal);
     status.textContent = '';
     if (focusResult) heading.focus();
+    return heading;
   } catch (error) {
+    if (controller.signal.aborted) return;
     if (error.status === 429) status.textContent = rateLimit;
     else if ([400, 422].includes(error.status)) {
       status.textContent = {
         idea: 'Describe your idea in up to 400 characters.',
         name: 'Enter a name or a domain, such as example.com.',
         personal: 'Enter your full name using up to 80 characters.'
-      }[state.mode];
+      }[mode];
     }
     else if (navigator.onLine === false) status.textContent = 'You’re offline. Reconnect and search again.';
     else if (error.name === 'TimeoutError') status.textContent = 'The search timed out. Try again.';
     else status.textContent = 'Couldn’t finish the search. Try again in a moment.';
+    return status;
   } finally {
-    state.pending = false;
-    state.field.readOnly = false;
-    state.submit.removeAttribute('aria-disabled');
-    submit.removeAttribute('aria-disabled');
+    if (!controller.signal.aborted) submit.removeAttribute('aria-disabled');
   }
 }
 
+// A single word or exact domain uses the registry check. A full name uses the
+// personal endpoint, which accepts the name in the request body.
+const fullName = /^[\p{L}\p{M}][\p{L}\p{M}'’.-]*(?:\s+[\p{L}\p{M}][\p{L}\p{M}'’.-]*)+$/u;
+
 for (const form of document.querySelectorAll('.hunt-form')) {
-  const mode = form.dataset.mode;
-  const field = document.getElementById(mode);
-  const submit = form.querySelector('button');
-  const page = el('div');
+  const field = form.querySelector('input, textarea');
+  const submit = form.querySelector('.hunt-submit');
   const status = statusLine();
-  const state = { form, field, mode, page, status, submit, pending: false, detailsRequest: null };
-  pages.append(page);
   form.append(status);
-  states.set(mode, state);
-  const fieldKey = mode === 'personal' ? 'fullName' : mode;
-  form.addEventListener('submit', event => {
+  form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (!field.value.trim()) {
-      field.setCustomValidity('Enter a ' + (mode === 'idea' ? 'description of your idea.' : 'name to check.'));
+    const value = field.value.trim();
+    const ambiguous = form.dataset.mode === 'name' && fullName.test(value);
+    const mode = ambiguous ? 'personal' : form.dataset.mode;
+    let anchor = status;
+    if (!value || (mode === 'personal' && value.length > 80)) {
+      field.setCustomValidity(mode === 'personal' ? 'Enter your full name using up to 80 characters.' :
+        mode === 'idea' ? 'Describe your idea.' : 'Enter a name or a domain.');
       field.reportValidity();
-      return;
+    } else {
+      if (form.dataset.mode === 'name') showPath(null);
+      const input = mode === 'personal' ? { fullName: value.replace(/’/g, "'").replace(/\s+/g, ' ') } : { [mode]: value };
+      anchor = await search(mode, input, status, submit);
     }
-    search(state, { [fieldKey]: field.value.trim() }, status, submit);
+    if (ambiguous && anchor) {
+      anchor.after(startupCheck);
+      startupCheck.onclick = async () => {
+        submit.focus();
+        const outcome = await search('name', { name: value }, status, submit);
+        if (outcome === status) status.after(startupCheck);
+      };
+    }
   });
-  field.addEventListener('input', () => field.setCustomValidity(''));
+  field.addEventListener('input', () => {
+    field.setCustomValidity('');
+    startupCheck.remove();
+    if (currentSearch?.submit.hasAttribute('aria-disabled')) cancelSearch();
+    status.textContent = '';
+  });
   submit.disabled = false;
 }
 
-tabs.forEach((tab, index) => {
-  tab.addEventListener('click', () => selectTab(index));
-  tab.addEventListener('keydown', event => {
-    const next = {
-      ArrowLeft: (index + tabs.length - 1) % tabs.length, ArrowRight: (index + 1) % tabs.length,
-      Home: 0, End: tabs.length - 1
-    }[event.key];
-    if (next === undefined) return;
+for (const path of paths) {
+  const panel = document.getElementById(path.getAttribute('aria-controls'));
+  path.addEventListener('click', event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    selectTab(next);
-    tabs[next].focus();
+    const opening = panel.hidden;
+    cancelSearch();
+    clearResults();
+    showPath(opening ? path : null);
+    if (opening) panel.querySelector('input, textarea').focus();
   });
-});
+  panel.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    cancelSearch();
+    clearResults();
+    showPath(null);
+    path.focus();
+  });
+}
+
+function openLinkedPath() {
+  const path = paths.find(link => link.hash === location.hash);
+  if (path) {
+    cancelSearch();
+    clearResults();
+    showPath(path);
+    document.getElementById(path.getAttribute('aria-controls')).querySelector('input, textarea').focus();
+  }
+}
+openLinkedPath();
+window.addEventListener('hashchange', openLinkedPath);

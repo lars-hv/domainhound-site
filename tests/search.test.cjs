@@ -96,13 +96,16 @@ async function openPage(t, handler, { width = 390, javaScriptEnabled = true } = 
   return { page, calls };
 }
 
-async function search(page, tab, value) {
-  const button = page.getByRole('tab', { name: tab, exact: true });
-  await button.click();
-  const panelId = await button.getAttribute('aria-controls');
-  const panel = page.locator('#' + panelId);
-  await panel.getByRole('textbox').first().fill(value);
-  await panel.locator('button[type=submit]').first().click();
+async function search(page, mode, value) {
+  const fieldNames = { name: 'Name or domain', idea: 'What are you building?', personal: 'What’s your full name?' };
+  const field = page.getByRole('textbox', { name: fieldNames[mode], exact: true });
+  if (mode !== 'name' && !await field.isVisible()) {
+    const opener = mode === 'idea' ? 'Need name ideas?' : 'Use my own name';
+    await page.getByText(opener, { exact: true }).click();
+  }
+  await field.fill(value);
+  const submitNames = { name: 'Check availability', idea: 'Find available names', personal: 'Find my domain' };
+  await page.getByRole('button', { name: submitNames[mode], exact: true }).click();
 }
 
 async function screenshot(page, filename) {
@@ -114,23 +117,80 @@ async function screenshot(page, filename) {
 }
 
 for (const width of [390, 1440]) {
-  test('homepage search and all three doors at ' + width + 'px', async t => {
+  test('homepage search and installer at ' + width + 'px', async t => {
     const { page } = await openPage(t, () => assert.fail('Unexpected search'), { width });
-    await page.getByRole('tab', { name: 'I have an idea' }).waitFor();
+    const hero = page.locator('.hero');
+    const field = hero.getByRole('textbox', { name: 'Name or domain', exact: true });
+    const submit = hero.getByRole('button', { name: 'Check availability' });
+    await field.waitFor();
     await page.evaluate(() => document.fonts.ready);
-    for (const name of ['I have an idea', 'I have a name', 'My own name']) {
-      const tab = page.getByRole('tab', { name, exact: true });
-      await tab.click();
-      assert.equal(await tab.getAttribute('aria-selected'), 'true');
-      const panel = page.locator('#' + await tab.getAttribute('aria-controls'));
-      assert.equal(await panel.getByRole('textbox').isVisible(), true);
+    assert.equal(await hero.locator('.stamp').textContent(), 'Name it already.');
+    assert.equal((await hero.locator('h1').innerText()).replace(/\s+/g, ' '), 'Find a startup name you can actually buy.');
+    assert.equal(await hero.locator('.subline').textContent(), 'Search domains right here for free. Or ask Claude or Codex to check domains, app names and Google.');
+    assert.equal(await field.getAttribute('placeholder'), 'Mapfern or mapfern.com');
+    assert.equal(await hero.getByRole('textbox').count(), 1);
+    assert.equal(await page.getByRole('heading', { name: 'A real search.' }).count(), 0);
+    const install = page.locator('#install');
+    const claude = install.getByRole('tab', { name: 'Claude Code' });
+    const checkBounds = await submit.boundingBox();
+    const installBounds = await install.boundingBox();
+    if (width === 390) {
+      const row = install.getByText('Install for Claude or Codex', { exact: true });
+      assert.ok(await row.isVisible());
+      assert.equal(await claude.isVisible(), false);
+      assert.ok(checkBounds.y + checkBounds.height <= installBounds.y);
+      const rowBounds = await row.boundingBox();
+      assert.ok(rowBounds.y + rowBounds.height <= 844, 'Install row falls below first screen');
+    } else {
+      assert.ok(await claude.isVisible());
+      assert.ok(installBounds.x >= checkBounds.x + checkBounds.width);
+      assert.ok(installBounds.y < checkBounds.y + checkBounds.height);
+    }
+    await screenshot(page, 'hero-' + width);
+    const paths = [['Need name ideas?', 'What are you building?'], ['Use my own name', 'What’s your full name?']];
+    for (const [label, prompt] of paths) {
+      const opener = hero.getByRole('link', { name: label });
+      await opener.focus();
+      await opener.press('Enter');
+      await hero.getByRole('textbox', { name: prompt }).waitFor();
+      assert.equal(await opener.getAttribute('aria-expanded'), 'true');
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     }
-    await page.getByRole('tab', { name: 'I have an idea' }).click();
-    await page.evaluate(() => scrollTo(0, 0));
-    await screenshot(page, 'search-' + width);
+  });
+
+  test('name search shows availability, prices and agent setup at ' + width + 'px', async t => {
+    const { page } = await openPage(t, call => {
+      assert.equal(call.path, '/v1/check');
+      assert.equal(call.query.get('name'), 'Mapfern');
+      return { json: checkReply() };
+    }, { width });
+    await search(page, 'name', 'Mapfern');
+    const results = page.getByRole('region', { name: 'Search results' });
+    await results.getByRole('link', { name: 'Book it at Spaceship for $6.25' }).waitFor();
+    await page.getByText('Let your agent buy and watch it', { exact: true }).waitFor();
+    await results.evaluate(el => el.scrollIntoView({ block: 'start' }));
+    await screenshot(page, 'name-' + width);
+    const installLink = results.locator('a[href="#install"]');
+    await installLink.click();
+    const setup = page.locator('#install');
+    await setup.getByRole('tab', { name: 'Codex', exact: true }).waitFor();
+    if (width === 390) {
+      await setup.locator('summary').click();
+      await installLink.click();
+      await setup.getByRole('tab', { name: 'Codex', exact: true }).waitFor();
+    }
   });
 }
+
+test('a dotted name reaches the API as an exact domain', async t => {
+  const { page } = await openPage(t, call => {
+    assert.equal(call.path, '/v1/check');
+    assert.equal(call.query.get('name'), 'mapfern.com');
+    return { json: { ...checkReply(), domains: [domainRow('mapfern.com')] } };
+  });
+  await search(page, 'name', 'mapfern.com');
+  await page.getByRole('link', { name: 'Book it at Spaceship for $6.25' }).waitFor();
+});
 
 test('all endings show registry verdicts; only an available domain gets a booking link', async t => {
   const { page, calls } = await openPage(t, call => {
@@ -140,7 +200,7 @@ test('all endings show registry verdicts; only an available domain gets a bookin
     assert.equal(call.query.get('name'), 'Mapfern');
     return { json: checkReply() };
   });
-  await search(page, 'I have a name', 'Mapfern');
+  await search(page, 'name', 'Mapfern');
   const book = page.getByRole('link', { name: /Book it at Spaceship for \$6\.25/i });
   await book.waitFor();
   assert.equal(await book.getAttribute('href'), price('mapfern.com').buyUrl);
@@ -158,7 +218,7 @@ test('all endings show registry verdicts; only an available domain gets a bookin
   await share.click();
   await page.getByRole('heading', { name: 'Mapfern', exact: true }).waitFor();
   await page.goBack();
-  if (!(await watch.isVisible())) await search(page, 'I have a name', 'Mapfern');
+  if (!(await watch.isVisible())) await search(page, 'name', 'Mapfern');
   await watch.click();
   assert.equal(await page.locator('#watch-domain').inputValue(), 'mapfern.dev');
 });
@@ -171,11 +231,11 @@ test('rate limited and unavailable searches can be retried', async t => {
   ];
   const { page } = await openPage(t, call => call.path.includes('/details')
     ? { status: 410, json: { error: 'expired' } } : responses.shift());
-  await search(page, 'I have a name', 'Mapfern');
+  await search(page, 'name', 'Mapfern');
   await page.getByText(breather, { exact: true }).waitFor();
-  await search(page, 'I have a name', 'Mapfern');
+  await search(page, 'name', 'Mapfern');
   await page.getByText('Couldn’t finish the search. Try again in a moment.').waitFor();
-  await search(page, 'I have a name', 'Mapfern');
+  await search(page, 'name', 'Mapfern');
   await page.getByRole('link', { name: /Book it at Spaceship/i }).waitFor();
   assert.equal(responses.length, 0);
 });
@@ -183,6 +243,11 @@ test('rate limited and unavailable searches can be retried', async t => {
 test('search has a readable fallback when scripts are off', async t => {
   const { page } = await openPage(t, () => assert.fail('Unexpected request'), { javaScriptEnabled: false });
   assert.match(await page.locator('#search').innerText(), /Turn on JavaScript to search/i);
+  const setup = page.locator('#install');
+  if (!await setup.locator('code').first().isVisible()) await setup.locator('summary').click();
+  for (const command of ['claude mcp add', 'codex mcp add']) {
+    assert.ok(await setup.locator('code').filter({ hasText: command }).isVisible());
+  }
 });
 
 test('agent setup offers working copy actions for both terminals and the hosted connector', async t => {
@@ -195,7 +260,8 @@ test('agent setup offers working copy actions for both terminals and the hosted 
   for (const [client, expected] of [
     ['Claude Code', 'claude mcp add domain-hound -- npx -y domain-hound'],
     ['Codex', 'codex mcp add domain-hound -- npx -y domain-hound'],
-    ['ChatGPT', 'https://domainhound-mcp.domainhound.workers.dev/mcp']
+    ['ChatGPT', 'https://domainhound-mcp.domainhound.workers.dev/mcp'],
+    ['Other MCP', '{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}']
   ]) {
     await setup.getByRole('tab', { name: client, exact: true }).click();
     await setup.getByRole('button', { name: /copy/i }).click();
@@ -208,21 +274,25 @@ test('a stale name response cannot replace a newly selected search', async t => 
   const pending = new Promise(resolve => { release = resolve; });
   const requestStarted = new Promise(resolve => { started = resolve; });
   t.after(() => release());
-  const { page } = await openPage(t, async () => {
-    started();
-    await pending;
-    return { json: checkReply() };
+  const { page } = await openPage(t, async call => {
+    if (call.path === '/v1/check') {
+      started();
+      await pending;
+      return { json: checkReply() };
+    }
+    assert.equal(call.path, '/v1/generate');
+    return { json: ideas([['Trailfin', 'trailfin.com']]) };
   });
-  await search(page, 'I have a name', 'Mapfern');
+  await search(page, 'name', 'Mapfern');
   await requestStarted;
   assert.match(await page.locator('main').innerText(), /checking|searching|looking/i);
-  await page.getByRole('tab', { name: 'My own name' }).click();
+  await search(page, 'idea', ideaText);
+  const results = page.locator('#search-results');
+  await results.getByRole('heading', { name: 'Trailfin' }).waitFor();
   release();
-  // A background tab may retain the response for later. Wait for its DOM to
-  // settle before asserting that the selected tab stayed on top.
-  await page.locator('#search-results article').first().waitFor({ state: 'attached' });
-  await page.getByRole('textbox', { name: /full name/i }).waitFor();
-  assert.equal(await page.getByRole('link', { name: /Book it at/i }).isVisible(), false);
+  await page.waitForLoadState('networkidle');
+  assert.equal(await results.getByRole('article').count(), 1);
+  assert.ok(await results.getByRole('heading', { name: 'Trailfin' }).isVisible());
 });
 
 test('two-year bookings use the full upfront charge and premium results withhold checkout', async t => {
@@ -235,7 +305,7 @@ test('two-year bookings use the full upfront charge and premium results withhold
   const { page } = await openPage(t, () => ({ json: {
     ...checkReply(), domains: [ai, premium], details: { id: null, status: 'unavailable' }, complete: true
   } }));
-  await search(page, 'I have a name', 'Mapfern');
+  await search(page, 'name', 'Mapfern');
   const book = page.getByRole('link', { name: /Book it at Spaceship for \$130/i });
   await book.waitFor();
   const result = await page.locator('#search-results').innerText();
@@ -271,7 +341,7 @@ for (const width of [390, 1440]) {
       assert.equal(call.method, 'POST');
       return { json: ideas(call.body.round === 2 ? [['Flintmap', 'flintmap.com']] : shortlist) };
     }, { width });
-    await search(page, 'I have an idea', ideaText);
+    await search(page, 'idea', ideaText);
     const results = page.locator('#search-results');
     const cards = results.getByRole('article');
     await cards.first().waitFor();
@@ -287,7 +357,7 @@ for (const width of [390, 1440]) {
     assert.doesNotMatch(await results.innerText(), /takenname|unverified/i);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await results.evaluate(el => el.scrollIntoView({ block: 'start' }));
-    await screenshot(page, 'results-' + width);
+    await screenshot(page, 'idea-' + width);
 
     const boxes = results.getByRole('combobox');
     for (const [i, name] of ['Mapfern', 'Trailfin', 'Mossfold'].entries()) await boxes.nth(i).selectOption(name);
@@ -297,19 +367,36 @@ for (const width of [390, 1440]) {
   });
 }
 
-test('personal search sends only the full name and shows the matched domain', async t => {
-  const { page } = await openPage(t, call => {
-    assert.equal(call.path, '/v1/personal');
-    assert.equal(call.method, 'POST');
-    assert.deepEqual(call.body, { fullName: 'Alex Sample' });
-    assert.equal(call.query.size, 0);
-    return { json: { results: [{ ...domainRow('alexsample.me'), bestPrice: price('alexsample.me') }], complete: true } };
+for (const mode of ['name', 'personal']) {
+  test(mode + ' field routes a full name to personal search', async t => {
+    const { page } = await openPage(t, call => {
+      assert.equal(call.path, '/v1/personal');
+      assert.equal(call.method, 'POST');
+      assert.deepEqual(call.body, { fullName: 'Alex Sample' });
+      assert.equal(call.query.size, 0);
+      return { json: { results: [{ ...domainRow('alexsample.me'), bestPrice: price('alexsample.me') }], complete: true } };
+    });
+    await search(page, mode, 'Alex Sample');
+    await page.getByRole('heading', { name: 'alexsample.me' }).waitFor();
+    const book = page.getByRole('link', { name: /Book it at Spaceship/ });
+    assert.equal(await book.getAttribute('href'), price('alexsample.me').buyUrl);
+    assert.equal(new URL(page.url()).search, '');
   });
-  await search(page, 'My own name', 'Alex Sample');
-  await page.getByRole('heading', { name: 'alexsample.me' }).waitFor();
-  const book = page.getByRole('link', { name: /Book it at Spaceship/ });
-  assert.equal(await book.getAttribute('href'), price('alexsample.me').buyUrl);
-  assert.equal(new URL(page.url()).search, '');
+}
+
+test('a multi-word startup name can use the domain check after a personal lookup fails', async t => {
+  const { page, calls } = await openPage(t, call => {
+    if (call.path === '/v1/personal') return { status: 503, json: { error: 'unavailable' } };
+    assert.equal(call.path, '/v1/check');
+    assert.equal(call.query.get('name'), 'Example Studio');
+    return { json: { ...checkReply(), domains: [domainRow('examplestudio.com')] } };
+  });
+  await search(page, 'name', 'Example Studio');
+  await page.getByText('Couldn’t finish the search. Try again in a moment.').waitFor();
+  assert.equal(calls.length, 1);
+  await page.getByText('Check as a startup name', { exact: true }).click();
+  await page.getByRole('heading', { name: 'examplestudio.com', exact: true }).waitFor();
+  assert.equal(calls.length, 2);
 });
 
 test('details qualify unknowns, exact US marks and public profile checks', async t => {
@@ -323,7 +410,7 @@ test('details qualify unknowns, exact US marks and public profile checks', async
       handles: [{ platform: 'GitHub', state: 'not-found', link: 'https://github.com/mapfern' }]
     } };
   });
-  await search(page, 'I have a name', 'Mapfern');
+  await search(page, 'name', 'Mapfern');
   await page.getByText('Check apps, trademarks and handles', { exact: true }).click();
   await page.getByText('No public profile found.', { exact: false }).waitFor();
   assert.match(await page.locator('.detail-checks').innerText(), /No exact live word mark found/);
@@ -336,12 +423,12 @@ test('an unconfirmed or over-budget idea never becomes a bookable suggestion', a
   reply.names[0].domains[0].evidence = null;
   for (const offer of reply.names[1].domain.prices) offer.threeYearUsd = 84;
   const { page } = await openPage(t, () => ({ json: reply }));
-  await search(page, 'I have an idea', ideaText);
+  await search(page, 'idea', ideaText);
   await page.getByText(/No available names confirmed/).waitFor();
   assert.equal(await page.locator('#search-results article').count(), 0);
 });
 
-test('single-offer API replies disclose the three-year basis on both naming tabs', async t => {
+test('single-offer API replies disclose the three-year basis on idea and personal searches', async t => {
   const { page } = await openPage(t, call => {
     if (call.path === '/v1/generate') {
       const reply = ideas([['Mapfern', 'mapfern.com']]);
@@ -355,10 +442,10 @@ test('single-offer API replies disclose the three-year basis on both naming tabs
     return { json: { results: [{ ...row, bestPrice: { shop, buyUrl, firstPaymentUsd, renewalUsd,
       minimumYears, threeYearUsd, checkedAt } }], complete: true } };
   });
-  for (const [tab, input] of [['I have an idea', ideaText], ['My own name', 'Alex Sample']]) {
-    await search(page, tab, input);
+  for (const [mode, input] of [['idea', ideaText], ['personal', 'Alex Sample']]) {
+    await search(page, mode, input);
     await page.getByRole('article').getByText('Lowest three-year cost · $32.00', { exact: true }).waitFor();
     await page.getByRole('link', { name: 'Book it at Gandi for $14.00' }).waitFor();
-    if (tab === 'I have an idea') await page.getByText(/Price snapshot 2026-11-24/).waitFor();
+    if (mode === 'idea') await page.getByText(/Price snapshot 2026-11-24/).waitFor();
   }
 });
