@@ -12,7 +12,7 @@ Use Node.js 20 or later. Add the server in your terminal and start a fresh clien
 
 ## Tools
 
-- `check_domains`: Check an exact domain or a batch of up to 20 names. A bare name covers ten default endings. Registry status, premium signals, list prices and confirmed shop quotes are distinct.
+- `check_domains`: Check an exact domain or a batch of up to 20 names. A bare name covers fourteen default endings. Registry status, premium signals, list prices and confirmed shop quotes are distinct.
 - `triage_names`: Screen a shortlist for similar US word marks, public iOS and Android listings, company names, social handles and search results. Results can be incomplete. Review other markets separately.
 - `naming_method`: Get a recipe for the assistant to generate names, check domains and screen the shortlist.
 - `broker_find`: Legacy alias for `check_domains`.
