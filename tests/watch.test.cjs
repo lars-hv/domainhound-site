@@ -56,7 +56,7 @@ for (const width of [390, 1440]) {
   }
 
   test(`/land/ request at ${width}px`, () => withLocalSite(width, async page => {
-    await page.goto(site + '/land/?d=B%C3%9CCHER.com&email=ignored%40example.com&name=Ignored&note=Ignored&news=yes');
+    await page.goto(site + '/land/?d=B%C3%9CCHER.co.uk&email=ignored%40example.com&name=Ignored&note=Ignored&news=yes');
     const domain = page.locator('#land-domain');
     const email = page.locator('#land-email');
     const name = page.locator('#land-name');
@@ -64,7 +64,7 @@ for (const width of [390, 1440]) {
     const news = page.locator('#land-news');
     const submit = page.locator('#land button[type="submit"]');
     const status = page.getByRole('status');
-    assert.equal(await domain.inputValue(), 'xn--bcher-kva.com');
+    assert.equal(await domain.inputValue(), 'xn--bcher-kva.co.uk');
     for (const field of [email, name, note]) assert.equal(await field.inputValue(), '');
     assert.equal(await note.getAttribute('required'), null);
     assert.equal(await news.isChecked(), false);
@@ -98,16 +98,17 @@ for (const width of [390, 1440]) {
     await submit.click();
     await status.filter({ hasText: 'Too many tries.' }).waitFor();
     assert.equal(await email.inputValue(), 'reader@example.com');
+    await domain.fill('example.рф');
     await name.fill('  Example Reader  ');
     await note.fill('  It’s the domain for my new app.  ');
     await news.check();
     await submit.click();
     await status.filter({ hasText: 'Check your inbox to confirm.' }).waitFor();
-    const payload = { domain: 'xn--bcher-kva.com', email: 'reader@example.com', source: 'site', website: '' };
+    const payload = { domain: 'xn--bcher-kva.co.uk', email: 'reader@example.com', source: 'site', website: '' };
     const request = { url: 'https://domainhound-alerts.domainhound.workers.dev/v1/landed', method: 'POST', credentials: 'omit' };
     assert.deepEqual(await page.evaluate(() => window.calls), [
       { ...request, payload },
-      { ...request, payload: { ...payload, name: 'Example Reader', note: 'It’s the domain for my new app.', news: 'yes' } }
+      { ...request, payload: { ...payload, domain: 'example.xn--p1ai', name: 'Example Reader', note: 'It’s the domain for my new app.', news: 'yes' } }
     ]);
     for (const field of [email, name, note]) assert.equal(await field.inputValue(), '');
     assert.equal(await news.isChecked(), false);
