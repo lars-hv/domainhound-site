@@ -1,0 +1,21 @@
+{
+  "package": "domain-hound",
+  "version": "0.1.3",
+  "license": "MIT",
+  "minimum_node_major": 20,
+  "discovered_tools": [
+    "check_domains",
+    "triage_names",
+    "naming_method",
+    "broker_find"
+  ],
+  "batch_limit": 20,
+  "claude_install": "claude mcp add domain-hound -- npx -y domain-hound",
+  "codex_install": "codex mcp add domain-hound -- npx -y domain-hound",
+  "checked_at": "2026-11-25T07:51:53+00:00",
+  "outputs": {
+    "check_domains": "**example.com is taken, and Domain Hound cannot buy or complete checkout.** Checked 2026-11-25 07:51 UTC.",
+    "naming_method": "2. Generate about 30 words. Pair one with a familiar animal or object. Avoid category-generic names.",
+    "triage_names": "- **Moss Loom** — Check first, cheapest now mossloom.me $9.21/$16.88. Fuzzy: MOSSLOO (EAGLE ROX ELECTRONICS USA INC., 009) · Brønnøysund did not answer  "
+  }
+}

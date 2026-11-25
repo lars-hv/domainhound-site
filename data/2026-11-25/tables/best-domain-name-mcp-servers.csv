@@ -1,0 +1,4 @@
+checked_utc,Server,Checks and price access,Run locally
+2026-11-25,Domain Hound,Our run found example.com taken. Standard renewal estimates are free.,npx -y domain-hound
+2026-11-25,Domain Check MCP,"RDAP and selected WHOIS lookups. Its MIT licensed server documents lookups, with no shop quotes listed.",uvx domain-check-mcp
+2026-11-25,Internet Names MCP,Free RDAP and social handle checks. An optional free NameSilo API key adds domain prices.,uvx internet-names-mcp

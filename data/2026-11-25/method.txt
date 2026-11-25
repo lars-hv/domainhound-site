@@ -1,0 +1,75 @@
+Domain Hound guide measurements, 25 November 2026 UTC
+
+Software: domain-hound 0.1.3 from the public npm registry.
+Package: https://registry.npmjs.org/domain-hound/-/domain-hound-0.1.3.tgz
+Use a fresh cache (DOMAIN_HOUND_CACHE_DIR) and no registrar credentials.
+Times in the files are UTC. Results apply to this run only.
+
+Availability
+------------
+We used all 200 combinations of these two handpicked word lists.
+Roots: ash, bay, birch, brook, cedar, cliff, cove, dawn, dune, elm, fern, flint, fox, lark, moss, pine, reed, sage, tide, wren.
+Suffixes: empty string, bay, dock, fern, gate, loom, nest, post, quill, ledger.
+In each batch a single root was paired with all ten suffixes, in that order.
+No names were dropped. Each name was tested under com, ai, io, me, co, dev, app, si, so and no.
+
+Run the installed package's CLI (clis/domain-check/index.mjs):
+  node clis/domain-check/index.mjs --agent --names ash,ashbay,ashdock,ashfern,ashgate,ashloom,ashnest,ashpost,ashquill,ashledger
+Repeat for each root. availability.csv keeps the tool's result for every name and ending.
+nc = registry free, no shop confirmation. ok = free with a shop quote.
+taken and resale = registered. prem = premium, separate from ordinary availability.
+shop_check = unsettled, including DNS hints. We did not promote hints to answers.
+The ending percentages divide free results by all 200 names, including unsettled checks.
+The length table counts letters before .com. This word list is not a random sample.
+
+Prices
+------
+Prices are annual USD list amounts before tax, for standard domains. A quoted list rate
+does not confirm the name is available. A .ai registration or renewal covers at least
+two years: see https://www.dynadot.com/domain/ai . Double the listed annual rate to
+estimate its minimum payment. Never double a figure already quoted for the full term.
+
+We ran the CLI for brindleledger under all 14 endings, and copperfernledger.org and
+copperfernledger.info. We also ran:
+  node clis/domain-check/index.mjs --refresh-prices --confirm
+The CLI refreshed Dynadot. Spaceship's storefront did not provide a fresh list.
+For each shop and ending, we kept the newest dated list row available, including
+the Spaceship list distributed with the package, dated 24 November 2026 UTC.
+To fill the four endings beyond the default catalog, we used the published
+price-catalog.mjs reader on Dynadot's USD list in an isolated Node process:
+  targetEndings.push('net', 'org', 'xyz', 'info')
+  await loadDynadotPrices()
+No installed code was edited. Each row in registrar-offers.csv names its source.
+
+For each ending, compare shops Domain Hound makes eligible for a purchase link.
+Rank by renewal, then by standard first year for ties. Show both prices from that
+same shop. The package marks Porkbun as comparison data only. Limited coverage:
+Spaceship and Dynadot had rates for eight endings; only Dynadot had eligible
+prices for the others. We did not rank shops without usable prices or claim a
+market-wide minimum. Exclude coupon codes, resale prices and premium offers.
+
+Name screens
+------------
+  node clis/domain-check/index.mjs --triage "Moss Loom" --category software --about "a bookkeeping app"
+Repeat for Brindle Ledger and Spotify. The last is a known existing brand.
+name-screens.json preserves the relevant fields and source response percentages.
+An empty result and a source failure have different meanings. We counted the Apple
+record and the distinct Play listings returned. The CLI searched US storefronts.
+Its automatic trademark results cover the US. Search other markets separately.
+The X and Google results are the tool's own classifications. No handles were claimed.
+
+Registration records and MCP
+----------------------------
+  node clis/domain-check/index.mjs github.com
+  node clis/domain-check/index.mjs mozilla.org
+registry-records.csv retains the exact RDAP expiry timestamps. An expiry is not a release date.
+For the setup guide we ran the published server with npx -y domain-hound, sent
+initialize and tools/list, then called check_domains on example.com, naming_method
+for a bookkeeping app and triage_names on Moss Loom. The latter used category
+software, the bookkeeping brief and an unknown prior brand association.
+mcp-results.json records the tool names, excerpts and package requirements.
+The comparison uses this run for Domain Hound and pinned project documentation for
+the other servers. Those servers were not run. Links are recorded in sources.json.
+
+Each file in tables/ contains the full table from one guide. The first field is
+the guide check date. Individual registrar price dates are in registrar-offers.csv.

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>How to check if a domain is available | Domain Hound</title>
+  <meta name="description" content="Look up the full domain in its registry, then ask a registrar for the price. A blank website tells you nothing about who owns the name.">
+  <link rel="canonical" href="https://domainhound.dev/guides/how-to-check-domain-availability/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Domain Hound">
+  <meta property="og:url" content="https://domainhound.dev/guides/how-to-check-domain-availability/">
+  <meta property="og:title" content="How to check if a domain is available | Domain Hound">
+  <meta property="og:description" content="Look up the full domain in its registry, then ask a registrar for the price. A blank website tells you nothing about who owns the name.">
+  <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
+  <meta property="og:image:alt" content="Domain Hound: Name it already.">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/brand-b.css">
+  <link rel="stylesheet" href="/assets/guides.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/hound-mark.svg">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Domain Hound",
+      "item": "https://domainhound.dev/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Guides",
+      "item": "https://domainhound.dev/guides/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "How to check if a domain is available",
+      "item": "https://domainhound.dev/guides/how-to-check-domain-availability/"
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+<header class="mast">
+  <div class="wrap mast-inner">
+    <a class="brand" href="/"><span>domainhound.dev</span></a>
+    <nav aria-label="Main"><a href="/#real-search">Example</a><a href="/watch/">Watch</a></nav>
+  </div>
+</header>
+<main class="guide wrap">
+  <h1>How to check if a domain is available</h1>
+  <p>Look up the full domain in its registry, then ask a registrar for the price. A blank website tells you nothing about who owns the name.</p>
+  <div class="table-wrap">
+    <table>
+      <caption>What the registry checks returned<time datetime="2026-11-25">Checked 25 November 2026 UTC</time></caption>
+      <thead><tr><th scope="col">Ending</th><th scope="col">Free</th><th scope="col">Taken</th><th scope="col">Unsettled</th><th scope="col">Premium</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">.com</th><td>8</td><td>192</td><td>0</td><td>0</td></tr>
+        <tr><th scope="row">.ai</th><td>35</td><td>26</td><td>139</td><td>0</td></tr>
+        <tr><th scope="row">.io</th><td>43</td><td>35</td><td>122</td><td>0</td></tr>
+        <tr><th scope="row">.me</th><td>64</td><td>21</td><td>115</td><td>0</td></tr>
+        <tr><th scope="row">.co</th><td>111</td><td>89</td><td>0</td><td>0</td></tr>
+        <tr><th scope="row">.dev</th><td>85</td><td>27</td><td>88</td><td>0</td></tr>
+        <tr><th scope="row">.app</th><td>76</td><td>40</td><td>84</td><td>0</td></tr>
+        <tr><th scope="row">.si</th><td>178</td><td>21</td><td>1</td><td>0</td></tr>
+        <tr><th scope="row">.so</th><td>180</td><td>19</td><td>1</td><td>0</td></tr>
+        <tr><th scope="row">.no</th><td>170</td><td>19</td><td>10</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>We tried the same 200 names under each ending. Free means the registry showed no registration. Taken includes possible resale listings. Unsettled means the tool needs a shop check. Premium names have a separate count.</p>
+  <p class="source">Domain Hound measurements · <a href="/data/2026-11-25/tables/how-to-check-domain-availability.csv">Table CSV</a> · <a href="/data/2026-11-25/availability.csv">Lookup data</a> · <a href="https://lookup.icann.org/en">ICANN registration lookup</a></p>
+  <section>
+    <h2>How Domain Hound does it</h2>
+    <p>Give Domain Hound a full name such as example.com. It looks for a registry record using RDAP or WHOIS. If the registry stays silent, it can use DNS for a clue. Ask for a shop check before you pay.</p>
+    <p>Install in Claude Code, or <a href="/guides/domain-hound-claude-code-codex/">use Codex</a>.</p><pre><code>claude mcp add domain-hound -- npx -y domain-hound</code></pre>
+  </section>
+  <section>
+    <h2>FAQ</h2>
+    <dl>
+      <dt>What if the site never loads?</dt><dd>The owner may use the domain for email, park it or leave it empty.</dd>
+      <dt>Why does the shop want more?</dt><dd>The registry can set a premium price for an unregistered name. A price set by an existing owner is a resale price.</dd>
+      <dt>When is the name mine?</dt><dd>After the registrar accepts the registration. A lookup does not hold it for you.</dd>
+    </dl>
+  </section>
+  <section>
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="/guides/find-an-available-startup-name/">How to find an available startup name</a></li>
+      <li><a href="/guides/domain-renewal-prices/">What does a domain cost to renew?</a></li>
+    </ul>
+  </section>
+  <p class="updated">Last updated <time datetime="2026-11-25">25 November 2026</time>.</p>
+</main>
+<footer><div class="wrap foot"><a href="/">domainhound.dev</a><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a></div></footer>
+</body>
+</html>

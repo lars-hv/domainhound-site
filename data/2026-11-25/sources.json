@@ -1,0 +1,67 @@
+{
+  "domaincheck": {
+    "url": "https://github.com/stucchi/domain-check-mcp/blob/04b01518617707e885dbb2e47558c8b0502a4fd3/README.md",
+    "label": "Domain Check MCP documentation",
+    "checked": "2026-11-25"
+  },
+  "internetnames": {
+    "url": "https://github.com/drewster99/InternetNamesMCP/blob/1c765025e2836029bae8ca59814ab21ec1fd176a/README.md",
+    "label": "Internet Names MCP documentation",
+    "checked": "2026-11-25"
+  },
+  "package": {
+    "url": "https://www.npmjs.com/package/domain-hound/v/0.1.3",
+    "label": "Domain Hound on npm",
+    "checked": "2026-11-25"
+  },
+  "registry": {
+    "url": "https://lookup.icann.org/en",
+    "label": "ICANN registration lookup",
+    "checked": "2026-11-25"
+  },
+  "icann": {
+    "url": "https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en",
+    "label": "ICANN status codes",
+    "checked": "2026-11-25"
+  },
+  "us": {
+    "url": "https://www.uspto.gov/trademarks/search/comprehensive-clearance-search-similar-trademarks",
+    "label": "USPTO clearance guidance",
+    "checked": "2026-11-25"
+  },
+  "eu": {
+    "url": "https://www.euipo.europa.eu/en/trade-marks/before-applying/availability",
+    "label": "EUIPO and TMview",
+    "checked": "2026-11-25"
+  },
+  "no": {
+    "url": "https://search.patentstyret.no/",
+    "label": "Norwegian Industrial Property Office register",
+    "checked": "2026-11-25"
+  },
+  "apple": {
+    "url": "https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/",
+    "label": "Apple’s app name rules",
+    "checked": "2026-11-25"
+  },
+  "android": {
+    "url": "https://support.google.com/googleplay/android-developer/answer/9859152?hl=en",
+    "label": "Google Play app setup",
+    "checked": "2026-11-25"
+  },
+  "ai": {
+    "url": "https://www.dynadot.com/domain/ai",
+    "label": "Dynadot’s .ai terms",
+    "checked": "2026-11-25"
+  },
+  "norid": {
+    "url": "https://www.norid.no/en/om-domenenavn/regelverk-for-no/",
+    "label": "Norid’s .no rules",
+    "checked": "2026-11-25"
+  },
+  "repo": {
+    "url": "https://github.com/lars-hv/domain-hound",
+    "label": "Source code",
+    "checked": "2026-11-25"
+  }
+}

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Use Domain Hound in Claude Code or Codex | Domain Hound</title>
+  <meta name="description" content="Add Domain Hound as a local MCP server, then start a fresh assistant session. Ask about a full domain first so you can see whether the tool is connected.">
+  <link rel="canonical" href="https://domainhound.dev/guides/domain-hound-claude-code-codex/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Domain Hound">
+  <meta property="og:url" content="https://domainhound.dev/guides/domain-hound-claude-code-codex/">
+  <meta property="og:title" content="Use Domain Hound in Claude Code or Codex | Domain Hound">
+  <meta property="og:description" content="Add Domain Hound as a local MCP server, then start a fresh assistant session. Ask about a full domain first so you can see whether the tool is connected.">
+  <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
+  <meta property="og:image:alt" content="Domain Hound: Name it already.">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/brand-b.css">
+  <link rel="stylesheet" href="/assets/guides.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/hound-mark.svg">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Domain Hound",
+      "item": "https://domainhound.dev/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Guides",
+      "item": "https://domainhound.dev/guides/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Use Domain Hound in Claude Code or Codex",
+      "item": "https://domainhound.dev/guides/domain-hound-claude-code-codex/"
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+<header class="mast">
+  <div class="wrap mast-inner">
+    <a class="brand" href="/"><span>domainhound.dev</span></a>
+    <nav aria-label="Main"><a href="/#real-search">Example</a><a href="/watch/">Watch</a></nav>
+  </div>
+</header>
+<main class="guide wrap">
+  <h1>Use Domain Hound in Claude Code or Codex</h1>
+  <p>Add Domain Hound as a local MCP server, then start a fresh assistant session. Ask about a full domain first so you can see whether the tool is connected.</p>
+  <div class="table-wrap">
+    <table>
+      <caption>Prompts and results from the published server<time datetime="2026-11-25">Checked 25 November 2026 UTC</time></caption>
+      <thead><tr><th scope="col">Ask your assistant</th><th scope="col">Tool used</th><th scope="col">Result from our run</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Check example.com.</th><td>check_domains</td><td>Taken. Checkout stays with you.</td></tr>
+        <tr><th scope="row">Suggest names for a bookkeeping app.</th><td>naming_method</td><td>Pair a word with a familiar animal or object.</td></tr>
+        <tr><th scope="row">Screen Moss Loom for a bookkeeping app.</th><td>triage_names</td><td>Check first. Similar US mark: MOSSLOO.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>We sent the underlying tool calls to the published MCP server over standard input and output. The results here are shortened. Your assistant may phrase them differently.</p>
+  <p class="source">Domain Hound measurements · <a href="/data/2026-11-25/tables/domain-hound-claude-code-codex.csv">Table CSV</a> · <a href="/data/2026-11-25/mcp-results.json">Lookup data</a> · <a href="https://www.npmjs.com/package/domain-hound/v/0.1.3">Domain Hound on npm</a></p>
+  <section>
+    <h2>How Domain Hound does it</h2>
+    <p>Install Node.js 20 or later. Run the command for your client in your terminal, then reopen the client. The server runs on your machine and sends the name to public sources.</p>
+    <p>For Claude Code</p><pre><code>claude mcp add domain-hound -- npx -y domain-hound</code></pre><p>For Codex</p><pre><code>codex mcp add domain-hound -- npx -y domain-hound</code></pre>
+  </section>
+  <section>
+    <h2>FAQ</h2>
+    <dl>
+      <dt>Do I need an API key?</dt><dd>The default domain and list price checks run without a registrar key.</dd>
+      <dt>How can I check the connection?</dt><dd>Ask your assistant to use check_domains on example.com. Look for the tool call and a dated result.</dd>
+      <dt>Does it need a registrar login to buy?</dt><dd>Domain Hound never buys. Open the registrar yourself and check the final price.</dd>
+    </dl>
+  </section>
+  <section>
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="/guides/how-to-check-domain-availability/">How to check if a domain is available</a></li>
+      <li><a href="/guides/best-domain-name-mcp-servers/">Which domain name MCP server fits?</a></li>
+    </ul>
+  </section>
+  <p class="updated">Last updated <time datetime="2026-11-25">25 November 2026</time>.</p>
+</main>
+<footer><div class="wrap foot"><a href="/">domainhound.dev</a><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a></div></footer>
+</body>
+</html>
