@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'none'; worker-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Domain shortlist | Domain Hound</title>
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/brand-b.css">
+  <link rel="stylesheet" href="./viewer.css">
+  <script type="module" src="./viewer.mjs"></script>
+</head>
+<body>
+  <header class="mast">
+    <div class="receipt-width mast-inner">
+      <a class="brand" href="/">domainhound.dev</a>
+      <button class="action" id="copy-link" type="button" hidden>Copy share link</button>
+    </div>
+  </header>
+  <main class="receipt-width">
+    <p class="copy-feedback" id="copy-feedback" role="status"></p>
+    <h1>Domain shortlist.</h1>
+    <div id="receipt" hidden>
+      <p class="receipt-meta">List prices in USD unless confirmed</p>
+      <div id="groups"></div>
+      <p class="signoff">You hold the leash.</p>
+    </div>
+    <section class="paper empty" id="unavailable" hidden>
+      <h2>This link has no readable receipt.</h2>
+      <p>Ask the sender for the full share link.</p>
+    </section>
+    <noscript><p class="paper empty">Turn on JavaScript to read this receipt.</p></noscript>
+  </main>
+</body>
+</html>
