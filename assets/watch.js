@@ -19,14 +19,14 @@
   /* Same rules as the alerts service, so most mistakes are caught before sending. */
   function domainHostname(value) {
     const raw = value.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/\.$/, '');
-    if (!raw || raw.length > 253 || /[\s@:/?#]/.test(raw)) return null;
+    if (!raw || raw.length > 253 || /[\s@:/?#]/.test(raw) || (land && raw.includes('\\'))) return null;
     try {
       const host = new URL('http://' + raw).hostname;
       if (!land) return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,63}$/.test(host) ? host : null;
       const labels = host.split('.');
       const validHost = host.length <= 253 && labels.length >= 2
         && labels.every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
-        && /^(?:[a-z]{2,63}|xn--[a-z0-9-]+)$/.test(labels.at(-1));
+        && /^(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/.test(labels.at(-1));
       return validHost ? host : null;
     } catch {
       return null;
