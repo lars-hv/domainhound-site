@@ -73,6 +73,19 @@ h2 { font-size: 2.25rem; line-height: 1.05; }
 .step-list li::before { content: counter(step); grid-row: span 2; font-size: 2.75rem; line-height: 1; font-weight: 1000; }
 .step-list h3 { font-size: 1.375rem; line-height: 1.15; }
 .step-list p { max-width: 39ch; }
+.name-checks { padding-block: clamp(28px, 4vw, 54px); background: var(--gold); }
+.name-checks dl { margin-top: 18px; display: grid; gap: 14px 32px; }
+.name-checks dl > div {
+  display: flex; flex-wrap: wrap; align-content: start; align-items: baseline; gap: 6px;
+  min-width: 0; padding-top: 10px; border-top: 2px solid var(--blue);
+}
+.name-checks dt { flex: 0 0 100%; font-weight: 900; }
+.name-checks .check-note { flex: 0 0 100%; }
+.name-checks dd:not(.check-note) {
+  max-width: 100%; padding: 2px 8px; overflow-wrap: anywhere;
+  background: var(--cream); color: var(--blue); border: 1px solid currentColor;
+  font: 700 1rem/1.45 var(--mono);
+}
 .demo { background: var(--coral); }
 .demo-summary { display: grid; align-content: start; justify-items: start; gap: 20px; }
 .receipt {
@@ -167,6 +180,8 @@ h2 { font-size: 2.25rem; line-height: 1.05; }
   .step-list li { display: block; }
   .step-list li::before { display: block; margin-bottom: 16px; font-size: 3.5rem; }
   .step-list h3 { margin-bottom: 8px; }
+  .name-checks dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .name-checks dl > div:first-child { grid-column: 1 / -1; }
   .demo-grid { grid-template-columns: .85fr 1.25fr; }
   .trust { padding-block: 26px; font-size: 1.375rem; }
 }
