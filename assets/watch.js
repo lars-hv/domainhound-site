@@ -1,22 +1,33 @@
-/* Domain watch form. Fields carry no name, so a native submit could never send the email anywhere. */
+/* Domain request forms. Fields carry no name, so native submission never sends signup details. */
 (() => {
-  const form = document.getElementById('watch');
+  const form = document.getElementById('watch') || document.getElementById('land');
   if (!form || !window.fetch || !window.AbortController) return;
-  const endpoint = 'https://domainhound-alerts.domainhound.workers.dev/watch';
-  const domainInput = document.getElementById('watch-domain');
-  const emailInput = document.getElementById('watch-email');
-  const nameInput = document.getElementById('watch-name');
-  const news = document.getElementById('watch-news');
-  const trap = document.getElementById('watch-website');
+  const land = form.id === 'land';
+  const path = land ? '/v1/landed' : '/watch';
+  const endpoint = 'https://domainhound-alerts.domainhound.workers.dev' + path;
+  const field = name => document.getElementById(form.id + '-' + name);
+  const domainInput = field('domain');
+  const emailInput = field('email');
+  const nameInput = field('name');
+  const noteInput = field('note');
+  const news = field('news');
+  const trap = field('website');
   const button = form.querySelector('.watch-submit');
-  const status = document.getElementById('watch-status');
+  const status = field('status');
+  const editable = [domainInput, emailInput, nameInput];
+  if (noteInput) editable.push(noteInput);
   /* Same rules as the alerts service, so most mistakes are caught before sending. */
-  function watchHostname(value) {
+  function domainHostname(value) {
     const raw = value.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/\.$/, '');
-    if (!raw || raw.length > 253 || /[\s@:/?#]/.test(raw)) return null;
+    if (!raw || raw.length > 253 || /[\s@:/?#]/.test(raw) || (land && raw.includes('\\'))) return null;
     try {
       const host = new URL('http://' + raw).hostname;
-      return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,63}$/.test(host) ? host : null;
+      if (!land) return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,63}$/.test(host) ? host : null;
+      const labels = host.split('.');
+      const validHost = host.length <= 253 && labels.length >= 2
+        && labels.every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
+        && /^(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/.test(labels.at(-1));
+      return validHost ? host : null;
     } catch {
       return null;
     }
@@ -26,8 +37,8 @@
     return email.length <= 254 && /^[^\s@<>()[\]",;:\\]{1,64}@(?:[a-z0-9-]+\.)+[a-z]{2,63}$/.test(email);
   }
 
-  const requestedDomain = new URLSearchParams(window.location.search).get('domain');
-  if (requestedDomain) domainInput.value = watchHostname(requestedDomain.trim()) || '';
+  const requestedDomain = new URLSearchParams(window.location.search).get(land ? 'd' : 'domain');
+  if (requestedDomain) domainInput.value = domainHostname(requestedDomain.trim()) || '';
 
   function showStatus(message, state, invalidInput) {
     status.textContent = message;
@@ -40,11 +51,18 @@
   }
 
   function clearStatus() {
-    for (const input of [domainInput, emailInput, nameInput]) {
+    for (const input of editable) {
       input.removeAttribute('aria-invalid');
       input.removeAttribute('aria-describedby');
     }
     showStatus('', '');
+  }
+
+  function setSending(sending) {
+    if (sending) button.setAttribute('aria-disabled', 'true');
+    else button.removeAttribute('aria-disabled');
+    for (const input of editable) input.readOnly = sending;
+    news.disabled = sending;
   }
 
   form.addEventListener('input', clearStatus);
@@ -52,20 +70,21 @@
     event.preventDefault();
     if (button.getAttribute('aria-disabled') === 'true') return;
     clearStatus();
-    const domain = watchHostname(domainInput.value.trim());
+    const domain = domainHostname(domainInput.value.trim());
     const email = emailInput.value.trim();
     const name = nameInput.value.trim();
+    const note = noteInput?.value.trim();
     if (!domain) return showStatus('Enter a domain like brightname.com.', 'error', domainInput);
     if (!validEmail(email)) return showStatus('Enter a valid email address.', 'error', emailInput);
     if (name.length > nameInput.maxLength) return showStatus('Use 80 characters or fewer for your name.', 'error', nameInput);
+    if (note && note.length > noteInput.maxLength) return showStatus('Use 500 characters or fewer for your note.', 'error', noteInput);
 
     const payload = { email, domain, source: 'site', website: trap.value };
     if (name) payload.name = name;
+    if (note) payload.note = note;
     if (news.checked) payload.news = 'yes';
 
-    button.setAttribute('aria-disabled', 'true');
-    domainInput.readOnly = emailInput.readOnly = nameInput.readOnly = true;
-    news.disabled = true;
+    setSending(true);
     showStatus('Sending…', 'sending');
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
@@ -86,19 +105,18 @@
       if (response.status === 202 && result?.ok === true) {
         form.reset();
         showStatus('Check your inbox to confirm.', 'success');
-      } else if ([400, 422].includes(response.status) && typeof result?.message === 'string' && result.message) {
-        const field = response.status === 422 || /domain/i.test(result.message) ? domainInput : emailInput;
-        showStatus(result.message, 'error', field);
+      } else if (([400, 422].includes(response.status) || (land && response.status === 413))
+        && typeof result?.message === 'string' && result.message) {
+        const invalidInput = land ? null : (response.status === 422 || /domain/i.test(result.message) ? domainInput : emailInput);
+        showStatus(result.message, 'error', invalidInput);
       } else {
-        showStatus('The watch service is unavailable. Try again later.', 'error');
+        showStatus(land ? 'Couldn’t send your request. Try again later.' : 'The watch service is unavailable. Try again later.', 'error');
       }
     } catch {
       showStatus('Couldn’t reach the server. Try again later.', 'error');
     } finally {
       clearTimeout(timer);
-      domainInput.readOnly = emailInput.readOnly = nameInput.readOnly = false;
-      news.disabled = false;
-      button.removeAttribute('aria-disabled');
+      setSending(false);
     }
   });
 
