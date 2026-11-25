@@ -21,6 +21,88 @@
   <link rel="icon" href="assets/hound-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/site.css">
   <link rel="stylesheet" href="assets/brand-b.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://domainhound.dev/#publisher",
+        "name": "BrightBoard AS",
+        "legalName": "BrightBoard AS"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://domainhound.dev/#website",
+        "url": "https://domainhound.dev/",
+        "name": "Domain Hound",
+        "inLanguage": "en",
+        "publisher": { "@id": "https://domainhound.dev/#publisher" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://domainhound.dev/#software",
+        "name": "Domain Hound",
+        "alternateName": "domain-hound",
+        "description": "Free, open source MCP server for Claude Code, Codex and other MCP clients. Checks domain availability, first-year and renewal prices, App Store and Google Play names, US trademarks, company registers, Google presence and handles.",
+        "url": "https://domainhound.dev/",
+        "image": "https://domainhound.dev/assets/social-preview.png",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any system with Node.js 20 or later",
+        "softwareRequirements": "Node.js 20 or later",
+        "downloadUrl": "https://www.npmjs.com/package/domain-hound",
+        "installUrl": "https://domainhound.dev/#install",
+        "license": "https://opensource.org/licenses/MIT",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "publisher": { "@id": "https://domainhound.dev/#publisher" },
+        "sameAs": [
+          "https://github.com/lars-hv/domain-hound",
+          "https://www.npmjs.com/package/domain-hound"
+        ]
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "@id": "https://domainhound.dev/#source",
+        "name": "domain-hound",
+        "codeRepository": "https://github.com/lars-hv/domain-hound",
+        "programmingLanguage": "JavaScript",
+        "runtimePlatform": "Node.js",
+        "license": "https://opensource.org/licenses/MIT",
+        "targetProduct": { "@id": "https://domainhound.dev/#software" },
+        "publisher": { "@id": "https://domainhound.dev/#publisher" }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://domainhound.dev/#faq",
+        "url": "https://domainhound.dev/",
+        "isPartOf": { "@id": "https://domainhound.dev/#website" },
+        "about": { "@id": "https://domainhound.dev/#software" },
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Search cost?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Free." }
+          },
+          {
+            "@type": "Question",
+            "name": "Who sells it?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The registrar." }
+          },
+          {
+            "@type": "Question",
+            "name": "Trademark clearance?",
+            "acceptedAnswer": { "@type": "Answer", "text": "US screening only." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 <header class="mast" id="top">
@@ -200,7 +282,7 @@
     </div>
   </aside>
 </main>
-<footer><div class="wrap foot"><a href="https://domainhound.dev/">domainhound.dev</a><a href="privacy/">Privacy</a></div></footer>
+<footer><div class="wrap foot"><a href="https://domainhound.dev/">domainhound.dev</a><a href="guides/">Guides</a><a href="privacy/">Privacy</a></div></footer>
 <script src="assets/site.js"></script>
 <script src="assets/watch.js"></script>
 <script>

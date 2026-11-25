@@ -1,0 +1,86 @@
+{
+  "Brindle Ledger": {
+    "completed_at": "2026-11-25T07:52:02+00:00",
+    "verdict": "No conflict found",
+    "google_result": "open",
+    "com_site": "Registry free",
+    "handle_results": {
+      "GitHub": "free",
+      "npm": "free",
+      "PyPI": "free",
+      "X": "free",
+      "YouTube": "free"
+    },
+    "us_mark": [],
+    "mark_record": null,
+    "ios": [],
+    "android": [],
+    "source_response": {
+      "USPTO": 100,
+      "App Store": 100,
+      "Google Play": 100
+    }
+  },
+  "Moss Loom": {
+    "completed_at": "2026-11-25T07:52:10+00:00",
+    "verdict": "Check first",
+    "google_result": "open",
+    "com_site": "Taken, no site found",
+    "handle_results": {
+      "GitHub": "free",
+      "npm": "free",
+      "PyPI": "free",
+      "X": "taken",
+      "YouTube": "taken"
+    },
+    "us_mark": "Fuzzy: MOSSLOO (EAGLE ROX ELECTRONICS USA INC., 009)",
+    "mark_record": "https://tsdr.uspto.gov/#caseNumber=86576849&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch",
+    "ios": [],
+    "android": [],
+    "source_response": {
+      "USPTO": 100,
+      "App Store": 100,
+      "Google Play": 100
+    }
+  },
+  "Spotify": {
+    "completed_at": "2026-11-25T07:51:59+00:00",
+    "verdict": "Avoid",
+    "google_result": "crowded",
+    "com_site": "Taken, no site found",
+    "handle_results": {
+      "GitHub": "taken",
+      "npm": "taken",
+      "PyPI": "taken",
+      "X": "taken",
+      "YouTube": "taken"
+    },
+    "us_mark": "Exact: SPOTIFY (Spotify AB, 038/041/009/035)",
+    "mark_record": "https://tsdr.uspto.gov/#caseNumber=79037568&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch",
+    "ios": {
+      "name": "Spotify: Music and Podcasts",
+      "developer": "Spotify",
+      "ratings": 43305026,
+      "url": "https://apps.apple.com/us/app/id324684580"
+    },
+    "android": [
+      {
+        "name": "Spotify: Music and Podcasts",
+        "developer": "Spotify AB",
+        "url": "https://play.google.com/store/apps/details?id=com.spotify.music",
+        "ratings": null
+      },
+      {
+        "name": "Spotify: Music & Podcasts",
+        "developer": "Spotify AB",
+        "url": "https://play.google.com/store/apps/details?id=com.spotify.tv.android",
+        "ratings": null
+      }
+    ],
+    "source_response": {
+      "USPTO": 100,
+      "App Store": 100,
+      "Google Play": 100
+    }
+  }
+}

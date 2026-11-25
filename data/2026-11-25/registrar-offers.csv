@@ -1,0 +1,35 @@
+ending,shop,price_list_as_of,first_year_usd,renewal_usd,ranked,capture,source
+ai,Dynadot,2026-11-25T07:53:58.582Z,85.60,85.60,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+ai,Porkbun,2026-11-25T07:51:56.118Z,82.70,82.70,False,Exact domain CLI: brindleledger.ai,https://api.porkbun.com/api/json/v3/pricing/get
+ai,Spaceship,2026-11-24T18:15:47.403Z,79.98,79.98,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+app,Dynadot,2026-11-25T07:53:58.582Z,8.00,14.50,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+app,Porkbun,2026-11-25T07:52:02.930Z,8.75,14.93,False,Exact domain CLI: brindleledger.app,https://api.porkbun.com/api/json/v3/pricing/get
+app,Spaceship,2026-11-24T18:15:47.403Z,8.28,14.49,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+co,Dynadot,2026-11-25T07:53:58.582Z,15.50,31.20,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+co,Porkbun,2026-11-25T07:52:05.264Z,15.76,31.20,False,Exact domain CLI: brindleledger.co,https://api.porkbun.com/api/json/v3/pricing/get
+co,Spaceship,2026-11-24T18:15:47.403Z,3.11,31.05,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+com,Dynadot,2026-11-25T07:53:58.582Z,11.62,11.62,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+com,Porkbun,2026-11-25T07:51:52.443Z,11.81,11.81,False,Exact domain CLI: brindleledger.com,https://api.porkbun.com/api/json/v3/pricing/get
+com,Spaceship,2026-11-24T18:15:47.403Z,9.48,10.68,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+dev,Dynadot,2026-11-25T07:53:58.582Z,8.00,12.50,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+dev,Porkbun,2026-11-25T07:52:00.810Z,8.75,12.87,False,Exact domain CLI: brindleledger.dev,https://api.porkbun.com/api/json/v3/pricing/get
+dev,Spaceship,2026-11-24T18:15:47.403Z,8.28,12.42,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+info,Dynadot,2026-11-25T07:53:58.582Z,3.99,22.69,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+info,Porkbun,2026-11-25T07:55:44.083Z,3.60,22.14,False,Exact domain CLI: copperfernledger.info,https://api.porkbun.com/api/json/v3/pricing/get
+io,Dynadot,2026-11-25T07:53:58.582Z,21.40,53.50,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+io,Porkbun,2026-11-25T07:51:59.195Z,20.91,51.80,False,Exact domain CLI: brindleledger.io,https://api.porkbun.com/api/json/v3/pricing/get
+io,Spaceship,2026-11-24T18:15:47.403Z,31.98,51.75,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+me,Dynadot,2026-11-25T07:53:58.582Z,9.21,16.88,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+me,Porkbun,2026-11-25T07:52:07.429Z,17.27,17.27,False,Exact domain CLI: brindleledger.me,https://api.porkbun.com/api/json/v3/pricing/get
+me,Spaceship,2026-11-24T18:15:47.403Z,8.70,15.53,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+net,Dynadot,2026-11-25T07:53:58.582Z,7.49,12.52,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+net,Porkbun,2026-11-25T07:52:28.523Z,12.52,12.52,False,Exact domain CLI: brindleledger.net,https://api.porkbun.com/api/json/v3/pricing/get
+no,Dynadot,2026-11-25T07:53:58.582Z,7.97,7.97,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+org,Dynadot,2026-11-25T07:55:42.822Z,7.99,11.64,True,Exact domain CLI: copperfernledger.org,https://www.dynadot.com/domain/prices?currency=USD
+org,Porkbun,2026-11-25T07:55:42.822Z,7.98,11.84,False,Exact domain CLI: copperfernledger.org,https://api.porkbun.com/api/json/v3/pricing/get
+si,Dynadot,2026-11-25T07:53:58.582Z,11.29,11.29,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+si,Porkbun,2026-11-25T07:52:09.921Z,19.95,17.13,False,Exact domain CLI: brindleledger.si,https://api.porkbun.com/api/json/v3/pricing/get
+si,Spaceship,2026-11-24T18:15:47.403Z,10.98,11.98,True,Bundled price list,https://www.spaceship.com/domain-search/pricing/
+so,Dynadot,2026-11-25T07:53:58.582Z,57.50,57.50,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+xyz,Dynadot,2026-11-25T07:53:58.582Z,1.50,14.45,True,Published Dynadot catalog reader,https://www.dynadot.com/domain/prices?currency=USD
+xyz,Porkbun,2026-11-25T07:52:36.236Z,1.29,14.21,False,Exact domain CLI: brindleledger.xyz,https://api.porkbun.com/api/json/v3/pricing/get

@@ -1,0 +1,4 @@
+checked_utc,Stage,Days,Who can act
+2026-11-25,Auto-renew grace,0 to 45,The registrar sets its renewal deadline and can delete the name.
+2026-11-25,Redemption grace,30,The previous owner can ask the registrar to restore it.
+2026-11-25,Pending delete,5,Restoration closes. The registry releases the name after this stage.

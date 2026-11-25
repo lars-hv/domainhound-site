@@ -1,0 +1,45 @@
+# Domain Hound
+
+> Domain Hound is a free, MIT licensed MCP server for checking domain availability, comparing registration and renewal prices, and screening startup names. It runs on your machine. The registrar handles checkout.
+
+## Install
+
+Use Node.js 20 or later. Add the server in your terminal and start a fresh client session.
+
+- Claude Code: `claude mcp add domain-hound -- npx -y domain-hound`
+- Codex: `codex mcp add domain-hound -- npx -y domain-hound`
+- Other local MCP clients: command `npx`, arguments `-y` and `domain-hound`, transport stdio.
+
+## Tools
+
+- `check_domains`: Check an exact domain or a batch of up to 20 names. A bare name covers ten default endings. Registry status, premium signals, list prices and confirmed shop quotes are distinct.
+- `triage_names`: Screen a shortlist for similar US word marks, public iOS and Android listings, company names, social handles and search results. Results can be incomplete. Review other markets separately.
+- `naming_method`: Get a recipe for the assistant to generate names, check domains and screen the shortlist.
+- `broker_find`: Legacy alias for `check_domains`.
+
+## Reference
+
+- [Domain Hound](https://domainhound.dev/): Product and install instructions.
+- [npm package](https://www.npmjs.com/package/domain-hound): Published software.
+- [Source and MIT license](https://github.com/lars-hv/domain-hound): Code, configuration and documentation.
+- [Watch a domain](https://domainhound.dev/watch/): Email alerts for a taken domain.
+- [Privacy](https://domainhound.dev/privacy/): Local lookups and hosted watch alerts.
+- [Data](https://domainhound.dev/data/): Dated samples, registrar sources and downloadable tables.
+- [Guide index](https://domainhound.dev/guides/): Answers with measured examples.
+
+## Guides
+
+- [How to check if a domain is available](https://domainhound.dev/guides/how-to-check-domain-availability/)
+- [How to find an available startup name](https://domainhound.dev/guides/find-an-available-startup-name/)
+- [Which domain name MCP server fits?](https://domainhound.dev/guides/best-domain-name-mcp-servers/)
+- [Is my app name available?](https://domainhound.dev/guides/is-my-app-name-available/)
+- [What does a domain cost to renew?](https://domainhound.dev/guides/domain-renewal-prices/)
+- [Should you buy .com, .ai or .io?](https://domainhound.dev/guides/com-vs-ai-vs-io/)
+- [How to check a trademark before naming](https://domainhound.dev/guides/trademark-check-before-naming/)
+- [How to buy a taken domain](https://domainhound.dev/guides/buy-a-taken-domain/)
+- [Use Domain Hound in Claude Code or Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/)
+- [What makes a good startup name?](https://domainhound.dev/guides/good-startup-name/)
+
+## Full text
+
+- [Full guide text and tables](https://domainhound.dev/llms-full.txt)
