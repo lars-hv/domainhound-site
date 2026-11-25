@@ -24,6 +24,11 @@ async function checkWatch({ dedicated, width }) {
   assert(bounds.height >= 44, 'Watch button is too small');
   if (dedicated) {
     assert(bounds.top >= 0 && bounds.bottom <= innerHeight, 'Signup below first viewport: ' + bounds.bottom);
+  } else if (width === 390) {
+    const art = document.querySelector('.paper-art').getBoundingClientRect();
+    const lead = document.querySelector('.lead').getBoundingClientRect();
+    const installer = document.querySelector('.installer').getBoundingClientRect();
+    assert(art.bottom <= lead.top && lead.bottom <= installer.top, 'Mobile hero overlaps the installer or headline');
   }
 
   const calls = [];
