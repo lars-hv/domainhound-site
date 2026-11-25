@@ -51,7 +51,12 @@
 
 <section aria-labelledby="tool">
 <h2 id="tool">The tool on your computer</h2>
-<p>Domain Hound runs on your own computer as an MCP server. We run no search server, so we never receive the names you check or your results. The tool uses no analytics, telemetry or cookies.</p>
+<p>The local tool runs on your own computer as an MCP server. It sends nothing to us, so we never receive the names you check or your results. It uses no analytics, telemetry or cookies.</p>
+</section>
+
+<section aria-labelledby="hosted">
+<h2 id="hosted">The hosted connector</h2>
+<p>ChatGPT, Claude on the web and other apps that can only use online tools connect to our hosted connector instead. It receives the names you check in order to look them up, and we keep no logs of them beyond a short-lived cache. That cache holds a one-way hash of each domain and whether it was free, never the name itself. The connector asks the same registries and price lists as the local tool and needs no account, email or cookie. Cloudflare runs it for us.</p>
 </section>
 
 <section aria-labelledby="sources">
@@ -104,7 +109,7 @@
 <section aria-labelledby="providers">
 <h2 id="providers">Who helps us</h2>
 <ul>
-<li>Cloudflare runs the alert service and stores our records under a data processing agreement that covers US transfers through the EU-US Data Privacy Framework and uses EU standard contract clauses where needed.</li>
+<li>Cloudflare runs the hosted connector and the alert service and stores our records under a data processing agreement that covers US transfers through the EU-US Data Privacy Framework and uses EU standard contract clauses where needed.</li>
 <li>Resend sends our emails through Amazon SES in Ireland and stores message data in the US under EU standard contract clauses and the EU-US Data Privacy Framework.</li>
 <li>GitHub independently hosts this free Pages site, logs visitor IP addresses for security, and describes EU standard contract clauses and the EU-US Data Privacy Framework in its privacy policy for transfers to the US.</li>
 </ul>
