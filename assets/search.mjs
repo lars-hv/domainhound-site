@@ -96,11 +96,12 @@ function resultCard(mode, item, shortlistUrl) {
 
   if (idea) {
     card.append(el('p', 'domain-title', item.domain));
+    if (item.endings?.length) card.append(suggestionEndings(item.endings));
     const score = el('p', 'name-score', 'Name score ' + (Number.isFinite(item.score) ? item.score + '/100' : 'unknown'));
     score.append(el('span', 'score-band', item.band || 'Band unknown'));
     card.append(score);
     const reasons = el('ul', 'reason-list');
-    for (const reason of item.reasons.slice(0, 3)) reasons.append(el('li', '', reason));
+    for (const reason of item.reasons.slice(0, 3)) reasons.append(el('li', '', reason.replace(/^Not checked: /i, 'Score excludes ')));
     if (reasons.childElementCount) card.append(reasons);
     else card.append(el('p', '', 'Score reasons unavailable.'));
   }
@@ -119,6 +120,45 @@ function resultCard(mode, item, shortlistUrl) {
   if (actions.childElementCount) card.append(actions);
   row.append(card);
   return row;
+}
+
+// The other confirmed endings of a suggestion: available first, taken after.
+function suggestionEndings(endings) {
+  const list = el('ul', 'suggestion-endings');
+  for (const ending of endings) {
+    const row = el('li');
+    row.dataset.status = ending.status;
+    row.append(el('span', '', ending.domain), ' ',
+      el('span', 'verdict ' + ending.status, ending.status === 'available' ? 'Available' : 'Taken'));
+    list.append(row);
+  }
+  return list;
+}
+
+// Every taken ending in one quiet group below the available ones, so the person
+// sees what was considered and what their agent can do next.
+function takenGroup() {
+  const box = el('section', 'taken-group');
+  const list = el('ul', 'taken-list');
+  const next = el('p', '', 'Your agent can find the owner and draft an offer, or watch it for you. ');
+  next.append(link('Install', '#install'));
+  box.append(el('h3', '', 'Taken'), list, next);
+  box.hidden = true;
+  return {
+    box,
+    add(items) {
+      for (const item of items) {
+        const row = el('li');
+        row.append(el('span', 'domain-title', item.domain));
+        if (/^[^.]+\.[a-z]{2,63}$/i.test(item.domain)) {
+          row.append(' ', link('Watch', '/watch/?domain=' + encodeURIComponent(item.domain)));
+        }
+        list.append(row);
+      }
+      box.hidden = !list.childElementCount;
+    },
+    get count() { return list.childElementCount; }
+  };
 }
 
 function cardList(mode, items, shortlistUrl) {
@@ -154,74 +194,160 @@ function sourceLink(label, href, hosts) {
   }
 }
 
-function detailRow(list, title, text, sources = []) {
+const detailSections = ['appStore', 'googlePlay', 'trademarks', 'handles'];
+const detailLabels = { appStore: 'App Store', googlePlay: 'Google Play', trademarks: 'US trademarks', handles: 'Handles' };
+const checkingDetails = 'Checking apps, trademarks and handles…';
+const autoChecks = 4;
+
+// Known platforms keep their own hosts. A platform the page does not know yet may
+// link to a public HTTPS host supplied by the API.
+const profileHosts = {
+  github: ['github.com'], npm: ['npmjs.com'], bluesky: ['bsky.app'], youtube: ['youtube.com'],
+  instagram: ['instagram.com'], x: ['x.com', 'twitter.com'], tiktok: ['tiktok.com'], facebook: ['facebook.com'],
+  linkedin: ['linkedin.com'], reddit: ['reddit.com'], twitch: ['twitch.tv'], threads: ['threads.com', 'threads.net']
+};
+const publicHost = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+const handleStates = {
+  taken: ['taken', 'Taken.'], 'not-found': ['clear', 'No public profile found.'], check: ['check', 'Check yourself.']
+};
+
+function profileLink(row, platform) {
+  if (Object.hasOwn(profileHosts, platform)) return sourceLink('Check profile', row.link, profileHosts[platform]);
+  try {
+    const url = new URL(row.link);
+    return publicHost.test(url.hostname) ? sourceLink('Check profile', url.href, [url.hostname]) : null;
+  } catch {
+    return null;
+  }
+}
+
+// One row: a decorative state icon in the term, the plain-words state and links in the description.
+function detailRow(title, state, text, sources = []) {
   const row = el('div');
+  row.dataset.state = state;
+  const term = el('dt');
+  const icon = el('span', 'detail-icon');
+  icon.setAttribute('aria-hidden', 'true');
+  term.append(icon, title);
   const description = el('dd', '', text);
   for (const source of sources.filter(Boolean)) description.append(' ', source);
-  row.append(el('dt', '', title), description);
-  list.append(row);
+  row.append(term, description);
+  return row;
 }
 
-function renderDetails(body, data) {
-  const list = el('dl');
+function pendingRows(sections) {
+  return sections.map(section => detailRow(detailLabels[section], 'pending', 'Checking…'));
+}
+
+function detailRows(data, name) {
+  const rows = [];
   const apple = data.appStore;
   const us = data.trademarks?.us;
-  const apps = (apple?.matches || []).map(match => sourceLink(match.name, match.url, ['apps.apple.com']));
-  detailRow(list, 'App Store', {
-    taken: 'Matching app found.', no_match_found: 'No matching app found.'
-  }[apple?.status] || 'Unknown.', apps);
-  const play = sourceLink('Check Google Play', data.googlePlay?.link, ['play.google.com']);
-  detailRow(list, 'Google Play', play ? 'Manual check.' : 'Unknown.', [play]);
-  const marks = (us?.marks || []).map(mark => sourceLink(mark.mark, mark.url, ['uspto.gov']));
-  detailRow(list, 'US trademarks', {
-    exact_match_found: 'Exact live mark found.', no_exact_match_found: 'No exact live word mark found.'
-  }[us?.status] || 'Unknown.', [...marks, sourceLink('Search USPTO', us?.searchUrl, ['uspto.gov'])]);
-  const profiles = { github: ['github.com'], npm: ['npmjs.com'], bluesky: ['bsky.app'] };
-  for (const handle of data.handles || []) {
-    const hosts = profiles[String(handle.platform).toLowerCase()];
-    if (!Array.isArray(hosts)) continue;
-    detailRow(list, handle.platform, {
-      taken: 'Taken.', 'not-found': 'No public profile found.'
-    }[handle.state] || 'Unknown.', [sourceLink('Check profile', handle.link, hosts)]);
+  const apps = (Array.isArray(apple?.matches) ? apple.matches : []).map(match => sourceLink(match?.name, match?.url, ['apps.apple.com']));
+  if (!apps.some(Boolean)) {
+    const search = new URL('https://apps.apple.com/us/iphone/search');
+    search.searchParams.set('term', name);
+    apps.push(link('Search App Store', search.href));
   }
-  body.replaceChildren(list);
-  if (data.complete === false) body.append(el('p', '', 'Some checks are still unknown.'));
+  rows.push(detailRow('App Store', ...({
+    taken: ['taken', 'Matching app found.'], no_match_found: ['clear', 'No matching app found.']
+  }[apple?.status] || ['unknown', 'Unknown.']), apps));
+  const play = sourceLink('Check Google Play', data.googlePlay?.link, ['play.google.com']);
+  rows.push(detailRow('Google Play', ...(play ? ['check', 'Manual check.'] : ['unknown', 'Unknown.']), [play]));
+  const marks = (Array.isArray(us?.marks) ? us.marks : []).map(mark => sourceLink(mark?.mark, mark?.url, ['uspto.gov']));
+  rows.push(detailRow('US trademarks', ...({
+    exact_match_found: ['taken', 'Exact live mark found.'], no_exact_match_found: ['clear', 'No exact live word mark found.']
+  }[us?.status] || ['unknown', 'Unknown.']), [...marks, sourceLink('Search USPTO', us?.searchUrl, ['uspto.gov'])]));
+  const platforms = new Set();
+  for (const handle of (Array.isArray(data.handles) ? data.handles : [])) {
+    const title = typeof handle?.platform === 'string' ? handle.platform.trim() : '';
+    const platform = title.toLowerCase();
+    if (!title || platforms.has(platform)) continue;
+    platforms.add(platform);
+    rows.push(detailRow(title, ...(handleStates[handle.state] || ['unknown', 'Unknown.']), [profileLink(handle, platform)]));
+  }
+  return rows;
 }
 
-function detailsPanel(path, signal) {
-  const box = el('details', 'detail-checks');
-  const body = el('div');
+// A details response is a snapshot. An incomplete snapshot can be retried manually.
+function checksPanel(name, source, signal, { heading = 'h3', pending = detailSections } = {}) {
+  const box = el('section', 'detail-checks');
   const status = statusLine();
+  const list = el('dl');
+  const note = el('p', '', 'Some checks are still unknown.');
   const retry = el('button', 'action', 'Retry checks');
   retry.type = 'button';
-  retry.hidden = true;
-  let loaded = false;
-  let pending = false;
+  note.hidden = retry.hidden = true;
+  const title = heading === 'h3' ? 'Name checks for ' + name : 'Apps, trademarks and handles';
+  box.append(el(heading, '', title));
+  box.append(status, list, note, retry);
+  list.replaceChildren(...pendingRows(pending));
+  let path = null;
+  let running = false;
+  let started = false;
+  let done = false;
+  let shown = false;
   async function load() {
-    if (loaded || pending || signal.aborted) return;
-    pending = true;
-    retry.hidden = true;
-    status.textContent = 'Checking apps, trademarks and handles…';
+    if (running || done || signal.aborted) return;
+    running = started = true;
+    retry.hidden = note.hidden = true;
+    status.textContent = checkingDetails;
+    if (!shown) list.replaceChildren(...pendingRows(pending));
     try {
-      const { loadDetails } = await import('./search-api.mjs');
-      const data = await loadDetails(path, signal);
+      const api = await import('./search-api.mjs');
+      if (!path) {
+        const found = await source(api);
+        if (signal.aborted) return;
+        path = found.path;
+        pending = found.pending || pending;
+        if (!shown) list.replaceChildren(...pendingRows(pending));
+      }
+      const data = await api.loadDetails(path, signal);
       if (signal.aborted) return;
-      renderDetails(body, data);
+      list.replaceChildren(...detailRows(data, name));
+      shown = true;
+      done = data.complete !== false;
       status.textContent = '';
-      loaded = true;
+      note.hidden = retry.hidden = done;
     } catch (error) {
       if (signal.aborted) return;
+      if (!shown) list.replaceChildren();
       status.textContent = error.status === 410 ? 'These checks expired. Search the name again.' :
         error.status === 429 ? rateLimit : 'Couldn’t load these checks. Your domain results are above.';
-      retry.hidden = error.status === 410;
+      retry.hidden = [400, 410].includes(error.status);
     } finally {
-      pending = false;
+      running = false;
     }
   }
-  box.append(el('summary', '', 'Check apps, trademarks and handles'), status, body, retry);
-  box.addEventListener('toggle', () => { if (box.open) load(); });
   retry.addEventListener('click', load);
-  return box;
+  return { box, loadOnce: () => { if (!started) load(); } };
+}
+
+// Wait for the ranking before spending the four automatic checks. Preview
+// cards can still be opened, and a name keeps its lookup across list updates.
+function attachChecks(card, item, automatic, checks) {
+  const key = nameKey(item.name);
+  let panel = checks.panels.get(key);
+  if (!panel) {
+    const source = api => Object.hasOwn(item, 'detailsPath')
+      ? { path: item.detailsPath } : api.nameChecks(item.name, checks.signal);
+    panel = checksPanel(item.name, source, checks.signal, { heading: 'h4' });
+    panel.node = panel.box;
+    if (!automatic) {
+      panel.node = el('details', 'suggestion-checks');
+      panel.node.append(el('summary', '', 'Name checks for ' + item.name), panel.box);
+      panel.node.addEventListener('toggle', event => { if (event.currentTarget.open) panel.loadOnce(); });
+    }
+    checks.panels.set(key, panel);
+  }
+  if (automatic) {
+    if (panel.node !== panel.box) {
+      panel.node.replaceWith(panel.box);
+      panel.node = panel.box;
+    }
+    panel.loadOnce();
+  }
+  if (panel.node.parentElement !== card) card.append(panel.node);
 }
 
 function steering(items, idea) {
@@ -267,29 +393,41 @@ function steering(items, idea) {
 
 const nameKey = name => String(name).toLowerCase().replace(/[\s-]/g, '');
 
-function updateIdeaCards(list, items, settling = false) {
+// Refresh a card's text in place. Its checks panel never leaves the DOM, so
+// loaded rows, an open disclosure and focus inside it survive.
+function refreshCard(old, fresh, kept) {
+  const current = old.cloneNode(true);
+  current.querySelector(':scope > .detail-checks, :scope > .suggestion-checks')?.remove();
+  if (current.isEqualNode(fresh)) return;
+  for (const child of [...old.childNodes]) if (child !== kept) child.remove();
+  old.prepend(...fresh.childNodes);
+}
+
+function updateIdeaCards(list, items, settling, checks, automaticCount) {
   const existing = new Map([...list.children].map(row => [row.dataset.name, row]));
   const focused = document.activeElement;
-  const focusedRow = focused?.closest('li');
-  const linkIndex = focusedRow?.parentElement === list ? [...focusedRow.querySelectorAll('a')].indexOf(focused) : -1;
+  let focusedRow = focused;
+  while (focusedRow && focusedRow.parentElement !== list) focusedRow = focusedRow.parentElement;
+  const linkIndex = focusedRow ? [...focusedRow.querySelectorAll('a')].indexOf(focused) : -1;
   const motion = settling && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const before = new Map(motion ? [...existing.values()].map(row => [row, row.getBoundingClientRect()]) : []);
   let next = list.firstElementChild;
-  for (const item of items) {
+  items.forEach((item, index) => {
     const key = nameKey(item.name);
     const card = resultCard('idea', item);
     const row = existing.get(key) || card;
     existing.delete(key);
     row.dataset.name = key;
-    if (row !== card && !row.firstElementChild.isEqualNode(card.firstElementChild)) {
-      row.replaceChildren(card.firstElementChild);
-    }
+    if (row !== card) refreshCard(row.firstElementChild, card.firstElementChild, checks.panels.get(key)?.node);
     if (row === next) next = next.nextElementSibling;
     else list.insertBefore(row, next);
-  }
+    attachChecks(row.firstElementChild, item, index < automaticCount, checks);
+  });
   for (const row of existing.values()) row.remove();
   list.hidden = !list.childElementCount;
-  if (linkIndex !== -1 && document.activeElement !== focused && focusedRow.parentElement === list) {
+  if (document.activeElement !== focused && focused?.isConnected && list.contains(focused)) {
+    focused.focus({ preventScroll: true });
+  } else if (linkIndex !== -1 && document.activeElement !== focused && focusedRow.parentElement === list) {
     focusedRow.querySelectorAll('a')[linkIndex]?.focus({ preventScroll: true });
   }
   const nudge = value => Math.max(-8, Math.min(8, value));
@@ -318,9 +456,14 @@ async function recover(query, signal, box, seenDomains) {
     variantList, ideaList, status);
   box.hidden = false;
   status.textContent = 'Sniffing free names close to yours…';
+  const checks = { signal, panels: new Map() };
   let variantItems = [];
   const showVariants = () => {
-    variantList.replaceChildren(...variantItems.map(item => resultCard('name', item)));
+    variantList.replaceChildren(...variantItems.map((item, index) => {
+      const row = resultCard('name', item);
+      if (item.detailsPath) attachChecks(row.firstElementChild, item, index < autoChecks, checks);
+      return row;
+    }));
     variantList.hidden = !variantItems.length;
   };
   const labels = api.variantLabels(query);
@@ -338,7 +481,7 @@ async function recover(query, signal, box, seenDomains) {
   const ideas = api.closeIdeas(query.name, signal).then(response => {
     if (signal.aborted || !response.generationDetails) return response;
     preview = response;
-    updateIdeaCards(ideaList, closeItems(response.items));
+    updateIdeaCards(ideaList, closeItems(response.items), false, checks, 0);
     status.textContent = moreNames;
     return api.finishIdeas(response, signal);
   });
@@ -346,7 +489,8 @@ async function recover(query, signal, box, seenDomains) {
   if (signal.aborted) return;
   if (variantList.hidden) showVariants();
   const result = ideaOutcome.value ?? preview;
-  if (result) updateIdeaCards(ideaList, closeItems(result.items), ideaOutcome.status === 'fulfilled' && !!preview);
+  if (result) updateIdeaCards(ideaList, closeItems(result.items), ideaOutcome.status === 'fulfilled' && !!preview,
+    checks, autoChecks - variantItems.length);
   const notes = [];
   const failure = (outcome, text) => {
     if (outcome.status !== 'rejected') return;
@@ -373,21 +517,25 @@ function uniqueIdeas(items, excludedDomains = [], excludedNames = []) {
   });
 }
 
-function nameSlots(response, exact) {
+// Name results: the validated pick, then the other available endings in the
+// server's quality order, close free names, and every taken ending last.
+// Unknown endings are not shown.
+function nameSlots(response) {
   const items = response.items;
   const best = response.best;
-  const query = response.query;
-  const fallback = !!query && !query.exactDomain && response.leadingTaken;
-  const lead = best && !fallback ? bestDomain(best) : null;
-  const rest = lead ? items.filter(item => item.domain !== best.domain) : items;
+  const lead = best ? bestDomain(best) : null;
+  const available = items.filter(item => item.status === 'available' && item.domain !== best?.domain);
+  const list = available.length ? cardList('name', available, response.shareUrl) : null;
+  const more = el('div');
+  more.hidden = true;
   const recovery = el('section', 'recovery');
   recovery.setAttribute('aria-label', 'Free names close to yours');
   recovery.hidden = true;
-  const more = el('section', 'more-endings');
-  more.hidden = true;
-  const list = rest.length ? cardList('name', rest, response.shareUrl) : null;
-  const parts = [lead, ...(exact ? [list, recovery] : [recovery, list]), more].filter(Boolean);
-  return { parts, fallback, recovery, more, empty: !lead && !list };
+  const taken = takenGroup();
+  taken.add(items.filter(item => item.status === 'taken'));
+  const fallback = !!response.query && !response.query.exactDomain && response.leadingTaken;
+  return { parts: [lead, list, more, recovery, taken.count ? taken.box : null].filter(Boolean), fallback, recovery, more, taken,
+    empty: !lead && !list && !taken.count };
 }
 
 async function followUp(response, signal, slots) {
@@ -400,9 +548,10 @@ async function followUp(response, signal, slots) {
   }
   const exact = response.items.find(item => item.domain === query.exactDomain);
   if (!query.exactDomain.endsWith('.com') || exact?.status !== 'taken') return;
-  // Learn the other endings from the bare label; the exact answer above stays as it is.
+  // Learn the other endings from the bare label and merge them into the same
+  // order: available above, taken into the taken group under the exact answer.
   const status = statusLine();
-  slots.more.append(el('h3', '', 'Other endings for ' + query.ascii), status);
+  slots.more.append(status);
   slots.more.hidden = false;
   status.textContent = 'Checking other endings…';
   let bare;
@@ -415,15 +564,17 @@ async function followUp(response, signal, slots) {
   }
   if (signal.aborted) return;
   status.textContent = '';
-  const others = bare.items.filter(item => item.domain !== query.exactDomain);
+  const others = bare.items.filter(item => !seen.has(item.domain));
   for (const item of others) seen.add(item.domain);
-  const fallback = bare.leadingTaken;
-  const best = !fallback && bare.best?.domain !== query.exactDomain ? bare.best : null;
+  const best = bare.best && others.some(item => item.domain === bare.best.domain) ? bare.best : null;
+  const available = others.filter(item => item.status === 'available' && item.domain !== best?.domain);
   if (best) slots.more.append(bestDomain(best));
-  const rest = best ? others.filter(item => item.domain !== best.domain) : others;
-  if (rest.length) slots.more.append(cardList('name', rest, bare.shareUrl));
-  if (!best && !rest.length) status.textContent = 'No other endings could be verified.';
-  if (fallback) await recover(query, signal, slots.recovery, seen);
+  if (available.length) slots.more.append(cardList('name', available, bare.shareUrl));
+  slots.taken.add(others.filter(item => item.status === 'taken'));
+  if (!best && !available.length && !others.some(item => item.status === 'taken')) {
+    status.textContent = 'No other endings could be verified.';
+  }
+  if (bare.leadingTaken) await recover(query, signal, slots.recovery, seen);
 }
 
 const incomplete = 'Some checks didn’t finish. Availability is unknown for the unchecked names.';
@@ -435,11 +586,12 @@ function renderIdeas(page, head, input, response, signal) {
   const followUp = el('div');
   const pending = !!response.generationDetails;
   const share = head.querySelector('a');
+  const checks = { signal, panels: new Map() };
   page.append(list, status, followUp);
 
   function render(result, settled, error) {
     const items = uniqueIdeas(result.items);
-    updateIdeaCards(list, items, settled && pending && !error);
+    updateIdeaCards(list, items, settled && pending && !error, checks, settled ? autoChecks : 0);
     if (result.shareUrl) {
       if (share) share.href = result.shareUrl;
       else head.append(link('Share shortlist', result.shareUrl));
@@ -488,27 +640,49 @@ function renderPage(mode, input, response, signal) {
   if (mode === 'idea') {
     finish = renderIdeas(page, head, input, response, signal);
   } else if (mode === 'name') {
-    slots = nameSlots(response, !!response.query?.exactDomain);
+    slots = nameSlots(response);
     page.append(...slots.parts);
-  } else if (items.length) {
-    page.append(cardList(mode, items, response.shareUrl));
+  } else {
+    const available = items.filter(item => item.status === 'available');
+    if (available.length) page.append(cardList(mode, available, response.shareUrl));
+    const taken = takenGroup();
+    taken.add(items.filter(item => item.status === 'taken'));
+    if (taken.count) page.append(taken.box);
   }
-  if (mode === 'name' ? slots.empty : mode === 'personal' && !items.length) {
+  if (mode === 'name' ? slots.empty : mode === 'personal' && !items.some(item => item.status !== 'unknown')) {
     const empty = {
       name: 'No endings could be verified. Try again or check at a registrar.',
       personal: 'No personal domains found for this spelling. Try another version of your name.'
     };
     head.after(el('p', 'results-intro', empty[mode]));
   }
-  if (mode !== 'idea' && response.complete === false) page.append(el('p', 'results-intro', incomplete));
-  if (mode === 'name' && response.detailsPath) page.append(detailsPanel(response.detailsPath, signal));
-  const install = el('aside', 'results-install');
-  install.append(el('h3', '', 'Let your agent buy and watch it'), link('Install', '#install', 'action'));
-  page.append(install);
+
+  let details = null;
+  if (mode === 'name' && response.detailsPath) {
+    const found = { path: response.detailsPath, pending: response.detailsPending };
+    details = checksPanel(response.query?.name || input.name, () => found, signal, { pending: found.pending });
+    page.append(details.box);
+  }
+  if (!page.querySelector('.taken-group:not([hidden])')) {
+    const install = el('aside', 'results-install');
+    install.append(el('h3', '', 'Let your agent buy and watch it'), link('Install', '#install', 'action'));
+    page.append(install);
+  }
   pages.replaceChildren(page);
   region.hidden = false;
+  details?.loadOnce();
   if (slots) followUp(response, signal, slots).catch(() => {});
   return { heading, finish };
+}
+
+// On a short screen the results start under the hero. When the first result is
+// below the fold, bring the results heading to the top once.
+function revealResults(heading) {
+  let first = heading.parentElement.nextElementSibling;
+  while (first?.hidden) first = first.nextElementSibling;
+  if (!first || first.getBoundingClientRect().top <= innerHeight * 0.8) return;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  heading.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
 }
 
 const loading = {
@@ -533,7 +707,10 @@ async function search(mode, input, status, submit) {
     const focusResult = submit.form.contains(document.activeElement) || document.activeElement === document.body;
     const { heading, finish } = renderPage(mode, input, response, controller.signal);
     status.textContent = '';
-    if (focusResult) heading.focus();
+    if (focusResult) {
+      heading.focus();
+      revealResults(heading);
+    }
     await finish?.(finishIdeas);
     return heading;
   } catch (error) {

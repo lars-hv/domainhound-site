@@ -66,9 +66,24 @@ function compactOffer(offer) {
     threeYearPick: true }];
 }
 
+// The other registry-confirmed endings of one generated name: available first, taken after,
+// unknown and premium rows left out.
+function suggestionEndings(rows, pickDomain) {
+  const seen = new Set([pickDomain]);
+  const endings = [];
+  for (const row of rows) {
+    const item = domainItem(row);
+    if (!item || item.premium || item.status === 'unknown' || seen.has(item.domain)) continue;
+    seen.add(item.domain);
+    endings.push({ domain: item.domain, status: item.status });
+  }
+  return endings.sort((a, b) => (a.status === 'available' ? 0 : 1) - (b.status === 'available' ? 0 : 1));
+}
+
 function ideaItem(entry, snapshotDate) {
   const pick = entry?.domain;
-  const row = entry?.domains?.find(candidate => candidate.domain === pick?.domain);
+  const rows = Array.isArray(entry?.domains) ? entry.domains : [];
+  const row = rows.find(candidate => candidate?.domain === pick?.domain);
   if (!row || typeof entry.name !== 'string' || !entry.name) return null;
   const prices = pick.prices ?? compactOffer({ ...pick, checkedAt: null, snapshotDate });
   const item = domainItem({ ...row, priceShown: true, prices }, 60);
@@ -77,7 +92,7 @@ function ideaItem(entry, snapshotDate) {
   const valid = Number.isInteger(score?.total) && score.total >= 0 && score.total <= 100;
   return { ...item, name: entry.name, score: valid ? score.total : null, band: valid ? score.band : null,
     reasons: Array.isArray(score?.reasons) ? score.reasons.filter(reason => typeof reason === 'string').slice(0, 3) : [],
-    shareUrl: shareUrl(entry.share) };
+    endings: suggestionEndings(rows, item.domain), shareUrl: shareUrl(entry.share) };
 }
 
 function personalItem(row) {
@@ -86,6 +101,14 @@ function personalItem(row) {
 }
 
 const detailsPath = /^\/v1\/check\/details\?id=[A-Za-z0-9_-]+$/;
+// The check answer names the detail sections still to come; anything else is ignored.
+const detailSections = ['appStore', 'googlePlay', 'trademarks', 'handles'];
+
+function pendingSections(details) {
+  const pending = Array.isArray(details?.pending) ? details.pending : [];
+  const known = detailSections.filter(section => pending.includes(section));
+  return known.length ? known : detailSections;
+}
 
 // The server's pick is shown only when it names a registry-confirmed row and
 // matches one of that row's bookable registrar offers to the cent.
@@ -204,6 +227,7 @@ export async function runSearch(mode, input, signal) {
     shareUrl: shareUrl(data.share), generationSource: data.path,
     detailsPath: mode === 'name' && detailsPath.test(data.details?.path) ? data.details.path : null
   };
+  if (result.detailsPath) result.detailsPending = pendingSections(data.details);
   if (mode === 'name') {
     result.best = bestItem(data);
     result.query = checkedQuery(data.query);
@@ -221,7 +245,7 @@ export function variantLabels({ ascii, name }) {
 
 export async function closeVariant(label, signal) {
   const response = await runSearch('name', { name: label }, signal);
-  return response.best ? { ...response.best, name: label, shareUrl: response.shareUrl } : null;
+  return response.best ? { ...response.best, name: label, shareUrl: response.shareUrl, detailsPath: response.detailsPath } : null;
 }
 
 // The Worker caps steering names at 40 characters. The idea can still carry the full name.
@@ -230,6 +254,14 @@ export function closeIdeas(name, signal) {
   const input = { idea: 'names like ' + name };
   if (name.length <= 40) input.wanted = [name];
   return runSearch('idea', input, signal);
+}
+
+// Apps, trademarks and handles for a generated name: one name check for the
+// details capability, then the caller loads the details path.
+export async function nameChecks(name, signal) {
+  const response = await runSearch('name', { name }, signal);
+  if (!response.detailsPath) throw Object.assign(new Error('Checks unavailable'), { status: 503 });
+  return { path: response.detailsPath, pending: response.detailsPending };
 }
 
 export function loadDetails(path, signal) {
