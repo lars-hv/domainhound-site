@@ -1,9 +1,10 @@
 import { guessMode, normalize } from './search-mode.mjs';
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-const rateLimit = 'The hound needs a breather. Try again in a few minutes.';
+const rateLimit = 'Too many searches. Try again in a few minutes.';
 const moreNames = 'Sniffing out more names…';
 const region = document.getElementById('search-results');
+const announcement = document.getElementById('result-announcement');
 const pages = document.getElementById('result-pages');
 const paths = [...document.querySelectorAll('.search-paths a')];
 let currentSearch;
@@ -39,6 +40,7 @@ function clearResults() {
   document.getElementById('real-search').hidden = false;
   region.hidden = true;
   pages.replaceChildren();
+  announcement.textContent = '';
 }
 
 function showPath(selected) {
@@ -54,8 +56,11 @@ const endingOf = domain => domain.slice(domain.indexOf('.'));
 
 function availableRow(item, best) {
   const row = el('div', best ? 'offer-row best-domain' : 'offer-row');
+  const condition = item.eligibility?.note || item.eligibility?.need;
+  const requirement = typeof condition === 'string' && condition.trim();
+  const verdict = item.premium || (item.eligibility ? 'Eligibility rules' : 'Available');
   row.append(el('strong', 'domain-title', item.domain),
-    el('span', 'verdict' + (item.premium ? '' : ' available'), item.premium || 'Available'));
+    el('span', verdict === 'Available' ? 'verdict available' : 'verdict', verdict));
   const offer = item.offer;
   if (offer) {
     const term = offer.minimumYears > 1 ? ' for ' + offer.minimumYears + ' years' : '';
@@ -64,11 +69,52 @@ function availableRow(item, best) {
       el('span', 'shop', offer.shop));
     const buy = link('Buy', offer.buyUrl, 'action');
     buy.setAttribute('aria-label', 'Buy ' + item.domain + ' at ' + offer.shop);
-    row.append(buy);
+    if (!item.eligibility || requirement) row.append(buy);
+    if (offer.needsCloudflareDns) row.append(el('small', 'offer-condition', 'You must use Cloudflare DNS.'));
+    const date = offer.checkedAt || offer.snapshotDate;
+    const dated = date && Number.isFinite(Date.parse(date));
+    row.dataset.quote = 'USD before tax · ' + (dated
+      ? (offer.checkedAt ? 'Checked ' : 'Price list dated ') + new Date(date).toISOString().slice(0, 10)
+      : 'Price date unknown');
   } else {
     row.append(el('span', 'price', 'Price unavailable'));
   }
+  if (item.eligibility) {
+    row.append(el('small', 'offer-condition', requirement || 'Check who can buy this domain.'));
+  }
   return row;
+}
+
+// Keep one dated caption for each group as new offers arrive or change order.
+function labelQuotes() {
+  const groups = new Map();
+  for (const row of pages.querySelectorAll('[data-quote]')) {
+    const caption = row.dataset.quote;
+    if (!groups.has(caption)) groups.set(caption, []);
+    groups.get(caption).push(row);
+  }
+  let number = 0;
+  for (const [caption, rows] of groups) {
+    const id = 'quote-' + ++number;
+    rows.forEach((row, index) => {
+      const previous = row.querySelector('.quote-caption, .quote-reference');
+      const numbered = groups.size > 1;
+      const text = (numbered ? number + '. ' : '') + caption;
+      if (index === 0 && previous?.id === id && previous.textContent === text) return;
+      if (index > 0 && previous?.hash === '#' + id && numbered && previous.getAttribute('aria-label') === caption) return;
+      previous?.remove();
+      row.setAttribute('aria-describedby', id);
+      if (index === 0) {
+        const note = el('small', 'quote-caption', text);
+        note.id = id;
+        row.append(note);
+      } else if (numbered) {
+        const ref = link(String(number), '#' + id, 'quote-reference');
+        ref.setAttribute('aria-label', caption);
+        row.querySelector('.shop').append(ref);
+      }
+    });
+  }
 }
 
 function watchChip(item, prominent) {
@@ -84,11 +130,10 @@ function nameCard(name, items, best, suggestion) {
   card.setAttribute('aria-label', name);
   if (suggestion) card.append(el('h3', '', name));
   const taken = items.filter(item => item.status === 'taken');
+  const priority = topEndings.flatMap(ending => taken.filter(item => endingOf(item.domain) === ending));
+  if (!priority.length && taken.length && !items.some(item => item.status === 'available')) priority.push(taken[0]);
   const top = el('div', 'top-taken');
-  for (const ending of topEndings) {
-    const item = taken.find(item => endingOf(item.domain) === ending);
-    if (item) top.append(watchChip(item, true));
-  }
+  for (const item of priority) top.append(watchChip(item, item === priority[0]));
   if (top.childElementCount) card.append(top);
   const offers = el('div', 'ending-list');
   if (best) offers.append(availableRow(best, true));
@@ -98,29 +143,35 @@ function nameCard(name, items, best, suggestion) {
   if (offers.childElementCount) card.append(offers);
   if (taken.length) {
     const group = el('div', 'taken-group');
-    const lesser = taken.filter(item => !topEndings.includes(endingOf(item.domain)));
+    const lesser = taken.filter(item => !priority.includes(item));
     if (lesser.length) {
       const line = el('div', 'taken-list');
       line.append(el('b', '', 'Taken'), ...lesser.map(item => watchChip(item, false)));
       group.append(line);
     }
-    const next = el('p', '', 'Your agent can find the owner, draft an offer or watch the domain. ');
-    next.append(link('Connect your agent', '#install'));
+    const next = el('p', '', 'Read ');
+    next.append(link('how to buy a taken domain', '/guides/buy-a-taken-domain/'), ', or ',
+      link('connect your agent', '#install'), ' to draft an offer.');
     group.append(next);
     card.append(group);
   }
   if (suggestion) {
-    const foot = el('div', 'suggestion-foot');
     if (Number.isFinite(suggestion.score)) {
-      foot.append(el('span', 'name-score', 'Name score ' + suggestion.score + '/100'));
-      if (suggestion.band) foot.append(el('span', 'score-band', suggestion.band));
-      const reasons = el('ul', 'reason-list');
-      for (const reason of suggestion.reasons) {
-        const text = reason.replace(/^Not checked: /i, 'Score excludes ').replace(/\bis free\b/gi, 'is available');
-        reasons.append(el('li', '', text));
-      }
-      if (reasons.childElementCount) foot.append(reasons);
+      const badge = el('span', 'name-score', 'Name score ' + suggestion.score + '/100');
+      card.querySelector('h3').after(badge);
     }
+    const foot = el('div', 'suggestion-foot');
+    const why = el('details');
+    why.append(el('summary', '', 'Why this name?'));
+    if (suggestion.band) why.append(el('p', 'score-band', suggestion.band));
+    const reasons = el('ul', 'reason-list');
+    for (const reason of suggestion.reasons || []) {
+      const text = reason.replace(/^Not checked: /i, 'Score excludes ')
+        .replace(/(\.[a-z]+) is free\b/gi, '$1 is available').replace(/\bFree (\.[a-z]+)\b/gi, 'Available $1');
+      reasons.append(el('li', '', text));
+    }
+    if (reasons.childElementCount) why.append(reasons);
+    if (why.childElementCount > 1) foot.append(why);
     if (suggestion.shareUrl) foot.append(link('Share', suggestion.shareUrl));
     if (foot.childElementCount) card.append(foot);
   }
@@ -152,12 +203,13 @@ const platforms = [
 ];
 
 function checkChip(title, state, target) {
-  const chip = el('span', 'check-chip');
-  chip.append(el('b', '', title), ' ');
-  target.textContent = state || 'Check';
-  target.setAttribute('aria-label', title + ' · ' + target.textContent);
-  chip.append(target);
-  return chip;
+  const status = state || 'Check';
+  target.className = 'check-chip';
+  target.dataset.state = !state ? 'manual' : ['Match found', 'Profile found'].includes(state) ? 'found' : 'absent';
+  target.textContent = title;
+  target.title = title + ' · ' + status;
+  target.setAttribute('aria-label', target.title);
+  return target;
 }
 
 function checkGroups(data, name) {
@@ -180,7 +232,7 @@ function checkGroups(data, name) {
     const hosts = [base.split('/')[0].replace(/^www\./, '')];
     if (title === 'X') hosts.push('twitter.com');
     const target = sourceLink('', row?.link, hosts) || link('', 'https://' + base + handle);
-    handles.append(checkChip(title, { taken: 'Taken', 'not-found': 'No public profile found' }[row?.state], target));
+    handles.append(checkChip(title, { taken: 'Profile found', 'not-found': 'No public profile found' }[row?.state], target));
   }
   return [apps, handles];
 }
@@ -233,13 +285,14 @@ function refreshDomains(card, item, response, panel) {
   }
   const selected = rows.get(item.domain);
   const best = selected?.status === 'available' && selected.offer ? selected : null;
-  const summary = generated ? (best ? item : { name: item.name }) : null;
+  const summary = generated ? item : null;
   const fresh = nameCard(item.name, [...rows.values()], best, summary);
   const focused = card.contains(document.activeElement) ? document.activeElement : null;
   refreshCard(card, fresh, panel);
   const offers = card.querySelector('.ending-list');
   if ([...rows.values()].some(item => item.status === 'available' && !item.premium)) offers.after(panel);
   else panel.remove();
+  labelQuotes();
   if (focused?.href && !focused.isConnected) {
     [...card.querySelectorAll('a')].find(node => node.href === focused.href)?.focus({ preventScroll: true });
   }
@@ -280,10 +333,9 @@ function drainChecks(checks) {
 
 function steering(items, idea) {
   const form = el('form', 'steer-form');
-  const title = el('h3', '', 'Which two do you love, and which one do you hate?');
   const choices = el('div', 'steer-choices');
   const names = [...new Set(items.map(item => item.name))];
-  const selects = ['Love most', 'Also love', 'Hate'].map(label => {
+  const selects = ['Like', 'Also like', 'Avoid'].map(label => {
     const field = el('label', '', label);
     const select = el('select');
     select.append(new Option('Choose a name', ''));
@@ -295,7 +347,7 @@ function steering(items, idea) {
   const status = statusLine();
   const submit = el('button', 'action', 'Find more names');
   submit.type = 'submit';
-  form.append(title, choices, submit, status);
+  form.append(choices, submit, status);
   form.addEventListener('change', () => {
     if (currentSearch?.submit === submit) cancelSearch();
     const selected = selects.map(select => select.value).filter(Boolean);
@@ -310,7 +362,7 @@ function steering(items, idea) {
     event.preventDefault();
     const [first, second, disliked] = selects.map(select => select.value);
     if (!first && !second && !disliked) {
-      status.textContent = 'Choose at least one name for the next round.';
+      status.textContent = 'Choose at least one name.';
       selects[0].focus();
       return;
     }
@@ -324,8 +376,12 @@ const nameKey = name => String(name).toLowerCase().replace(/[\s-]/g, '');
 // Keep the existing controls when the content has not changed.
 function refreshCard(old, fresh, kept) {
   const current = old.cloneNode(true);
+  for (const note of current.querySelectorAll('.quote-reference, .quote-caption')) note.remove();
+  for (const row of current.querySelectorAll('[data-quote]')) row.removeAttribute('aria-describedby');
+  for (const details of current.querySelectorAll('details[open]')) details.open = false;
   current.querySelector(':scope > .detail-checks')?.remove();
   if (current.isEqualNode(fresh)) return;
+  if (old.querySelector('.suggestion-foot details[open]')) fresh.querySelector('.suggestion-foot details')?.setAttribute('open', '');
   for (const child of [...old.childNodes]) if (child !== kept) child.remove();
   old.prepend(...fresh.childNodes);
 }
@@ -352,6 +408,7 @@ function updateIdeaCards(list, items, settling, checks, loadChecks) {
   });
   for (const row of existing.values()) row.remove();
   list.hidden = !list.childElementCount;
+  if (list.isConnected) labelQuotes();
   if (document.activeElement !== focused && focused?.isConnected && list.contains(focused)) {
     focused.focus({ preventScroll: true });
   } else if (linkIndex !== -1 && document.activeElement !== focused && focusedRow.parentElement === list) {
@@ -373,21 +430,21 @@ function updateIdeaCards(list, items, settling, checks, loadChecks) {
 async function recover(query, signal, box, seenDomains) {
   const api = await import('./search-api.mjs');
   if (signal.aborted) return;
-  const owner = query.exactDomain || query.ascii + '.com';
   const status = statusLine();
-  const heading = el('h3', '', 'Available names close to yours');
+  const heading = el('h3', '', 'Similar names');
   const variantList = el('ul', 'hunt-list idea-list');
   const ideaList = el('ul', 'hunt-list idea-list');
   variantList.hidden = ideaList.hidden = true;
-  box.append(heading, link('Who owns ' + owner + '? See if it can be bought', '/land/?d=' + encodeURIComponent(owner)),
-    variantList, ideaList, status);
+  heading.hidden = true;
+  box.append(heading, variantList, ideaList, status);
   box.hidden = false;
-  status.textContent = 'Sniffing out similar names…';
+  status.textContent = 'Checking similar names…';
   const checks = checkQueue(signal);
   let variantItems = [];
   const showVariants = () => {
     updateIdeaCards(variantList, variantItems, false, checks, true);
     variantList.hidden = !variantItems.length;
+    heading.hidden = variantList.hidden && ideaList.hidden;
   };
   const labels = api.variantLabels(query);
   const variants = Promise.allSettled(labels.map(label => api.closeVariant(label, signal))).then(results => {
@@ -405,6 +462,7 @@ async function recover(query, signal, box, seenDomains) {
     if (signal.aborted || !response.generationDetails) return response;
     preview = response;
     updateIdeaCards(ideaList, closeItems(response.items), false, checks, false);
+    heading.hidden = variantList.hidden && ideaList.hidden;
     status.textContent = moreNames;
     return api.finishIdeas(response, signal);
   });
@@ -414,16 +472,16 @@ async function recover(query, signal, box, seenDomains) {
   const result = ideaOutcome.value ?? preview;
   if (result) updateIdeaCards(ideaList, closeItems(result.items), ideaOutcome.status === 'fulfilled' && !!preview,
     checks, true);
+  heading.hidden = variantList.hidden && ideaList.hidden;
   const notes = [];
   const failure = (outcome, text) => {
     if (outcome.status !== 'rejected') return;
     notes.push(outcome.reason?.status === 429 ? rateLimit : text);
   };
-  failure(variantOutcome, 'Couldn’t check close versions of this name.');
+  failure(variantOutcome, 'Couldn’t check similar spellings.');
   failure(ideaOutcome, preview && !ideaList.hidden ? 'Couldn’t load more names.' : 'Couldn’t load name ideas.');
   if (!variantList.childElementCount && !ideaList.childElementCount) {
-    heading.textContent = 'Taken.';
-    if (!notes.length) notes.push('No similar names confirmed available yet.');
+    if (!notes.length) notes.push('We couldn’t confirm any similar names are available.');
   }
   status.textContent = [...new Set(notes)].join(' ');
 }
@@ -449,11 +507,9 @@ function nameSlots(response, name, signal) {
   }
   const more = statusLine();
   const recovery = el('section', 'recovery');
-  recovery.setAttribute('aria-label', 'Available names close to yours');
+  recovery.setAttribute('aria-label', 'Similar names');
   recovery.hidden = true;
-  const empty = !card.childElementCount;
-  card.hidden = empty;
-  return { card, more, recovery, empty };
+  return { card, more, recovery };
 }
 
 async function followUp(response, signal, slots) {
@@ -475,7 +531,7 @@ async function followUp(response, signal, slots) {
     const api = await import('./search-api.mjs');
     bare = await api.runSearch('name', { name: query.ascii }, signal);
   } catch (error) {
-    if (!signal.aborted) status.textContent = error.status === 429 ? rateLimit : 'Couldn’t check other endings. The result above stands.';
+    if (!signal.aborted) status.textContent = error.status === 429 ? rateLimit : 'Couldn’t check other endings.';
     return;
   }
   if (signal.aborted) return;
@@ -485,40 +541,44 @@ async function followUp(response, signal, slots) {
   const best = bare.best && others.some(item => item.domain === bare.best.domain) ? bare.best : null;
   const merged = nameSlots({ ...bare, items: [...response.items, ...others], best }, query.name, signal);
   slots.card.replaceWith(merged.card);
-  if (!others.some(item => item.status !== 'unknown')) status.textContent = 'No other endings could be verified.';
+  labelQuotes();
+  if (!others.some(item => item.status !== 'unknown')) status.textContent = 'No other endings confirmed.';
   if (bare.leadingTaken) await recover(query, signal, slots.recovery, seen);
 }
 
-const incomplete = 'Some checks didn’t finish. Availability is unknown for the unchecked names.';
+const incomplete = 'Some domains couldn’t be checked.';
 
-function renderIdeas(page, head, input, response, signal) {
+function renderIdeas(page, sharing, input, response, signal) {
   const list = el('ul', 'hunt-list idea-list');
   const status = statusLine();
   status.classList.add('idea-progress');
   const followUp = el('div');
   const pending = !!response.generationDetails;
-  const share = head.querySelector('a');
+
   const checks = checkQueue(signal);
   page.append(list, status, followUp);
 
   function render(result, settled, error) {
-    const items = uniqueIdeas(result.items);
+    const items = uniqueIdeas(result.items).map(item => item.shareUrl && item.shareUrl === result.shareUrl
+      ? { ...item, shareUrl: null } : item);
     updateIdeaCards(list, items, settled && pending && !error, checks, settled);
+    const share = sharing.querySelector('a');
     if (result.shareUrl) {
       if (share) share.href = result.shareUrl;
-      else head.append(link('Share shortlist', result.shareUrl));
+      else sharing.append(link('Share results', result.shareUrl));
     } else share?.remove();
     if (!settled) {
       status.textContent = moreNames;
       return;
     }
-    status.textContent = error ? (items.length ? 'Couldn’t load more names.' : 'Couldn’t finish finding names. Try again in a moment.') : '';
-    if (items.length && input.round !== 2) followUp.append(steering(items, input.idea));
-    if (!items.length && !error) status.textContent = 'No available names confirmed within $60 over three years. Try a different description.';
-    if (!error && result.complete === false) followUp.append(el('p', 'results-intro', incomplete));
-    if (result.generationSource === 'deterministic') {
-      followUp.append(el('p', 'results-intro', 'These suggestions use word pairs from your idea.'));
+    status.textContent = error ? (items.length ? 'Couldn’t load more names.' : 'Couldn’t finish the search. Try again.') : '';
+    if (items.length && input.round !== 2) {
+      const refine = el('details', 'refine');
+      refine.append(el('summary', '', 'Refine these ideas'), steering(items, input.idea));
+      followUp.append(refine);
     }
+    if (!items.length && !error) status.textContent = 'No available names confirmed at $60 or less for 3 years. Try another description.';
+    if (!error && items.length && result.complete === false) followUp.append(el('p', 'results-intro', incomplete));
   }
 
   render(response, !pending);
@@ -540,17 +600,18 @@ function renderIdeas(page, head, input, response, signal) {
 function renderPage(mode, input, response, signal) {
   const items = response.items;
   const head = el('header', 'results-head');
-  const titles = { idea: input.round === 2 ? 'Your second shortlist.' : 'Your shortlist.', name: input.name, personal: 'Domains for ' + input.fullName };
+  const titles = { idea: input.round === 2 ? 'More name ideas' : 'Name ideas', name: input.name, personal: 'Domains for ' + input.fullName };
   const heading = el('h2', '', titles[mode]);
   heading.tabIndex = -1;
   head.append(heading);
-  if (response.shareUrl) head.append(link('Share shortlist', response.shareUrl));
+  const sharing = el('div', 'result-sharing');
+  if (response.shareUrl) sharing.append(link('Share results', response.shareUrl));
   const page = document.createDocumentFragment();
   page.append(head);
   let slots = null;
   let finish = null;
   if (mode === 'idea') {
-    finish = renderIdeas(page, head, input, response, signal);
+    finish = renderIdeas(page, sharing, input, response, signal);
   } else if (mode === 'name') {
     slots = nameSlots(response, response.query?.ascii || input.name.split('.')[0], signal);
     page.append(slots.card, slots.more, slots.recovery);
@@ -562,62 +623,86 @@ function renderPage(mode, input, response, signal) {
       if (!groups.has(name)) groups.set(name, []);
       groups.get(name).push(item);
     }
-    for (const [name, endings] of groups) {
+    const availableFirst = [...groups].sort(([, a], [, b]) =>
+      Number(b.some(item => item.offer)) - Number(a.some(item => item.offer)));
+    for (const [name, endings] of availableFirst) {
       const card = nameCard(name, endings, null);
       page.append(card);
       if (endings.some(item => item.status === 'available' && !item.premium)) attachChecks(card, { name, endings }, checks);
     }
   }
-  if (mode === 'name' ? slots.empty : mode === 'personal' && !items.some(item => item.status !== 'unknown')) {
-    const empty = {
-      name: 'No endings could be verified. Try again or check at a registrar.',
-      personal: 'No personal domains found for this spelling. Try another version of your name.'
-    };
-    head.after(el('p', 'results-intro', empty[mode]));
+  if (mode !== 'idea' && (response.complete === false || items.some(item => item.status === 'unknown'))) {
+    page.append(el('p', 'results-intro', incomplete));
   }
 
+  page.append(sharing);
   pages.replaceChildren(page);
+  labelQuotes();
   region.hidden = false;
   document.getElementById('real-search').hidden = true;
   if (slots) followUp(response, signal, slots).catch(() => {});
   return { heading, finish };
 }
 
-// On a short screen the results start under the hero. When the first result is
-// below the fold, bring the results heading to the top once.
-function revealResults(heading) {
-  let first = heading.parentElement.nextElementSibling;
-  while (first?.hidden) first = first.nextElementSibling;
-  if (!first || first.getBoundingClientRect().top <= innerHeight * 0.8) return;
+function scrollToAnswer(target, block = 'start') {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  heading.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
+  target.scrollIntoView({ block, behavior: reduce ? 'instant' : 'smooth' });
 }
 
 const loading = {
-  idea: 'Finding names and checking the registry…',
-  name: 'Checking endings and registrar prices…',
+  idea: 'Finding name ideas…',
+  name: 'Checking domains and prices…',
   personal: 'Checking domains for your name…'
 };
 
 async function search(mode, input, status, submit) {
   if (submit.hasAttribute('aria-disabled')) return;
   cancelSearch();
+  const form = submit.form;
+  const ownsFocus = () => form.contains(document.activeElement) || document.activeElement === document.body;
+  function returnToField() {
+    if (!ownsFocus()) return;
+    form.querySelector('input, select')?.focus({ preventScroll: true });
+    scrollToAnswer(form, 'center');
+  }
   const controller = new AbortController();
   currentSearch = { controller, status, submit };
   if (input.round !== 2) clearResults();
+  document.getElementById('real-search').hidden = true;
   status.textContent = loading[mode];
   submit.setAttribute('aria-disabled', 'true');
   try {
     const { runSearch, finishIdeas } = await import('./search-api.mjs');
     if (controller.signal.aborted) return;
-    const response = await runSearch(mode, input, controller.signal);
+    let response = await runSearch(mode, input, controller.signal);
     if (controller.signal.aborted) return;
-    const focusResult = submit.form.contains(document.activeElement) || document.activeElement === document.body;
+    if (response.generationDetails && !response.items.length) {
+      status.textContent = moreNames;
+      response = await finishIdeas(response, controller.signal);
+      if (controller.signal.aborted) return;
+    }
+    if (!response.items.some(item => item.status !== 'unknown')) {
+      if (mode === 'idea') status.textContent = 'No available names confirmed at $60 or less for 3 years. Try another description.';
+      else if (mode === 'personal' && response.complete !== false && !response.items.length) {
+        status.textContent = 'No domains found for this spelling. Try another spelling.';
+      } else status.textContent = 'Couldn’t confirm any domains. Try again.';
+      returnToField();
+      return status;
+    }
+    const focusResult = ownsFocus();
     const { heading, finish } = renderPage(mode, input, response, controller.signal);
     status.textContent = '';
+    const firstCard = pages.querySelector('.hunt-card:not([hidden])');
+    const answer = firstCard?.querySelector('.offer-row') || firstCard?.querySelector('.top-taken a');
+    if (answer) {
+      const domain = answer.querySelector('.domain-title').textContent;
+      const verdict = answer.querySelector('.verdict')?.textContent || 'Taken';
+      announcement.textContent = domain + ': ' + verdict + '.';
+    }
     if (focusResult) {
-      heading.focus();
-      revealResults(heading);
+      heading.focus({ preventScroll: true });
+      const end = answer?.getBoundingClientRect().bottom || 0;
+      scrollToAnswer(end - heading.getBoundingClientRect().top > innerHeight - 32 ? answer : heading);
     }
     await finish?.(finishIdeas);
     return heading;
@@ -633,7 +718,8 @@ async function search(mode, input, status, submit) {
     }
     else if (navigator.onLine === false) status.textContent = 'You’re offline. Reconnect and search again.';
     else if (error.name === 'TimeoutError') status.textContent = 'The search timed out. Try again.';
-    else status.textContent = 'Couldn’t finish the search. Try again in a moment.';
+    else status.textContent = 'Couldn’t finish the search. Try again.';
+    returnToField();
     return status;
   } finally {
     if (!controller.signal.aborted) submit.removeAttribute('aria-disabled');
@@ -641,8 +727,8 @@ async function search(mode, input, status, submit) {
 }
 
 const hints = {
-  name: ['Checking a name', 'Use this as an idea instead'],
-  idea: ['Finding available names for your idea', 'Search this as a name instead']
+  name: ['Name search', 'Search as an idea'],
+  idea: ['Name ideas', 'Search as a name']
 };
 
 for (const form of document.querySelectorAll('.hunt-form')) {

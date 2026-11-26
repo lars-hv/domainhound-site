@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>Watch a taken domain | Domain Hound</title>
-  <meta name="description" content="Watch a taken domain for free. Confirm by email and get an alert when the name becomes available.">
+  <meta name="description" content="Watch a taken domain for free. Confirm by email. We’ll email you if it becomes available.">
   <link rel="canonical" href="https://domainhound.dev/watch/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Domain Hound">
   <meta property="og:url" content="https://domainhound.dev/watch/">
   <meta property="og:title" content="Watch a taken domain | Domain Hound">
-  <meta property="og:description" content="Watch a taken domain for free. Confirm by email and get an alert when the name becomes available.">
+  <meta property="og:description" content="Watch a taken domain for free. Confirm by email. We’ll email you if it becomes available.">
   <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
   <meta property="og:image:alt" content="Domain Hound: Name it already.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Watch a taken domain | Domain Hound">
-  <meta name="twitter:description" content="Watch a taken domain for free. Confirm by email and get an alert when the name becomes available.">
+  <meta name="twitter:description" content="Watch a taken domain for free. Confirm by email. We’ll email you if it becomes available.">
   <meta name="twitter:image" content="https://domainhound.dev/assets/social-preview.png">
   <link rel="icon" href="../assets/hound-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/site.css">
@@ -38,22 +38,17 @@
 <header class="mast">
   <div class="wrap mast-inner">
     <a class="brand" href="../"><span>domainhound.dev</span></a>
-    <nav aria-label="Main"><a href="../#search">Search</a><a href="./" aria-current="page">Watch</a></nav>
+    <nav aria-label="Main"><a href="../#search">Search</a></nav>
   </div>
 </header>
 <main class="hero">
   <div class="wrap hero-grid">
-      <div class="paper-art" aria-hidden="true">
-        <span class="paper-word first">Domain</span>
-        <span class="paper-word second">Hound</span>
-        <span class="paper-dog"><img src="../assets/hound-mark.svg" width="180" height="180" alt=""></span>
-      </div>
       <div class="lead">
-        <h1 id="watch-title">Watch a taken domain.</h1>
-        <p class="subline">We’ll email you when it becomes available.</p>
+        <img src="../assets/hound-mark.svg" width="64" height="64" alt="">
+        <h1 id="watch-title">Domain taken? We’ll keep watch.</h1>
+        <p class="subline">Confirm by email. We’ll email you if it becomes available.</p>
       </div>
       <form class="watch" id="watch" novalidate aria-labelledby="watch-title" autocomplete="off">
-        <p class="watch-intro">Confirm by email to start your free watch.</p>
         <div class="watch-controls">
           <div class="watch-field">
             <label for="watch-domain">Domain</label>
@@ -63,21 +58,17 @@
             <label for="watch-email">Email</label>
             <input id="watch-email" required type="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="you@example.com">
           </div>
-          <div class="watch-field">
-            <label for="watch-name">Name (optional)</label>
-            <input id="watch-name" type="text" autocomplete="name" maxlength="80">
-          </div>
         </div>
         <label class="watch-news"><input id="watch-news" type="checkbox" autocomplete="off"> <span>Yes, email me news about Domain Hound and other developer tools from BrightBoard AS. At most twice a month. Unsubscribe any time.</span></label>
         <div hidden><label for="watch-website">Website</label><input id="watch-website" type="text" tabindex="-1" autocomplete="off"></div>
-        <button class="watch-submit action" type="submit" disabled>Watch it</button>
+        <button class="watch-submit action" type="submit" disabled>Watch for free</button>
         <noscript><p>Turn on JavaScript to request a watch.</p></noscript>
         <p class="watch-status" id="watch-status" role="status"></p>
         <div class="watch-help">
           <details>
             <summary>What emails will I get?</summary>
-            <p>Up to four per watch, including confirmation. We’ll email you if the registration expires, if the registry lists the domain for deletion (about five days left), or if the domain becomes available to register. No scheduled digests.</p>
-            <p>News is optional. Each watch email has a private link to manage your alerts. Turn off news, stop one watch or erase your address and watches.</p>
+            <p>Up to four emails per domain. One to confirm, then alerts if it expires, is due for release, or becomes available.</p>
+            <p>Each watch email has a private link to stop news, stop a watch, or erase your address and watches.</p>
           </details>
           <a href="../privacy/#watch">Privacy</a>
         </div>

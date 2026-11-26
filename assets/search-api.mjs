@@ -53,7 +53,7 @@ function domainItem(row, cap = Infinity) {
   const prices = confirmed && !premium && row.priceShown && Array.isArray(row.prices) ? row.prices : [];
   const offers = prices.filter(offer => bookable(offer, row.domain) && offer.threeYearUsd <= cap);
   offers.sort((a, b) => a.firstPaymentUsd - b.firstPaymentUsd || a.threeYearUsd - b.threeYearUsd);
-  return { domain: row.domain, status, premium, offer: offers[0] || null };
+  return { domain: row.domain, status, premium, eligibility: row.eligibility, offer: offers[0] || null };
 }
 
 // The generator and personal-name endpoints also supply a compact offer for the

@@ -11,17 +11,17 @@ export const shareVersion = '2.';
 const versions = { '1.': 1, '2.': 2 };
 export const shareVerdicts = [null, 'No conflict found', 'Check first', 'Avoid'];
 export const shareStatuses = [
-  'Available at the registry',
-  'Confirmed at shop',
+  'Available',
+  'Shop confirmed',
   'Taken',
-  'Taken, possible resale',
-  'Not offered for registration',
-  'May be premium, price at shop',
-  'Premium, price at shop',
-  'Check at shop',
-  'Check at shop, possibly available based on DNS',
-  'Check at shop, likely taken by DNS',
-  'Still checking',
+  'Taken · may be for sale',
+  'You can’t register this domain',
+  'May cost extra. Check the shop.',
+  'Costs extra. Check the shop.',
+  'Check the shop',
+  'May be available. Check the shop.',
+  'May be taken. Check the shop.',
+  'Unconfirmed when shared',
 ];
 
 const label = '[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?';
@@ -38,7 +38,7 @@ function parseFacts(facts, rows) {
   if (!facts || typeof facts !== 'object' || Array.isArray(facts) || Object.keys(facts).some(key => !factKeys.includes(key))) return null;
   const { p: pick = null, b: best = null, j: jumps = 0, t: taken = [] } = facts;
   const validIndex = index => Number.isInteger(index) && index >= 0 && index < rows.length;
-  const available = index => validIndex(index) && ['Available at the registry', 'Confirmed at shop'].includes(rows[index].status);
+  const available = index => validIndex(index) && ['Available', 'Shop confirmed'].includes(rows[index].status);
   if ((pick !== null && !available(pick))
       || (best !== null && !(Array.isArray(best) && best.length === 2 && available(best[0]) && best[1] !== null && isCents(best[1])))
       || !Number.isSafeInteger(jumps) || jumps < 0 || jumps >= 2 ** rows.length

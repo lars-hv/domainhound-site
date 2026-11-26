@@ -17,8 +17,6 @@ function element(tag, className, text) {
   return node;
 }
 
-const registryAvailable = 'Available at the registry';
-
 function price(label, amount, years, jump = false) {
   const pair = element('div');
   const term = years > 1 ? ' for ' + years + ' years' : '';
@@ -38,59 +36,44 @@ function domainRow(record) {
   if (Number.isFinite(record.bestValue)) {
     identity.append(element('span', 'chip best-value', 'Best value · ' + usd.format(record.bestValue) + ' over 3 years'));
   }
-  if (record.status !== registryAvailable) identity.append(element('span', 'status', record.status));
+  identity.append(element('span', 'status', record.status));
   const prices = element('dl', 'quotes');
-  prices.append(price('Upfront', record.now, record.term), price('Renewal', record.renew, record.term, record.jump));
+  prices.append(price('Due now', record.now, record.term), price('At renewal', record.renew, record.term, record.jump));
   item.append(identity, prices);
   return item;
 }
 
 function takenFooter(name, targets) {
   const base = name.toLowerCase().split('.')[0].replaceAll(' ', '');
-  const summary = targets.map(domain => {
-    const ending = domain.slice(base.length);
-    const sameName = domain.startsWith(base + '.') && (/^\.[^.]+$/.test(ending) || ending === '.co.uk');
-    return (sameName ? ending : domain) + ' taken';
-  });
   const foot = element('div', 'group-foot');
-  const watch = element('a', 'watch-link', 'Watch ' + targets[0]);
-  watch.href = '/watch/?domain=' + encodeURIComponent(targets[0]);
-  if (summary.length > 2) {
-    const details = element('details', 'taken-summary');
-    const preview = summary.slice(0, 2).join(' · ') + ' · +' + (summary.length - 2) + ' more';
-    details.append(element('summary', '', preview), element('div', '', summary.slice(2).join(' · ')));
-    foot.append(details);
-  } else {
-    foot.append(element('span', 'taken-summary', summary.join(' · ')));
-  }
-  foot.append(watch);
+  foot.append(element('strong', '', 'Taken'));
+  const extra = element('details', 'taken-summary');
+  extra.append(element('summary', '', '+' + (targets.length - 2) + ' more'));
+  targets.forEach((domain, index) => {
+    const watch = element('a', 'watch-link', domain.startsWith(base + '.') ? domain.slice(base.length) : domain);
+    watch.href = '/watch/?domain=' + encodeURIComponent(domain);
+    watch.setAttribute('aria-label', 'Watch ' + domain);
+    (index < 2 ? foot : extra).append(watch);
+  });
+  if (targets.length > 2) foot.append(extra);
   return foot;
 }
 
-function nameGroup({ name, verdict, records, takenDomains: targets }, checkedAt, checkTime) {
+function nameGroup({ name, verdict, records, takenDomains }) {
+  const targets = [...new Set([...takenDomains, ...records
+    .filter(record => record.status.startsWith('Taken')).map(record => record.domain)])];
   const card = element('article', 'paper');
   const heading = element('header', 'group-heading');
   heading.append(element('h2', '', name));
   if (verdict) heading.append(element('p', 'verdict', verdict));
-  const meta = element('p', 'group-meta');
-  const available = records.filter(record => record.status === registryAvailable).length;
-  if (available) {
-    const mixed = available < records.length;
-    meta.append(mixed ? available + (available === 1 ? ' ending' : ' endings') + ' available at the registry · ' : registryAvailable + ' · ');
-  }
-  const time = element('time', '', checkTime);
-  time.dateTime = checkedAt;
-  meta.append('Checked ', time);
-  heading.append(meta);
   card.append(heading);
-  if (targets.length) card.append(takenFooter(name, targets));
 
   const rows = element('ul', 'domain-list');
   rows.setAttribute('aria-label', 'Domain prices in USD');
   const offers = [];
   const others = [];
   for (const record of records) {
-    if (record.status === registryAvailable || record.status === 'Confirmed at shop') offers.push(record);
+    if (record.status === 'Available' || record.status === 'Shop confirmed') offers.push(record);
     else if (!(record.status === 'Taken' && record.now == null && record.renew == null && targets.includes(record.domain))) {
       others.push(record);
     }
@@ -98,6 +81,7 @@ function nameGroup({ name, verdict, records, takenDomains: targets }, checkedAt,
   offers.sort((a, b) => (a.now ?? Infinity) - (b.now ?? Infinity));
   for (const record of [...offers, ...others]) rows.append(domainRow(record));
   if (offers.length || others.length) card.append(rows);
+  if (targets.length) card.append(takenFooter(name, targets));
   return card;
 }
 
@@ -108,6 +92,7 @@ async function showReceipt() {
   copyButton.hidden = true;
   feedback.textContent = '';
   groups.replaceChildren();
+  unavailable.querySelector('h2').textContent = hash ? 'We couldn’t read this link.' : 'This link is incomplete.';
   try {
     const data = await readShareFragment(hash);
     if (hash !== location.hash) return;
@@ -115,8 +100,10 @@ async function showReceipt() {
       unavailable.hidden = false;
       return;
     }
-    const checkTime = timestamp.format(new Date(data.checkedAt)) + ' UTC';
-    groups.replaceChildren(...data.groups.map(group => nameGroup(group, data.checkedAt, checkTime)));
+    const time = document.getElementById('checked-at');
+    time.dateTime = data.checkedAt;
+    time.textContent = timestamp.format(new Date(data.checkedAt)) + ' UTC';
+    groups.replaceChildren(...data.groups.map(nameGroup));
     receipt.hidden = false;
     copyButton.hidden = false;
   } catch {
@@ -129,7 +116,7 @@ copyButton.addEventListener('click', async () => {
   feedback.textContent = '';
   try {
     await navigator.clipboard.writeText(url);
-    if (url === location.href) feedback.textContent = 'Share link copied.';
+    if (url === location.href) feedback.textContent = 'Link copied.';
   } catch {
     if (url === location.href) feedback.textContent = 'Copy the full link from your address bar.';
   }

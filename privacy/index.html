@@ -38,55 +38,55 @@
 <header class="mast" id="top">
   <div class="wrap mast-inner">
     <a class="brand" href="../"><span>domainhound.dev</span></a>
-    <nav aria-label="Main"><a href="../#search">Search</a><a href="../#watch">Watch</a></nav>
+    <nav aria-label="Main"><a href="../#search">Search</a><a href="/watch/">Watch</a></nav>
   </div>
 </header>
 <main class="privacy-panel">
 <h1>Privacy</h1>
 
-<section aria-labelledby="who-we-are">
-<h2 id="who-we-are">Who we are</h2>
-<p>Domain Hound is made by BrightBoard AS, org. no. 935 969 034, Middelthuns gate 13C, 0368 Oslo, Norway. We are responsible for the personal data described here. For privacy questions and requests, write to <a href="mailto:privacy@domainhound.dev">privacy@domainhound.dev</a>.</p>
+<section aria-labelledby="website">
+<h2 id="website">Search on this website</h2>
+<p>GitHub Pages hosts this site, including its fonts and images. When you search, your browser sends your idea, name or full name to our online tool. For name ideas, the tool may send your idea and choices to Cloudflare Workers AI. It can reuse subject words and suggested names for up to 24 hours, keyed by a one-way code derived from your idea and choices. The watch form sends your details to our alert service only when you submit it.</p>
 </section>
 
 <section aria-labelledby="tool">
-<h2 id="tool">The tool on your computer</h2>
-<p>The local tool runs on your own computer as an MCP server. It sends nothing to us, so we never receive the names you check or your results. It uses no analytics, telemetry or cookies.</p>
+<h2 id="tool">Search on your computer</h2>
+<p>The local MCP tool runs on your computer. It sends us nothing, including names and results. It uses no cookies, analytics or telemetry.</p>
 </section>
 
 <section aria-labelledby="hosted">
-<h2 id="hosted">The hosted connector</h2>
-<p>ChatGPT, Claude on the web and other apps that can only use online tools connect to our hosted connector instead. It receives the names you check in order to look them up, and we keep no logs of them beyond a short-lived cache. For a domain availability check, the cache holds a one-way hash of the domain and its status. The connector asks the same registries and price lists as the local tool and needs no account, email or cookie. Cloudflare runs it for us.</p>
+<h2 id="hosted">Search with an online assistant</h2>
+<p>ChatGPT, Claude on the web and other online-only apps send us the names you check. Our tool looks them up using the same domain records and price lists as the local tool. We keep the names only briefly to reuse results. For domain checks, we save the result alongside a one-way code made from the domain name. We keep no other logs of those names. Cloudflare runs the tool. You need no account, email or cookie.</p>
 </section>
 
 <section aria-labelledby="sources">
 <h2 id="sources">Who sees the names you check?</h2>
-<p>Your computer contacts public sources directly. Each service can see your IP address. If a check sends a name, the service sees that name too. Each service’s own privacy policy applies.</p>
+<p>With the local tool, your computer contacts public sources. Each service can see your IP address and any name sent to it. Its own privacy policy applies.</p>
 <ul>
-<li><strong>Domains and prices.</strong> Domain Hound checks domain registries through RDAP or WHOIS. It also checks DNS records and reads price lists from Spaceship, Porkbun, Dynadot and Gandi.</li>
+<li><strong>Domains and prices.</strong> We check RDAP, WHOIS and DNS records and read prices from Spaceship, Porkbun, Dynadot and Gandi.</li>
 <li><strong>Trademarks and companies.</strong> It checks the USPTO trademark search, Norway’s Brønnøysund registers and company records from SEC EDGAR.</li>
 <li><strong>Apps, projects and handles.</strong> It looks for names on the Apple App Store, Google Play, GitHub, npm and Bluesky.</li>
 <li><strong>Names on the web.</strong> It can check Google autocomplete, Google Trends and Wikidata. It may visit the domain itself and check Tranco and Common Crawl for signs of use. If you set up Brave Search or Serper, it can send your search there too.</li>
 </ul>
-<p>Domain Hound may save results on your computer so it can reuse them the next time you check.</p>
+<p>The tool may save results on your computer for your next search.</p>
 </section>
 
 <section aria-labelledby="assistant">
 <h2 id="assistant">Your AI assistant</h2>
-<p>Claude, Codex or whichever assistant you use sees the results Domain Hound sends back. The assistant provider’s privacy policy applies to those results.</p>
+<p>Your assistant, such as Claude or Codex, sees your results. Its privacy policy applies to them.</p>
 </section>
 
 <section aria-labelledby="price-check">
 <h2 id="price-check">Live price checks</h2>
-<p>If you ask for a live price, Domain Hound opens the shop’s public search page in a hidden browser on your computer. The shop sees the domain you check. Domain Hound does this without signing in or buying anything.</p>
+<p>For a live price, the tool opens the shop’s search page in a hidden browser on your computer. The shop sees the domain. The tool checks the price without signing in or buying anything.</p>
 </section>
 
 <section aria-labelledby="watch">
 <h2 id="watch">Domain watch alerts</h2>
 <ul>
-<li>We store your email address, your name if you give it, the domains you ask us to watch, and when you signed up and confirmed.</li>
-<li>You can sign up on domainhound.dev or ask your AI assistant, such as Claude or Codex, to sign you up. Your assistant sends us what you ask it to send. Either way, your watch starts when you click the confirmation link we email you.</li>
-<li>We send a confirmation email. After that, we email you when a domain you watch expires, when it is about to be released, and when it becomes available. We send at most four watch emails per domain, including confirmation.</li>
+<li>We store your email, the domains you watch, your sign-up and confirmation dates, and your name if you give it.</li>
+<li>Sign up here or ask your assistant to send us your details. Your watch starts when you click the link we email you.</li>
+<li>We send up to four emails per domain. One to confirm, then alerts if the domain expires, is due for release, or becomes available.</li>
 <li>We use your data to provide the watch you asked for (GDPR Art. 6(1)(b)).</li>
 <li>We delete unconfirmed sign-ups after 7 days. We remove watches when they end or when you erase them. A backup copy can remain for up to 30 days. Every watch email has a link to see and stop your watches and a one-click link to erase your address, watches and news subscription.</li>
 <li>We do not track opens or clicks in our emails.</li>
@@ -101,17 +101,27 @@
 <li>We send news with your consent (GDPR Art. 6(1)(a) and the Norwegian Marketing Control Act section 15).</li>
 <li>We keep a record of when you said yes, where you signed up (site or assistant) and the exact words you agreed to.</li>
 <li>Every news email has our postal address and a one-click unsubscribe link. You can also write to us. We stop at once, at the latest within 10 days.</li>
-<li>When you unsubscribe from news or erase your data, we keep an address hash on our do-not-send list. This lets us check whether an address should receive news without storing the email address itself on that list (our legitimate interest, GDPR Art. 6(1)(f)). We keep the record of your consent for 3 years after you withdraw it to show what you agreed to. After erasure, that record contains only the address hash, the version of the consent text and the dates and times.</li>
+<li>When you unsubscribe or erase your data, we keep an address hash on our do-not-send list. The hash replaces your email address and prevents further news emails. This is our legitimate interest (GDPR Art. 6(1)(f)). We keep proof of consent for 3 years after you withdraw it. After erasure, it holds only the hash, consent text version and timestamps.</li>
 <li>If we ever want to send a wider kind of email, we will ask you again.</li>
 </ul>
+</section>
+
+<section aria-labelledby="rights">
+<h2 id="rights">Your rights</h2>
+<p>You can ask to see, correct, export or erase your data, and object to or limit how we use it. Write to <a href="mailto:privacy@domainhound.dev">privacy@domainhound.dev</a>. You can also complain to <a href="https://www.datatilsynet.no/">Datatilsynet, the Norwegian Data Protection Authority</a>.</p>
+</section>
+
+<section aria-labelledby="who-we-are">
+<h2 id="who-we-are">Who we are</h2>
+<p>Domain Hound is made by BrightBoard AS, org. no. 935 969 034, Middelthuns gate 13C, 0368 Oslo, Norway. We are responsible for the personal data described here. For privacy questions or requests, email <a href="mailto:privacy@domainhound.dev">privacy@domainhound.dev</a>.</p>
 </section>
 
 <section aria-labelledby="providers">
 <h2 id="providers">Who helps us</h2>
 <ul>
-<li>Cloudflare runs the hosted connector and the alert service and stores our records under a data processing agreement that covers US transfers through the EU-US Data Privacy Framework and uses EU standard contract clauses where needed.</li>
-<li>Resend sends our emails through Amazon SES in Ireland and stores message data in the US under EU standard contract clauses and the EU-US Data Privacy Framework.</li>
-<li>GitHub independently hosts this free Pages site, logs visitor IP addresses for security, and describes EU standard contract clauses and the EU-US Data Privacy Framework in its privacy policy for transfers to the US.</li>
+<li>Cloudflare runs our online tool and alerts and stores our records. Our data processing agreement covers US transfers through the EU-US Data Privacy Framework. It uses EU standard contract clauses where needed.</li>
+<li>Resend sends our emails through Amazon SES in Ireland. It stores message data in the US under EU standard contract clauses and the EU-US Data Privacy Framework.</li>
+<li>GitHub hosts this site independently, for free. It logs visitors’ IP addresses for security. Its privacy policy describes EU standard contract clauses and the EU-US Data Privacy Framework for transfers to the US.</li>
 </ul>
 <p>We never sell your data or share it with anyone for their own marketing.</p>
 </section>
@@ -128,22 +138,12 @@
 
 <section aria-labelledby="changes">
 <h2 id="changes">Changes</h2>
-<p>If we change this policy we update the date below. If a change affects what you agreed to, we ask you again.</p>
-</section>
-
-<section aria-labelledby="rights">
-<h2 id="rights">Your rights</h2>
-<p>You can ask to see, correct, export or erase your data, and object to or limit how we use it. Write to <a href="mailto:privacy@domainhound.dev">privacy@domainhound.dev</a>. You can also complain to <a href="https://www.datatilsynet.no/">Datatilsynet, the Norwegian Data Protection Authority</a>.</p>
-</section>
-
-<section aria-labelledby="website">
-<h2 id="website">This website</h2>
-<p>GitHub Pages hosts this website. Fonts and images load from this site. When you submit a search, your browser sends your idea, chosen name or full name to our hosted connector. For name suggestions, the connector can send your idea and preferences to Cloudflare Workers AI. It can reuse the subject words and candidate names for up to 24 hours, using a hash of your idea and preferences as the cache key. The watch form sends what you type to our alert service only when you press the button.</p>
+<p>When we change this policy, we update the date below. If a change affects what you agreed to, we ask you again.</p>
 </section>
 
 <section aria-labelledby="contact">
 <h2 id="contact">Source code</h2>
-<p>Domain Hound is open source under the MIT license. You can <a href="https://github.com/lars-hv/domain-hound">read the code on GitHub</a>.</p>
+<p><a href="https://github.com/lars-hv/domain-hound">Domain Hound’s source code</a> uses the MIT license.</p>
 </section>
 <p class="updated">Last updated <time datetime="2026-11-25">25 November 2026</time></p>
 </main>

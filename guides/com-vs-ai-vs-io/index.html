@@ -67,34 +67,37 @@
 </header>
 <main class="guide wrap">
   <h1>Should you buy .com, .ai or .io?</h1>
-  <p>87% of our .ai sample was available on 2026-11-25. The same 200 names yielded 81% under .io and 4% under .com.</p>
-  <div class="table-wrap">
-    <table>
-      <caption>Same names, different endings<time datetime="2026-11-25">Checked 2026-11-25 UTC</time></caption>
-      <thead><tr><th scope="col">Ending</th><th scope="col">Available among settled checks</th><th scope="col">First year</th><th scope="col">Renewal</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">.com</th><td>8 of 200 (4.0%)</td><td><a href="https://www.spaceship.com/domain-search/pricing/">$9.48</a></td><td><a href="https://www.spaceship.com/domain-search/pricing/">$10.68</a></td></tr>
-        <tr><th scope="row">.ai</th><td>174 of 200 (87.0%)</td><td><a href="https://www.spaceship.com/domains/cctld/ai/">$79.98</a></td><td><a href="https://www.spaceship.com/domains/cctld/ai/">$79.98</a></td></tr>
-        <tr><th scope="row">.io</th><td>162 of 200 (81.0%)</td><td><a href="https://www.spaceship.com/domain-search/pricing/">$31.98</a></td><td><a href="https://www.spaceship.com/domain-search/pricing/">$51.75</a></td></tr>
-        <tr><th scope="row">.dev</th><td>85 of 112 (75.9%)</td><td><a href="https://www.spaceship.com/domain-search/pricing/">$8.28</a></td><td><a href="https://www.spaceship.com/domain-search/pricing/">$12.42</a></td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p>Of the 174 available .ai names, 35 had no registry record and GoDaddy offered 139 at its standard price. For .io, the counts were 43 and 119. One more .io was premium. We excluded 88 unresolved .dev checks. Prices are Spaceship’s annual USD list rates before fees.</p>
-  <p class="source">Domain Hound measurements · <a href="/data/2026-11-25/tables/com-vs-ai-vs-io.csv">Table CSV</a> · <a href="/data/2026-11-25/availability.csv">Registry lookups</a> · <a href="/data/2026-11-25/registrar-rechecks.csv">Shop rechecks for .ai and .io</a> · <a href="/data/2026-11-25/registrar-offers.csv">Price lists</a> · <a href="https://www.spaceship.com/domains/cctld/ai/">Spaceship’s .ai page</a></p>
-  <section>
-    <h2>How Domain Hound does it</h2>
+  <p>We tested 200 names. Only 8 were available under .com, compared with 162 under .io and 174 under .ai. The catch? Spaceship wanted $159.96 up front for two years of .ai. <a href="/#search">Search your name.</a></p>
+  <details class="guide-evidence">
+    <summary>See the prices, checks and sources</summary>
+    <div class="table-wrap">
+      <table>
+        <caption>Same names, different endings<time datetime="2026-11-25">Checked 2026-11-25 UTC</time></caption>
+        <thead><tr><th scope="col">Ending</th><th scope="col">Available among confirmed results</th><th scope="col">First payment</th><th scope="col">Yearly renewal</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">.com</th><td>8 of 200 (4.0%)</td><td><a href="https://www.spaceship.com/domain-search/pricing/">$9.48</a></td><td><a href="https://www.spaceship.com/domain-search/pricing/">$10.68</a></td></tr>
+          <tr><th scope="row">.ai</th><td>174 of 200 (87.0%)</td><td><a href="https://www.spaceship.com/domains/cctld/ai/">$159.96 for 2 years</a></td><td><a href="https://www.spaceship.com/domains/cctld/ai/">$79.98</a></td></tr>
+          <tr><th scope="row">.io</th><td>162 of 200 (81.0%)</td><td><a href="https://www.spaceship.com/domain-search/pricing/">$31.98</a></td><td><a href="https://www.spaceship.com/domain-search/pricing/">$51.75</a></td></tr>
+          <tr><th scope="row">.dev</th><td>85 of 112 (75.9%)</td><td><a href="https://www.spaceship.com/domain-search/pricing/">$8.28</a></td><td><a href="https://www.spaceship.com/domain-search/pricing/">$12.42</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Of the 174 available .ai names, 35 had no registry record and GoDaddy offered 139 at its standard price. For .io, the counts were 43 and 119. One more .io was premium. We excluded 88 unresolved .dev checks. Prices come from Spaceship’s USD price list, before fees. The .ai first payment covers two years.</p>
+    <p class="source">Domain Hound measurements · <a href="/data/2026-11-25/tables/com-vs-ai-vs-io.csv">Table CSV</a> · <a href="/data/2026-11-25/availability.csv">Registry lookups</a> · <a href="/data/2026-11-25/registrar-rechecks.csv">Shop rechecks for .ai and .io</a> · <a href="/data/2026-11-25/registrar-offers.csv">Price lists</a> · <a href="https://www.spaceship.com/domains/cctld/ai/">Spaceship’s .ai page</a></p>
+  </details>
+  <details class="guide-evidence">
+    <summary><h2>How Domain Hound does it</h2></summary>
     <p>Ask for the same name under each ending. You get the availability and both prices together. At Spaceship, .ai requires 2 years at $79.98 per year. The first payment is $159.96 before tax.</p>
     <p>Install in Claude Code, or <a href="/guides/domain-hound-claude-code-codex/">use Codex</a>.</p><pre><code>claude mcp add domain-hound -- npx -y domain-hound</code></pre>
-  </section>
-  <section>
-    <h2>FAQ</h2>
+  </details>
+  <details class="guide-evidence">
+    <summary><h2>FAQ</h2></summary>
     <dl>
       <dt>Are these my odds of finding a name?</dt><dd>No. The sample uses 200 English names we picked. It shows how those names fared on one day.</dd>
       <dt>What does .dev add?</dt><dd>It signals a developer audience. Say the full address aloud and see whether people remember the ending.</dd>
       <dt>What if someone owns the .com?</dt><dd>Visit it. An active business with a similar product is a reason to try another name.</dd>
     </dl>
-  </section>
+  </details>
   <section>
     <h2>Related guides</h2>
     <ul>
@@ -102,8 +105,6 @@
       <li><a href="/guides/good-startup-name/">What makes a good startup name?</a></li>
     </ul>
   </section>
-  <p class="updated">Last updated <time datetime="2026-11-25">25 November 2026</time>.</p>
-  <p>The hound won’t pick up the renewal bill.</p>
 </main>
 <footer><div class="wrap foot"><a href="/">domainhound.dev</a><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a></div></footer>
 </body>

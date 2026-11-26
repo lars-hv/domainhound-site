@@ -127,6 +127,7 @@
         <p class="subline">The .com is taken. Again. Check your next name for free.</p>
       </div>
       <div class="hunt-box" id="search">
+        <p class="renewal-proof">A .co for <strong>$3.11</strong> the first year. Then <strong>$31.05</strong> a year. <a href="/guides/domain-renewal-prices/">Spaceship, Nov 2026</a></p>
         <form class="hunt-form" data-mode="auto">
           <label for="name">Name or idea</label>
           <input id="name" type="text" required maxlength="400" autocapitalize="none" spellcheck="false" aria-describedby="search-hint-text" placeholder="A name, or what you’re building">
@@ -134,7 +135,7 @@
             <button class="hunt-submit action" type="submit" disabled>Search domains</button>
             <button class="action" type="button" id="connect" aria-controls="install" aria-expanded="false">Connect your agent</button>
           </div>
-          <p class="search-hint" hidden><span id="search-hint-text" aria-live="polite"></span> <button type="button" class="hint-switch"></button></p>
+          <p class="search-hint" hidden><span class="sr-only" id="search-hint-text" aria-live="polite"></span> <button type="button" class="hint-switch"></button></p>
         </form>
         <div class="search-paths" hidden>
           <a href="#panel-personal" aria-controls="panel-personal" aria-expanded="false">Use my own name</a>
@@ -146,53 +147,55 @@
         </form>
         <noscript><p class="hunt-notice">Turn on JavaScript to search here, or <a href="#install">open the agent setup</a>.</p></noscript>
       </div>
-      <details id="install">
-        <summary>Connect your agent</summary>
-        <div class="installer">
-          <p class="install-heading">Free · open source. <a href="/guides/domain-hound-claude-code-codex/#purchase">Never buys without you.</a></p>
-          <div class="tabs" role="tablist" aria-label="Install for">
-            <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
-            <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
-            <button type="button" role="tab" id="tab-chatgpt" aria-selected="false" aria-controls="panel-chatgpt" tabindex="-1">ChatGPT</button>
-            <button type="button" role="tab" id="tab-other" aria-selected="false" aria-controls="panel-other" tabindex="-1">Other MCP</button>
-          </div>
-          <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude">
-            <noscript><strong>Claude Code</strong></noscript>
-            <p class="hint">In your terminal</p>
-            <code tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
-            <button type="button" class="copy action"><span>Copy command</span></button>
-          </div>
-          <div role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
-            <noscript><strong>Codex</strong></noscript>
-            <p class="hint">In your terminal</p>
-            <code tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
-            <button type="button" class="copy action"><span>Copy command</span></button>
-          </div>
-          <div role="tabpanel" id="panel-chatgpt" aria-labelledby="tab-chatgpt" hidden>
-            <noscript><strong>ChatGPT</strong></noscript>
-            <p class="hint">Paste this URL when adding a connector</p>
-            <code tabindex="0">https://domainhound-mcp.domainhound.workers.dev/mcp</code>
-            <button type="button" class="copy action"><span>Copy URL</span></button>
-          </div>
-          <div role="tabpanel" id="panel-other" aria-labelledby="tab-other" hidden>
-            <noscript><strong>Other MCP clients</strong></noscript>
-            <p class="hint">MCP configuration</p>
-            <code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
-            <button type="button" class="copy action"><span>Copy config</span></button>
-          </div>
-          <p class="feedback" role="status"></p>
-        </div>
-      </details>
     </div>
   </section>
+  <p class="sr-only" id="result-announcement" role="status"></p>
   <section class="hunt-results" id="search-results" aria-label="Search results" hidden>
     <div class="wrap" id="result-pages"></div>
   </section>
+  <div class="setup-strip"><div class="wrap">
+    <details id="install">
+      <summary>Connect your agent</summary>
+      <div class="installer">
+        <p class="install-heading">Free · <a href="https://github.com/lars-hv/domain-hound">open source (MIT)</a>. <a href="/guides/domain-hound-claude-code-codex/#purchase">Never buys without you.</a></p>
+        <div class="tabs" role="tablist" aria-label="Install for">
+          <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
+          <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
+          <button type="button" role="tab" id="tab-chatgpt" aria-selected="false" aria-controls="panel-chatgpt" tabindex="-1">ChatGPT</button>
+          <button type="button" role="tab" id="tab-other" aria-selected="false" aria-controls="panel-other" tabindex="-1">Other MCP</button>
+        </div>
+        <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude">
+          <noscript><strong>Claude Code</strong></noscript>
+          <p class="hint">In your terminal</p>
+          <code tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
+          <button type="button" class="copy action"><span>Copy command</span></button>
+        </div>
+        <div role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
+          <noscript><strong>Codex</strong></noscript>
+          <p class="hint">In your terminal</p>
+          <code tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
+          <button type="button" class="copy action"><span>Copy command</span></button>
+        </div>
+        <div role="tabpanel" id="panel-chatgpt" aria-labelledby="tab-chatgpt" hidden>
+          <noscript><strong>ChatGPT</strong></noscript>
+          <p class="hint">Paste this URL when adding a connector</p>
+          <code tabindex="0">https://domainhound-mcp.domainhound.workers.dev/mcp</code>
+          <button type="button" class="copy action"><span>Copy URL</span></button>
+        </div>
+        <div role="tabpanel" id="panel-other" aria-labelledby="tab-other" hidden>
+          <noscript><strong>Other MCP clients</strong></noscript>
+          <p class="hint">MCP configuration</p>
+          <code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
+          <button type="button" class="copy action"><span>Copy config</span></button>
+        </div>
+        <p class="feedback" role="status"></p>
+      </div>
+    </details>
+  </div></div>
   <aside class="pain-strip" aria-label="The cost of a name">
     <div class="wrap">
-      <p><strong>$1,311</strong> Average domain resale price. <a href="https://www.namepros.com/threads/domain-name-sales-semi-annual-report-2025.1356912/">NamePros, 2025</a></p>
-      <p><strong>81%</strong> of the 1,000 most common English words had a US trademark. <a href="https://harvardlawreview.org/print/vol-131/are-we-running-out-of-trademarks/">Harvard Law Review, 2018</a></p>
-      <p><strong>$3.11</strong> for a .co. Then $31.05 a year. <a href="/guides/domain-renewal-prices/">Spaceship, Nov 2026</a></p>
+      <p><strong>$1,311</strong> average resale price across 93,100 reported domain sales. <a href="https://www.namepros.com/threads/domain-name-sales-semi-annual-report-2025.1356912/">NamePros, Jan to Jun 2025</a></p>
+      <p><strong>81%</strong> of the 1,000 most common English words had a US trademark in 2016. <a href="https://harvardlawreview.org/print/vol-131/are-we-running-out-of-trademarks/">Harvard Law Review, 2018</a></p>
     </div>
   </aside>
   <section class="trip-proof" id="real-search" aria-labelledby="proof-title">
@@ -201,7 +204,7 @@
       <dl class="proof-chat">
         <div><dt>Ask</dt><dd>“Trip planning app. Thinking Concierge?”</dd></div>
         <div><dt>Sniff</dt><dd><s>concierge.com</s> was taken. “Try Tripfixer.”</dd></div>
-        <div><dt>Grab</dt><dd><strong>tripfixer.app</strong> Bought at Spaceship for $8.28. Renews at $14.49 a year.</dd></div>
+        <div><dt>Grab</dt><dd><strong>tripfixer.app</strong> $8.28 first year. $14.49 a year to renew. Bought at Spaceship, before tax.</dd></div>
       </dl>
     </div>
   </section>
