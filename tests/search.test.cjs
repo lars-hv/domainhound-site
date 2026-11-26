@@ -171,7 +171,7 @@ async function search(page, mode, value) {
   if (await page.locator('#search-hint-text').textContent() !== wanted) {
     await page.getByRole('button', { name: mode === 'name' ? 'Search as a name' : 'Search as an idea' }).click();
   }
-  await page.getByRole('button', { name: 'Search domains', exact: true }).click();
+  await page.getByRole('button', { name: 'Find it here', exact: true }).click();
 }
 
 async function screenshot(page, filename, target = page) {
@@ -187,12 +187,12 @@ for (const width of [390, 1440]) {
     const { page } = await openPage(t, () => assert.fail('Unexpected search'), { width });
     const hero = page.locator('.hero');
     const field = hero.getByRole('textbox', { name: 'Name or idea', exact: true });
-    const submit = hero.getByRole('button', { name: 'Search domains', exact: true });
+    const submit = hero.getByRole('button', { name: 'Find it here', exact: true });
     await field.waitFor();
     await page.evaluate(() => document.fonts.ready);
     assert.equal(await hero.locator('.stamp').textContent(), 'Name it already.');
     assert.equal((await hero.locator('h1').innerText()).replace(/\s+/g, ' '), 'Find a startup name you can actually buy.');
-    assert.equal(await hero.locator('.subline').textContent(), 'The .com is taken. Again. Check your next name for free.');
+    assert.equal(await hero.locator('.subline').textContent(), "Say what you're building. The Hound sniffs out names that are available everywhere, at the best price.");
     assert.equal(await field.getAttribute('placeholder'), "A name, or what you’re building");
     assert.equal(await hero.getByRole('textbox').count(), 1);
     assert.equal(await hero.locator('.search-hint').isVisible(), false);
@@ -202,20 +202,46 @@ for (const width of [390, 1440]) {
     assert.match(await page.locator('#real-search').innerText(), /tripfixer\.app[\s\S]*\$8\.28[\s\S]*\$14\.49/);
     const install = page.locator('#install');
     const claude = install.getByRole('tab', { name: 'Claude Code' });
-    const connect = hero.getByRole('button', { name: 'Connect your agent' });
+    const connect = hero.getByRole('button', { name: 'Find it in your agent' });
     const first = await submit.boundingBox();
     const second = await connect.boundingBox();
     assert.ok(Math.abs(first.width - second.width) <= 1 && first.height === second.height);
     assert.ok(second.y + second.height <= (width === 390 ? 844 : 900));
     assert.equal(await claude.isVisible(), false);
     assert.equal(await page.locator('.search-paths').isVisible(), false);
-    assert.equal(await page.locator('.check-strip li').count(), 6);
+    const receipt = hero.locator('#real-search');
+    assert.equal(await receipt.locator('s').textContent(), 'concierge.com · Taken');
+    assert.equal(await receipt.locator('time').getAttribute('datetime'), '2026-11-24');
+    assert.match(await receipt.innerText(), /360 names sniffed. One winner./);
+    const how = await page.locator('#how').innerText();
+    for (const fact of ['shops', 'renewal', 'App Store', 'Google Play', 'LinkedIn', 'X', 'Instagram',
+      'TikTok', 'YouTube', 'GitHub', 'connects your site', 'owner', 'offer']) assert.ok(how.includes(fact), fact);
+    const questions = page.locator('#faq details');
+    assert.equal(await questions.count(), 2);
+    assert.equal(await page.locator('#faq details[open]').count(), 0);
+    const faqData = await page.locator('script[type="application/ld+json"]').evaluate(node =>
+      JSON.parse(node.textContent)['@graph'].find(entity => entity['@type'] === 'FAQPage').mainEntity);
+    for (const [index, item] of faqData.entries()) {
+      const question = questions.nth(index);
+      const summary = question.locator('summary');
+      assert.equal(await summary.innerText(), item.name);
+      await summary.click();
+      assert.equal(await question.locator('p').innerText(), item.acceptedAnswer.text);
+      await summary.click();
+    }
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const visible = await page.locator('main').innerText();
+    assert.doesNotMatch(visible, /\b(?:free|registered|unavailable|patents?|patented|triage|screening|MCP|connector|registrar|crawl|scan|query)\b|recurring fee|ongoing cost|handle available/i);
+    assert.ok(await field.evaluate(node => node.getBoundingClientRect().bottom <= innerHeight));
     await screenshot(page, 'front-' + width);
     await connect.click();
     await claude.waitFor();
     assert.equal(await install.getByRole('tab').count(), 4);
     await connect.click();
-    await field.focus();
+    await page.locator('#close').getByRole('link', { name: 'Find it in your agent' }).click();
+    await claude.waitFor();
+    await page.locator('#close').getByRole('link', { name: 'Find it here' }).click();
+    assert.ok(await field.evaluate(node => document.activeElement === node));
     const opener = hero.getByRole('link', { name: 'Use my own name' });
     await opener.focus();
     await opener.press('Enter');
@@ -727,7 +753,7 @@ test('the hint follows typing and one click switches name and idea before, durin
   const hint = page.locator('#search-hint-text');
   const toIdea = page.getByRole('button', { name: 'Search as an idea' });
   const toName = page.getByRole('button', { name: 'Search as a name' });
-  const sniff = page.getByRole('button', { name: 'Search domains', exact: true });
+  const sniff = page.getByRole('button', { name: 'Find it here', exact: true });
   const results = page.locator('#search-results');
   await field.fill('Mapfern');
   assert.equal(await hint.textContent(), 'Name search');
@@ -1249,7 +1275,7 @@ test('a taken exact domain lands with its watch link and a failed retry keeps th
   await error.waitFor();
   assert.equal(await field.inputValue(), domain);
   assert.ok(await field.evaluate(node => node === document.activeElement));
-  for (const node of [field, page.getByRole('button', { name: 'Search domains' }), error]) {
+  for (const node of [field, page.getByRole('button', { name: 'Find it here' }), error]) {
     assert.ok(await node.evaluate(inView));
   }
 });
