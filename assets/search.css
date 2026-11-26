@@ -134,7 +134,6 @@
 .handle-list { gap: 0; }
 .check-line { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid #10238540; font-size: .88rem; }
 .check-line a { text-align: right; font-weight: 650; }
-.check-line .check-search-link { white-space: nowrap; }
 .mark-result:not(:empty) { margin-top: 8px; font-weight: 800; font-size: .9rem; }
 .taken-group { margin-top: 14px; }
 .taken-list > a { font-family: var(--mono); margin-left: 4px; }

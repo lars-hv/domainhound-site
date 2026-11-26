@@ -697,13 +697,36 @@ test('details use manual links for unknowns and restrict platform destinations',
   assert.match(await details.innerText(), /US trademark: none found/);
   assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
   assert.equal(await details.locator('a[href="https://reader.example/profile?name=mapfern"]').count(), 0);
-  assert.equal(await page.getByRole('link', { name: 'Search Google Play' }).getAttribute('href'),
+  assert.equal(await page.getByRole('link', { name: "Google Play · Couldn't check · Search Google Play" }).getAttribute('href'),
     'https://play.google.com/store/search?q=mapfern');
-  assert.equal(new URL(await details.getByRole('link', { name: 'Search LinkedIn' }).getAttribute('href')).searchParams.get('keywords'), 'mapfern');
-  assert.match(await details.innerText(), /Google Play has no public search/);
-  assert.match(await details.innerText(), /LinkedIn doesn't allow checks/);
+  assert.equal(new URL(await details.getByRole('link', { name: "LinkedIn · Couldn't check · Search LinkedIn" }).getAttribute('href')).searchParams.get('keywords'), 'mapfern');
+  assert.match(await details.innerText(), /Google Play\s+Couldn't check/);
+  assert.match(await details.innerText(), /LinkedIn\s+Couldn't check/);
   assert.equal(await details.getByRole('link', { name: "Instagram · Couldn't check" }).getAttribute('href'),
     'https://www.instagram.com/mapfern');
+});
+
+test('details show checked store and archive outcomes and every requested platform', async t => {
+  const { page } = await openPage(t, call => {
+    if (call.path === '/v1/check') return { json: checkReply(true) };
+    const details = profileChecks('mapfern');
+    details.googlePlay = { status: 'taken', link: 'https://play.google.com/store/search?q=mapfern', linkLabel: 'Search Google Play' };
+    details.handles.push(
+      { platform: 'LinkedIn', state: 'taken', seenYear: 2021, link: 'https://www.linkedin.com/company/mapfern' },
+      { platform: 'Reddit', state: 'not-seen', linkLabel: 'Search Reddit', link: 'https://www.reddit.com/search/?q=mapfern&type=users' },
+      { platform: 'Twitch', state: 'not-found', link: 'https://www.twitch.tv/mapfern' },
+      { platform: 'Threads', state: 'taken', link: 'https://www.threads.com/@mapfern' }
+    );
+    return { json: details };
+  });
+  await search(page, 'name', 'Mapfern');
+  const details = page.locator('.detail-checks');
+  for (const label of ['Google Play · Taken · Search Google Play', 'LinkedIn · Found in 2021',
+    'Reddit · No page found in public archives · Search Reddit', 'Twitch · No profile found', 'Threads · Taken',
+    "Facebook · Couldn't check"]) {
+    await details.getByRole('link', { name: label, exact: true }).waitFor();
+  }
+  assert.doesNotMatch(await details.innerText(), /Check yourself/i);
 });
 
 test('an unconfirmed or over-budget idea never becomes a bookable suggestion', async t => {
@@ -1101,7 +1124,7 @@ for (const width of [390, 1440]) {
     await details.getByRole('link', { name: /No profile found/ }).waitFor();
     assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
     assert.deepEqual(await details.locator('.check-line b').allTextContents(),
-      ['App Store', 'Google Play has no public search', "LinkedIn doesn't allow checks", 'X', 'Instagram', 'TikTok', 'YouTube', 'GitHub']);
+      ['App Store', 'Google Play', 'LinkedIn', 'X', 'Instagram', 'Threads', 'TikTok', 'YouTube', 'GitHub', 'Facebook', 'Twitch', 'Reddit']);
     assert.ok(await details.evaluate(box => box.previousElementSibling.matches('.ending-list')));
     assert.equal(await details.locator('a[href="https://www.instagram.com/mapfern"]').count(), 1);
     assert.match(await details.innerText(), /No profile found/i);
