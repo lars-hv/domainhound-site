@@ -53,8 +53,7 @@ function domainItem(row, cap = Infinity) {
   const prices = confirmed && !premium && row.priceShown && Array.isArray(row.prices) ? row.prices : [];
   const offers = prices.filter(offer => bookable(offer, row.domain) && offer.threeYearUsd <= cap);
   offers.sort((a, b) => a.firstPaymentUsd - b.firstPaymentUsd || a.threeYearUsd - b.threeYearUsd);
-  return { domain: row.domain, status, premium, offer: offers[0] || null,
-    note: row.note, eligibility: row.eligibility };
+  return { domain: row.domain, status, premium, offer: offers[0] || null };
 }
 
 // The generator and personal-name endpoints also supply a compact offer for the
@@ -62,8 +61,7 @@ function domainItem(row, cap = Infinity) {
 function compactOffer(offer) {
   if (!offer || !Number.isInteger(offer.minimumYears) || offer.minimumYears < 1) return [];
   return [{ ...offer, firstYearUsd: offer.firstPaymentUsd / offer.minimumYears,
-    renewalPaymentUsd: offer.renewalPaymentUsd ?? offer.renewalUsd * offer.minimumYears,
-    threeYearPick: true }];
+    renewalPaymentUsd: offer.renewalPaymentUsd ?? offer.renewalUsd * offer.minimumYears }];
 }
 
 // The other registry-confirmed endings of one generated name: available first, taken after,
@@ -75,7 +73,7 @@ function suggestionEndings(rows, pickDomain) {
     const item = domainItem(row);
     if (!item || item.premium || item.status === 'unknown' || seen.has(item.domain)) continue;
     seen.add(item.domain);
-    endings.push({ domain: item.domain, status: item.status });
+    endings.push(item);
   }
   return endings.sort((a, b) => (a.status === 'available' ? 0 : 1) - (b.status === 'available' ? 0 : 1));
 }
@@ -101,15 +99,6 @@ function personalItem(row) {
 }
 
 const detailsPath = /^\/v1\/check\/details\?id=[A-Za-z0-9_-]+$/;
-// The check answer names the detail sections still to come; anything else is ignored.
-const detailSections = ['appStore', 'googlePlay', 'trademarks', 'handles'];
-
-function pendingSections(details) {
-  const pending = Array.isArray(details?.pending) ? details.pending : [];
-  const known = detailSections.filter(section => pending.includes(section));
-  return known.length ? known : detailSections;
-}
-
 // The server's pick is shown only when it names a registry-confirmed row and
 // matches one of that row's bookable registrar offers to the cent.
 const pickTerms = ['firstPaymentUsd', 'renewalUsd', 'renewalPaymentUsd', 'minimumYears', 'threeYearUsd'];
@@ -213,7 +202,7 @@ export async function finishIdeas(result, signal) {
   }
 }
 
-export async function runSearch(mode, input, signal) {
+export async function runSearch(mode, input, signal, cap = Infinity) {
   let data;
   if (mode === 'idea') data = await request('/v1/generate', signal, { ...input, idea: input.idea.replace(/\s+/g, ' ').trim() });
   else if (mode === 'personal') data = await request('/v1/personal', signal, input);
@@ -221,13 +210,13 @@ export async function runSearch(mode, input, signal) {
   else throw new Error('Unknown search mode');
   if (mode === 'idea') return ideaResult(data);
 
-  const items = mode === 'personal' ? data.results.map(personalItem) : data.domains.map(row => domainItem(row));
+  const items = mode === 'personal' ? data.results.map(personalItem) : data.domains.map(row => domainItem(row, cap));
   const result = {
     items: items.filter(Boolean), complete: data.complete,
     shareUrl: shareUrl(data.share), generationSource: data.path,
-    detailsPath: mode === 'name' && detailsPath.test(data.details?.path) ? data.details.path : null
+    detailsPath: mode === 'name' && items.some(item => item?.status === 'available' && !item.premium) &&
+      detailsPath.test(data.details?.path) ? data.details.path : null
   };
-  if (result.detailsPath) result.detailsPending = pendingSections(data.details);
   if (mode === 'name') {
     result.best = bestItem(data);
     result.query = checkedQuery(data.query);
@@ -245,7 +234,8 @@ export function variantLabels({ ascii, name }) {
 
 export async function closeVariant(label, signal) {
   const response = await runSearch('name', { name: label }, signal);
-  return response.best ? { ...response.best, name: label, shareUrl: response.shareUrl, detailsPath: response.detailsPath } : null;
+  return response.best ? { ...response.best, name: label, shareUrl: response.shareUrl,
+    endings: response.items.filter(item => item.domain !== response.best.domain), detailsPath: response.detailsPath } : null;
 }
 
 // The Worker caps steering names at 40 characters. The idea can still carry the full name.
@@ -254,14 +244,6 @@ export function closeIdeas(name, signal) {
   const input = { idea: 'names like ' + name };
   if (name.length <= 40) input.wanted = [name];
   return runSearch('idea', input, signal);
-}
-
-// Apps, trademarks and handles for a generated name: one name check for the
-// details capability, then the caller loads the details path.
-export async function nameChecks(name, signal) {
-  const response = await runSearch('name', { name }, signal);
-  if (!response.detailsPath) throw Object.assign(new Error('Checks unavailable'), { status: 503 });
-  return { path: response.detailsPath, pending: response.detailsPending };
 }
 
 export function loadDetails(path, signal) {

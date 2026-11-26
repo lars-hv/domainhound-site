@@ -40,26 +40,25 @@ async function copyLine(panel, feedback) {
 }
 
 const setup = document.getElementById('install');
-const desktop = window.matchMedia('(min-width: 760px)');
-
-function fitInstaller() {
-  setup.open = desktop.matches || location.hash === '#install';
-}
+const connect = document.getElementById('connect');
+setup.classList.add('interactive');
+connect.addEventListener('click', () => {
+  setup.open = !setup.open;
+  if (setup.open) setup.querySelector('[aria-selected="true"]').focus();
+});
+setup.addEventListener('toggle', () => connect.setAttribute('aria-expanded', String(setup.open)));
 
 function openLinkedInstaller() {
   if (location.hash === '#install') setup.open = true;
 }
-
-fitInstaller();
-desktop.addEventListener('change', fitInstaller);
+openLinkedInstaller();
 window.addEventListener('hashchange', openLinkedInstaller);
 window.addEventListener('pageshow', openLinkedInstaller);
 document.addEventListener('click', event => {
   if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   if (!event.target.closest('a[href="#install"]')) return;
   setup.open = true;
-  const target = desktop.matches ? setup.querySelector('[aria-selected="true"]') : setup.querySelector('summary');
-  target.focus({ preventScroll: true });
+  setup.querySelector('[aria-selected="true"]').focus();
 });
 
 for (const installer of installers) {

@@ -17,11 +17,12 @@ function element(tag, className, text) {
   return node;
 }
 
-const registryFree = 'Free at the registry';
+const registryAvailable = 'Available at the registry';
 
-function price(label, amount, jump = false) {
+function price(label, amount, years, jump = false) {
   const pair = element('div');
-  const value = element('dd', '', amount == null ? 'No quote' : usd.format(amount));
+  const term = years > 1 ? ' for ' + years + ' years' : '';
+  const value = element('dd', '', amount == null ? 'No quote' : usd.format(amount) + term);
   if (jump) value.append(element('span', 'chip jump', 'Renewal jumps'));
   pair.append(element('dt', '', label), value);
   return pair;
@@ -37,11 +38,10 @@ function domainRow(record) {
   if (Number.isFinite(record.bestValue)) {
     identity.append(element('span', 'chip best-value', 'Best value · ' + usd.format(record.bestValue) + ' over 3 years'));
   }
-  if (record.status !== registryFree) identity.append(element('span', 'status', record.status));
+  if (record.status !== registryAvailable) identity.append(element('span', 'status', record.status));
   const prices = element('dl', 'quotes');
-  prices.append(price('Upfront', record.now), price('Renewal', record.renew, record.jump));
+  prices.append(price('Upfront', record.now, record.term), price('Renewal', record.renew, record.term, record.jump));
   item.append(identity, prices);
-  if (record.term > 1) item.append(element('p', 'term', record.term + ' years per payment'));
   return item;
 }
 
@@ -73,10 +73,10 @@ function nameGroup({ name, verdict, records, takenDomains: targets }, checkedAt,
   heading.append(element('h2', '', name));
   if (verdict) heading.append(element('p', 'verdict', verdict));
   const meta = element('p', 'group-meta');
-  const free = records.filter(record => record.status === registryFree).length;
-  if (free) {
-    const mixed = free < records.length;
-    meta.append(mixed ? free + (free === 1 ? ' ending' : ' endings') + ' free at the registry · ' : registryFree + ' · ');
+  const available = records.filter(record => record.status === registryAvailable).length;
+  if (available) {
+    const mixed = available < records.length;
+    meta.append(mixed ? available + (available === 1 ? ' ending' : ' endings') + ' available at the registry · ' : registryAvailable + ' · ');
   }
   const time = element('time', '', checkTime);
   time.dateTime = checkedAt;
@@ -90,7 +90,7 @@ function nameGroup({ name, verdict, records, takenDomains: targets }, checkedAt,
   const offers = [];
   const others = [];
   for (const record of records) {
-    if (record.status === registryFree || record.status === 'Confirmed at shop') offers.push(record);
+    if (record.status === registryAvailable || record.status === 'Confirmed at shop') offers.push(record);
     else if (!(record.status === 'Taken' && record.now == null && record.renew == null && targets.includes(record.domain))) {
       others.push(record);
     }

@@ -78,9 +78,7 @@ h1 { max-width: none; font-size: clamp(2.65rem, 7vw, 4.75rem); }
 .pick { color: var(--cream); background: var(--blue); }
 .best-value { margin-top: .35rem; background: var(--gold); }
 .jump { margin: .25rem 0 0 auto; background: var(--coral); }
-.status, .term { font-size: .9375rem; }
-.status { display: block; margin-top: .25rem; }
-.term { grid-column: 1 / -1; text-align: end; }
+.status { display: block; margin-top: .25rem; font-size: .9375rem; }
 
 .quotes {
   display: grid;
@@ -119,6 +117,6 @@ h1 { max-width: none; font-size: clamp(2.65rem, 7vw, 4.75rem); }
 
 @media (max-width: 38rem) {
   .domain-row { grid-template-columns: minmax(0, 1fr); gap: .75rem; }
-  .quotes, .term { text-align: start; }
+  .quotes { text-align: start; }
   .jump { margin-inline-start: 0; }
 }

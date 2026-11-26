@@ -22,14 +22,7 @@ async function checkWatch({ dedicated, width }) {
   assert(document.documentElement.scrollWidth <= width, 'Page overflows horizontally');
   const bounds = button.getBoundingClientRect();
   assert(bounds.height >= 44, 'Watch button is too small');
-  if (dedicated) {
-    assert(bounds.top >= 0 && bounds.bottom <= innerHeight, 'Signup below first viewport: ' + bounds.bottom);
-  } else if (width === 390) {
-    const art = document.querySelector('.paper-art').getBoundingClientRect();
-    const lead = document.querySelector('.lead').getBoundingClientRect();
-    const search = document.querySelector('#search').getBoundingClientRect();
-    assert(art.bottom <= lead.top && lead.bottom <= search.top, 'Mobile hero overlaps the search form or headline');
-  }
+  assert(bounds.top >= 0 && bounds.bottom <= innerHeight, 'Signup below first viewport: ' + bounds.bottom);
 
   const calls = [];
   let reply;

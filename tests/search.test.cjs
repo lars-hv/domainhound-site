@@ -139,15 +139,18 @@ async function openPage(t, handler, { width = 390, javaScriptEnabled = true, red
 
 // Supply the per-name checks for tests focused on shortlist ranking and steering.
 async function openShortlistPage(t, handler, options) {
-  const names = new Set();
+  const names = new Map();
   return openPage(t, async call => {
     const name = call.query.get('name')?.toLowerCase();
     if (call.path === '/v1/check' && names.has(name)) {
-      return { json: { ...bareReply(name, { com: 'available' }), details: detailToken(name) } };
+      const entry = names.get(name);
+      const domains = entry.domains.map(row => ({ ...domainRow(row.domain, row.status), ...row,
+        ...(entry.domain.domain === row.domain && { prices: entry.domain.prices || [entry.domain] }) }));
+      return { json: { domains, details: detailToken(name) } };
     }
     if (call.path === '/v1/check/details') return { json: profileChecks(call.query.get('id')) };
     const response = await handler(call);
-    for (const entry of response.json?.names || []) names.add(entry.name.toLowerCase());
+    for (const entry of response.json?.names || []) names.set(entry.name.toLowerCase(), entry);
     return response;
   }, options);
 }
@@ -155,17 +158,20 @@ async function openShortlistPage(t, handler, options) {
 async function search(page, mode, value) {
   if (mode === 'personal') {
     const field = page.getByRole('textbox', { name: 'What’s your full name?', exact: true });
-    if (!await field.isVisible()) await page.getByText('Use my own name', { exact: true }).click();
+    if (!await field.isVisible()) {
+      await page.locator('#name').focus();
+      await page.getByText('Use my own name', { exact: true }).click();
+    }
     await field.fill(value);
     await page.getByRole('button', { name: 'Find my domain', exact: true }).click();
     return;
   }
   await page.getByRole('textbox', { name: 'Name or idea', exact: true }).fill(value);
-  const wanted = mode === 'name' ? 'Checking a name' : 'Finding free names for your idea';
+  const wanted = mode === 'name' ? 'Checking a name' : 'Finding available names for your idea';
   if (await page.locator('#search-hint-text').textContent() !== wanted) {
     await page.getByRole('button', { name: mode === 'name' ? 'Search this as a name instead' : 'Use this as an idea instead' }).click();
   }
-  await page.getByRole('button', { name: 'Sniff it', exact: true }).click();
+  await page.getByRole('button', { name: 'Search domains', exact: true }).click();
 }
 
 async function screenshot(page, filename, target = page) {
@@ -173,7 +179,7 @@ async function screenshot(page, filename, target = page) {
   if (!dir) return;
   mkdirSync(dir, { recursive: true });
   await page.evaluate(() => document.fonts.ready);
-  await target.screenshot({ path: path.join(dir, filename + '.png'), animations: 'disabled' });
+  await target.screenshot({ ...(target === page && { fullPage: true }), path: path.join(dir, filename + '.png'), animations: 'disabled' });
 }
 
 for (const width of [390, 1440]) {
@@ -181,35 +187,35 @@ for (const width of [390, 1440]) {
     const { page } = await openPage(t, () => assert.fail('Unexpected search'), { width });
     const hero = page.locator('.hero');
     const field = hero.getByRole('textbox', { name: 'Name or idea', exact: true });
-    const submit = hero.getByRole('button', { name: 'Sniff it', exact: true });
+    const submit = hero.getByRole('button', { name: 'Search domains', exact: true });
     await field.waitFor();
     await page.evaluate(() => document.fonts.ready);
     assert.equal(await hero.locator('.stamp').textContent(), 'Name it already.');
     assert.equal((await hero.locator('h1').innerText()).replace(/\s+/g, ' '), 'Find a startup name you can actually buy.');
-    assert.equal(await hero.locator('.subline').textContent(), 'Search domains right here for free. Or ask Claude or Codex to check domains, app names and Google.');
-    assert.equal(await field.getAttribute('placeholder'), "A name, or what you're building");
+    assert.equal(await hero.locator('.subline').textContent(), 'The .com is taken. Again. Check your next name for free.');
+    assert.equal(await field.getAttribute('placeholder'), "A name, or what you’re building");
     assert.equal(await hero.getByRole('textbox').count(), 1);
     assert.equal(await hero.locator('.search-hint').isVisible(), false);
     assert.equal(await hero.getByRole('link', { name: 'Need name ideas?' }).count(), 0);
     assert.deepEqual(await hero.locator('.search-paths a').allTextContents(), ['Use my own name']);
     assert.equal(await page.getByRole('heading', { name: 'A real search.' }).count(), 0);
+    assert.match(await page.locator('#real-search').innerText(), /tripfixer\.app[\s\S]*\$8\.28[\s\S]*\$14\.49/);
     const install = page.locator('#install');
     const claude = install.getByRole('tab', { name: 'Claude Code' });
-    const checkBounds = await submit.boundingBox();
-    const installBounds = await install.boundingBox();
-    if (width === 390) {
-      const row = install.getByText('Install for Claude or Codex', { exact: true });
-      assert.ok(await row.isVisible());
-      assert.equal(await claude.isVisible(), false);
-      assert.ok(checkBounds.y + checkBounds.height <= installBounds.y);
-      const rowBounds = await row.boundingBox();
-      assert.ok(rowBounds.y + rowBounds.height <= 844, 'Install row falls below first screen');
-    } else {
-      assert.ok(await claude.isVisible());
-      assert.ok(installBounds.x >= checkBounds.x + checkBounds.width);
-      assert.ok(installBounds.y < checkBounds.y + checkBounds.height);
-    }
-    await screenshot(page, 'hero-' + width);
+    const connect = hero.getByRole('button', { name: 'Connect your agent' });
+    const first = await submit.boundingBox();
+    const second = await connect.boundingBox();
+    assert.ok(Math.abs(first.width - second.width) <= 1 && first.height === second.height);
+    assert.ok(second.y + second.height <= (width === 390 ? 844 : 900));
+    assert.equal(await claude.isVisible(), false);
+    assert.equal(await page.locator('.search-paths').isVisible(), false);
+    assert.equal(await page.locator('.check-strip li').count(), 6);
+    await screenshot(page, 'front-' + width);
+    await connect.click();
+    await claude.waitFor();
+    assert.equal(await install.getByRole('tab').count(), 4);
+    await connect.click();
+    await field.focus();
     const opener = hero.getByRole('link', { name: 'Use my own name' });
     await opener.focus();
     await opener.press('Enter');
@@ -227,10 +233,10 @@ for (const width of [390, 1440]) {
     await search(page, 'name', 'Mapfern');
     const results = page.getByRole('region', { name: 'Search results' });
     const best = results.locator('.best-domain');
-    await best.getByRole('link', { name: 'Book it at Gandi for $14.00' }).waitFor();
-    assert.equal((await best.locator('h3').innerText()).replace(/\s+/g, ' '), 'Best domain: mapfern.com');
-    assert.match(await best.innerText(), /\$14\.00 first year, \$9\.00 renewal/);
-    await results.getByRole('heading', { name: 'Taken', exact: true }).waitFor();
+    await best.getByRole('link', { name: /Buy .* at Gandi/ }).waitFor();
+    assert.equal((await best.locator('.domain-title').innerText()).replace(/\s+/g, ' '), 'mapfern.com');
+    assert.match(await best.innerText(), /\$14\.00 first year\s+Renewal \$9\.00\/year/);
+    await results.locator('.taken-list b').waitFor();
     await results.evaluate(el => el.scrollIntoView({ block: 'start' }));
     await screenshot(page, 'name-' + width);
     const installLink = results.locator('.taken-group a[href="#install"]');
@@ -238,7 +244,7 @@ for (const width of [390, 1440]) {
     const setup = page.locator('#install');
     await setup.getByRole('tab', { name: 'Codex', exact: true }).waitFor();
     if (width === 390) {
-      await setup.locator('summary').click();
+      await page.locator('#connect').click();
       await installLink.click();
       await setup.getByRole('tab', { name: 'Codex', exact: true }).waitFor();
     }
@@ -253,7 +259,7 @@ test('a dotted name reaches the API as an exact domain', async t => {
       domains: [domainRow('mapfern.com')], choice: null } };
   });
   await search(page, 'name', 'mapfern.com');
-  await page.getByRole('link', { name: 'Book it at Spaceship for $6.25' }).waitFor();
+  await page.getByRole('link', { name: /Buy .* at Spaceship/ }).waitFor();
 });
 
 test('confirmed endings remain usable when automatic details have expired', async t => {
@@ -265,12 +271,12 @@ test('confirmed endings remain usable when automatic details have expired', asyn
     return { json: checkReply(true) };
   });
   await search(page, 'name', 'Mapfern');
-  const book = page.getByRole('link', { name: /Book it at Gandi for \$14\.00/i });
+  const book = page.getByRole('link', { name: /Buy .* at Gandi/i });
   await book.waitFor();
   assert.equal(await book.getAttribute('href'), 'https://shop.gandi.net/en/domain/suggest?search=mapfern.com');
-  assert.equal(await page.locator('.ending-list').getByText('mapfern.com', { exact: true }).count(), 0);
-  assert.equal(await page.getByRole('link', { name: /Book it at/i }).count(), 1);
-  await page.getByText('mapfern.dev', { exact: true }).first().waitFor();
+  assert.equal(await page.locator('.ending-list').getByText('mapfern.com', { exact: true }).count(), 1);
+  assert.equal(await page.getByRole('link', { name: /Buy /i }).count(), 1);
+  await page.getByRole('link', { name: 'Watch mapfern.dev' }).waitFor();
   assert.equal(await page.getByText('mapfern.app', { exact: true }).count(), 0);
   await page.getByText(/checks expired/).waitFor();
   assert.equal(calls[1].query.get('id'), 'mapfern');
@@ -299,7 +305,7 @@ test('rate limited and unavailable searches can be retried', async t => {
   await search(page, 'name', 'Mapfern');
   await page.getByText('Couldn’t finish the search. Try again in a moment.').waitFor();
   await search(page, 'name', 'Mapfern');
-  await page.getByRole('link', { name: /Book it at Gandi/i }).waitFor();
+  await page.getByRole('link', { name: /Buy .* at Gandi/i }).waitFor();
   assert.equal(responses.length, 0);
 });
 
@@ -319,7 +325,7 @@ test('agent setup offers working copy actions for both terminals and the hosted 
     configurable: true, value: { writeText(text) { window.copiedSetup = text; } }
   }));
   const setup = page.locator('#install');
-  await setup.locator('summary').click();
+  await page.locator('#connect').click();
   for (const [client, expected] of [
     ['Claude Code', 'claude mcp add domain-hound -- npx -y domain-hound'],
     ['Codex', 'codex mcp add domain-hound -- npx -y domain-hound'],
@@ -369,13 +375,13 @@ test('two-year bookings use the full upfront charge and premium results withhold
     ...checkReply(), domains: [ai, premium], details: { id: null, status: 'unavailable' }, complete: true
   } }));
   await search(page, 'name', 'Mapfern');
-  const book = page.getByRole('link', { name: /Book it at Spaceship for \$130/i });
+  const book = page.getByRole('link', { name: /Buy .* at Spaceship/i });
   await book.waitFor();
   const result = await page.locator('#search-results').innerText();
   assert.match(result, /\$140/);
   assert.match(result, /2 years|two.year/i);
   assert.match(result, /premium/i);
-  assert.equal(await page.getByRole('link', { name: /Book it at/i }).count(), 1);
+  assert.equal(await page.getByRole('link', { name: /Buy /i }).count(), 1);
 });
 
 function ideas(names) {
@@ -398,7 +404,7 @@ const ideaText = 'A field notebook for people who map forest trails';
 const shortlist = [['Mapfern', 'mapfern.com'], ['Trailfin', 'trailfin.com'], ['Mossfold', 'mossfold.app'],
   ['Takenname', 'takenname.dev', 'taken'], ['Unverified', 'unverified.dev', 'unknown']];
 const generationId = 'opaque-synthetic-generation-token';
-const collectingNames = 'Sniffing out more names...';
+const collectingNames = 'Sniffing out more names…';
 
 function initialIdeas(names) {
   return { ...ideas(names), version: 2, stage: 'initial', complete: false,
@@ -453,7 +459,7 @@ for (const width of [390, 1440]) {
     await screenshot(page, 'initial-' + width, results);
     assert.equal(await previewRow.evaluate(row => row.offsetTop), position);
     assert.equal(await progress.isVisible(), true);
-    const booking = previewRow.getByRole('link', { name: /Book it/ });
+    const booking = previewRow.getByRole('link', { name: /Buy / });
     await booking.focus();
     await page.evaluate(() => {
       const animate = Element.prototype.animate;
@@ -476,7 +482,7 @@ for (const width of [390, 1440]) {
     await page.waitForLoadState('networkidle');
     assert.equal(calls.filter(call => call.path.startsWith('/v1/generate')).length, 3);
     assert.deepEqual(calls.filter(call => call.path === '/v1/check/details').map(call => call.query.get('id')).sort(),
-      ['cedarink', 'driftpen', 'mapfern', 'paperclip']);
+      ['cedarink', 'driftpen', 'mapfern', 'mossfold', 'paperclip', 'trailfin']);
     assert.ok(pollTimes[1] - pollTimes[0] >= 65);
   });
 }
@@ -571,7 +577,7 @@ for (const width of [390, 1440]) {
     assert.equal(await cards.count(), 3);
     const card = cards.first();
     const content = await card.innerText();
-    for (const pattern of [/74\/100/, /Workable/, /mapfern.com/, /\$6\.25/, /\$16\.50/, /Renewal jumps/,
+    for (const pattern of [/74\/100/, /Workable/, /mapfern.com/, /\$6\.25/, /\$16\.50/,
       /US trademarks not checked/]) assert.match(content, pattern);
     assert.equal(await card.locator('li').count(), 3);
     assert.equal(await card.getByRole('link', { name: 'Share', exact: true }).getAttribute('href'),
@@ -593,6 +599,7 @@ for (const width of [390, 1440]) {
 for (const mode of ['personal']) {
   test(mode + ' field routes a full name to personal search', async t => {
     const { page } = await openPage(t, call => {
+      if (call.path === '/v1/check') return { json: bareReply('alexsample', { me: 'available' }) };
       assert.equal(call.path, '/v1/personal');
       assert.equal(call.method, 'POST');
       assert.deepEqual(call.body, { fullName: 'Alex Sample' });
@@ -600,8 +607,8 @@ for (const mode of ['personal']) {
       return { json: { results: [{ ...domainRow('alexsample.me'), bestPrice: price('alexsample.me') }], complete: true } };
     });
     await search(page, mode, 'Alex Sample');
-    await page.getByRole('heading', { name: 'alexsample.me' }).waitFor();
-    const book = page.getByRole('link', { name: /Book it at Spaceship/ });
+    await page.getByText('alexsample.me', { exact: true }).waitFor();
+    const book = page.getByRole('link', { name: /Buy .* at Spaceship/ });
     assert.equal(await book.getAttribute('href'), price('alexsample.me').buyUrl);
     assert.equal(new URL(page.url()).search, '');
   });
@@ -619,7 +626,7 @@ test('a full name in the main field is checked as a name, never routed to person
   assert.equal(await page.getByText('Check as a startup name').count(), 0);
 });
 
-test('details qualify unknowns, exact US marks and public profile checks', async t => {
+test('details use manual links for unknowns and restrict platform destinations', async t => {
   const { page } = await openPage(t, call => {
     if (call.path === '/v1/check') return { json: checkReply(true) };
     assert.equal(call.path, '/v1/check/details');
@@ -636,12 +643,12 @@ test('details qualify unknowns, exact US marks and public profile checks', async
     } };
   });
   await search(page, 'name', 'Mapfern');
-  await page.getByText('No public profile found.', { exact: false }).waitFor();
+  await page.getByText('No public profile found', { exact: false }).waitFor();
   const details = page.locator('.detail-checks');
-  assert.match(await details.innerText(), /No exact live word mark found/);
+  assert.doesNotMatch(await details.innerText(), /trademark/i);
   assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
-  assert.equal(await details.locator('a[href="https://reader.example/profile?name=mapfern"]').count(), 1);
-  assert.equal(await page.getByRole('link', { name: 'Check Google Play' }).getAttribute('href'),
+  assert.equal(await details.locator('a[href="https://reader.example/profile?name=mapfern"]').count(), 0);
+  assert.equal(await page.getByRole('link', { name: 'Google Play · Check' }).getAttribute('href'),
     'https://play.google.com/store/search?q=mapfern');
 });
 
@@ -655,7 +662,7 @@ test('an unconfirmed or over-budget idea never becomes a bookable suggestion', a
   assert.equal(await page.locator('#search-results article').count(), 0);
 });
 
-test('single-offer API replies disclose the three-year basis on idea and personal searches', async t => {
+test('single-offer API replies show the actual purchase and renewal prices on idea and personal searches', async t => {
   const { page } = await openShortlistPage(t, call => {
     if (call.path === '/v1/generate') {
       const reply = ideas([['Mapfern', 'mapfern.com']]);
@@ -663,6 +670,7 @@ test('single-offer API replies disclose the three-year basis on idea and persona
       reply.priceSnapshot = { checkedAt: '2026-11-24' };
       return { json: reply };
     }
+    if (call.path === '/v1/check') return { json: { domains: [{ ...domainRow('alexsample.me'), prices: [domainRow('alexsample.me').prices[0]] }] } };
     const row = domainRow('alexsample.me');
     const { shop, buyUrl, firstPaymentUsd, renewalUsd, minimumYears, threeYearUsd, checkedAt } = row.prices[0];
     delete row.prices;
@@ -671,9 +679,9 @@ test('single-offer API replies disclose the three-year basis on idea and persona
   });
   for (const [mode, input] of [['idea', ideaText], ['personal', 'Alex Sample']]) {
     await search(page, mode, input);
-    await page.getByRole('article').getByText('Lowest three-year cost · $32.00', { exact: true }).waitFor();
-    await page.getByRole('link', { name: 'Book it at Gandi for $14.00' }).waitFor();
-    if (mode === 'idea') await page.getByText(/Price snapshot 2026-11-24/).waitFor();
+    await page.getByRole('article').getByText('$14.00 first year', { exact: true }).waitFor();
+    await page.getByRole('link', { name: /Buy .* at Gandi/ }).waitFor();
+    await page.getByRole('article').getByText('Renewal $9.00/year').waitFor();
   }
 });
 
@@ -712,12 +720,12 @@ test('the hint follows typing and one click switches name and idea before, durin
   const hint = page.locator('#search-hint-text');
   const toIdea = page.getByRole('button', { name: 'Use this as an idea instead' });
   const toName = page.getByRole('button', { name: 'Search this as a name instead' });
-  const sniff = page.getByRole('button', { name: 'Sniff it', exact: true });
+  const sniff = page.getByRole('button', { name: 'Search domains', exact: true });
   const results = page.locator('#search-results');
   await field.fill('Mapfern');
   assert.equal(await hint.textContent(), 'Checking a name');
   await field.fill('A trip planner for people who travel by train');
-  assert.equal(await hint.textContent(), 'Finding free names for your idea');
+  assert.equal(await hint.textContent(), 'Finding available names for your idea');
   await field.fill('');
   assert.equal(await page.locator('.search-hint').isVisible(), false);
   assert.equal(await hint.textContent(), '');
@@ -726,7 +734,7 @@ test('the hint follows typing and one click switches name and idea before, durin
   await field.fill('my trip app');
   assert.equal(await hint.textContent(), 'Checking a name');
   await toIdea.click();
-  assert.equal(await hint.textContent(), 'Finding free names for your idea');
+  assert.equal(await hint.textContent(), 'Finding available names for your idea');
   assert.equal(calls.length, 0);
   await field.fill('my trip app');
   assert.equal(await hint.textContent(), 'Checking a name');
@@ -738,7 +746,7 @@ test('the hint follows typing and one click switches name and idea before, durin
   await results.getByRole('heading', { name: 'Railnest' }).waitFor();
   release();
   await page.waitForLoadState('networkidle');
-  assert.equal(await results.locator('.best-domain').count(), 0);
+  assert.equal(await results.locator('.best-domain').getByText('mytripapp.com', { exact: true }).count(), 0);
   assert.equal(await results.getByRole('heading', { name: 'my trip app' }).count(), 0);
 
   // A new submission on the same text keeps the chosen route.
@@ -769,7 +777,7 @@ test('the best domain shows only a server pick that matches a confirmed row and 
   const replies = [exact, ...tampered];
   const { page } = await openPage(t, call => ({ json: replies.shift() }));
   await search(page, 'name', 'Mapfern');
-  await page.locator('.best-domain').getByRole('link', { name: 'Book it at Gandi for $14.00' }).waitFor();
+  await page.locator('.best-domain').getByRole('link', { name: /Buy .* at Gandi/ }).waitFor();
   for (let i = 0; i < tampered.length; i++) {
     await search(page, 'name', 'Mapfern');
     await page.getByRole('heading', { name: 'Mapfern', exact: true }).waitFor();
@@ -778,7 +786,7 @@ test('the best domain shows only a server pick that matches a confirmed row and 
   assert.equal(replies.length, 0);
 });
 
-test('the best domain keeps the two-year term and Cloudflare DNS disclosures', async t => {
+test('the best domain shows the full two-year payments inline', async t => {
   const ai = domainRow('mapfern.ai');
   ai.prices = [price(ai.domain, {
     shop: 'Cloudflare', minimumYears: 2, firstYearUsd: 65, firstPaymentUsd: 130, renewalUsd: 70,
@@ -791,11 +799,11 @@ test('the best domain keeps the two-year term and Cloudflare DNS disclosures', a
   } }));
   await search(page, 'name', 'mapfern.ai');
   const best = page.locator('.best-domain');
-  await best.getByRole('link', { name: 'Book it at Cloudflare for $130.00' }).waitFor();
+  await best.getByRole('link', { name: /Buy .* at Cloudflare/ }).waitFor();
   const text = await best.innerText();
-  assert.match(text, /\$65\.00 first year, \$70\.00 renewal/);
-  assert.match(text, /2-year minimum\. \$130\.00 upfront, then \$140\.00 per 2 years\./);
-  assert.match(text, /Needs Cloudflare DNS/);
+  assert.match(text, /\$130\.00 for 2 years/);
+  assert.match(text, /Renewal \$140\.00 for 2 years/);
+  assert.doesNotMatch(text, /minimum|Needs Cloudflare DNS/i);
   assert.doesNotMatch(await page.locator('#search-results').innerText(), /No endings could be verified/);
 });
 
@@ -840,42 +848,42 @@ test('a taken name shows the idea preview while close variants are still being c
     return fallback(call);
   });
   await search(page, 'name', 'Mapfern');
-  const recovery = page.getByRole('region', { name: 'Free names close to yours' });
+  const recovery = page.getByRole('region', { name: 'Available names close to yours' });
   await recovery.getByText(collectingNames, { exact: true }).waitFor();
   assert.deepEqual(await recovery.locator('article h3').allTextContents(), ['Fernly']);
   release();
   await recovery.getByRole('heading', { name: 'Mapwise' }).waitFor();
   assert.deepEqual(await recovery.locator('article h3').allTextContents(),
-    ['getmapfern.com', 'mapfernhq.dev', 'Mapwise', 'Fernly']);
+    ['getmapfern', 'mapfernhq', 'Mapwise', 'Fernly']);
   assert.equal(await recovery.locator(':scope > [role=status]').textContent(), '');
 });
 
 for (const width of [390, 1440]) {
-  test('a taken name brings back close free names without another click at ' + width + 'px', async t => {
+  test('a taken name brings back similar available names without another click at ' + width + 'px', async t => {
     const { page, calls } = await openShortlistPage(t, call => takenHandler()(call), { width });
     await search(page, 'name', 'Mapfern');
     const results = page.locator('#search-results');
-    const recovery = results.getByRole('region', { name: 'Free names close to yours' });
-    await recovery.getByRole('heading', { name: 'Taken. Here are free names close to yours', exact: true }).waitFor();
+    const recovery = results.getByRole('region', { name: 'Available names close to yours' });
+    await recovery.getByRole('heading', { name: 'Available names close to yours', exact: true }).waitFor();
     await recovery.getByRole('heading', { name: 'Fernhaus' }).waitFor();
     await page.waitForLoadState('networkidle');
     await results.locator('.best-domain').getByText('mapfern.xyz', { exact: true }).waitFor();
     assert.deepEqual(await recovery.locator('article h3').allTextContents(),
-      ['getmapfern.com', 'mapfernhq.dev', 'Mapwise', 'Mossmap', 'Fernly', 'Fernpath', 'Trailfern', 'Fernhaus']);
+      ['getmapfern', 'mapfernhq', 'Mapwise', 'Mossmap', 'Fernly', 'Fernpath', 'Trailfern', 'Fernhaus']);
     // Variants book the server pick; generated names book their lowest first-year offer.
-    assert.equal(await recovery.getByRole('link', { name: 'Book it at Gandi for $14.00' }).count(), 2);
-    assert.equal(await recovery.getByRole('link', { name: 'Book it at Spaceship for $6.25' }).count(), 6);
+    assert.equal(await recovery.getByRole('link', { name: /Buy .* at Gandi/ }).count(), 2);
+    assert.equal(await recovery.getByRole('link', { name: /Buy .* at Spaceship/ }).count(), 6);
     assert.equal(await recovery.getByText('getmapfern.com', { exact: true }).count(), 1);
     assert.equal(await recovery.locator(':scope > [role=status]').textContent(), '');
     const owner = recovery.getByRole('link', { name: 'Who owns mapfern.com? See if it can be bought' });
     assert.equal(await owner.getAttribute('href'), '/land/?d=mapfern.com');
     // The ending rows stay, including the low-tier endings that can be booked.
     await results.locator('.ending-list').getByText('mapfern.tech', { exact: true }).waitFor();
-    assert.equal(await results.locator('.ending-list').getByRole('link', { name: /Book it at/ }).count(), 1);
+    assert.equal(await results.locator(':scope article[aria-label="mapfern"] .ending-list').getByRole('link', { name: /Buy / }).count(), 2);
     const checked = calls.filter(call => call.path === '/v1/check').map(call => call.query.get('name'));
     assert.deepEqual(checked.map(name => name.toLowerCase()).sort(),
-      ['mapfern', 'getmapfern', 'mapfernapp', 'mapfernhq', 'trymapfern', 'mapwise', 'mossmap'].sort());
-    await recovery.locator('a[href="https://social.example/mapwise"]').waitFor();
+      ['mapfern', 'getmapfern', 'mapfernapp', 'mapfernhq', 'trymapfern', 'mapwise', 'mossmap', 'fernly', 'fernpath', 'trailfern', 'fernhaus'].sort());
+    await recovery.locator('a[href="https://www.instagram.com/mapwise"]').waitFor();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await recovery.evaluate(el => el.scrollIntoView({ block: 'start' }));
     await screenshot(page, 'taken-' + width);
@@ -889,7 +897,7 @@ test('an unknown leading ending keeps the plain result instead of the taken fall
   await search(page, 'name', 'Mapfern');
   await page.locator('.best-domain').getByText('mapfern.xyz', { exact: true }).waitFor();
   await page.waitForLoadState('networkidle');
-  assert.equal(await page.getByText('Taken. Here are free names close to yours').count(), 0);
+  assert.equal(await page.getByText('Available names close to yours').count(), 0);
   assert.equal(calls.length, 1);
 });
 
@@ -907,13 +915,13 @@ test('taken hyphenated international names get four variants without added separ
     return { json: bareReply(variant, { com: 'available' }, label) };
   });
   await search(page, 'name', name);
-  const recovery = page.getByRole('region', { name: 'Free names close to yours' });
+  const recovery = page.getByRole('region', { name: 'Available names close to yours' });
   await recovery.locator('article').nth(3).waitFor();
   assert.deepEqual(calls.filter(call => call.path === '/v1/check').map(call => call.query.get('name')).sort(),
     [name, 'getblåfuru', 'tryblåfuru', 'blåfuruhq', 'blåfuruapp'].sort());
 });
 
-test('an exact taken .com checks other endings and shows the original domain once below available endings', async t => {
+test('an exact taken .com checks other endings and shows the original domain once above available endings', async t => {
   const { page, calls } = await openPage(t, call => {
     if (call.path === '/v1/check' && call.query.get('name') === 'mapfern.com') {
       return { json: { ...bareReply('mapfern', {}, 'mapfern'), query: { name: 'mapfern', ascii: 'mapfern', exactDomain: 'mapfern.com' },
@@ -923,19 +931,19 @@ test('an exact taken .com checks other endings and shows the original domain onc
   });
   await search(page, 'name', 'mapfern.com');
   const results = page.locator('#search-results');
-  const recovery = results.getByRole('region', { name: 'Free names close to yours' });
+  const recovery = results.getByRole('region', { name: 'Available names close to yours' });
   await recovery.getByText('Couldn’t load name ideas.', { exact: true }).waitFor();
   assert.equal(calls[0].query.get('name'), 'mapfern.com');
   assert.equal(calls[1].query.get('name'), 'mapfern');
-  await results.locator('.taken-group').getByText('mapfern.com', { exact: true }).waitFor();
+  await results.locator('.top-taken').getByText('mapfern.com', { exact: true }).waitFor();
   // The exact row appears once, as typed and checked.
   assert.equal(await results.locator('.domain-title', { hasText: /^mapfern\.com$/ }).count(), 1);
   await results.locator('a[href="/watch/?domain=mapfern.com"]').waitFor();
-  assert.deepEqual(await recovery.locator('article h3').allTextContents(), ['getmapfern.com', 'mapfernhq.dev']);
+  assert.deepEqual(await recovery.locator('article h3').allTextContents(), ['getmapfern', 'mapfernhq']);
   assert.equal(await recovery.getByRole('link', { name: 'Who owns mapfern.com? See if it can be bought' })
     .getAttribute('href'), '/land/?d=mapfern.com');
   const titles = await results.locator('.domain-title').allTextContents();
-  assert.ok(titles.indexOf('mapfern.tech') >= 0 && titles.indexOf('mapfern.tech') < titles.indexOf('mapfern.com'));
+  assert.ok(titles.indexOf('mapfern.tech') >= 0 && titles.indexOf('mapfern.tech') > titles.indexOf('mapfern.com'));
 });
 
 test('failed close-name lookups say so and never hide the ending rows', async t => {
@@ -946,7 +954,7 @@ test('failed close-name lookups say so and never hide the ending rows', async t 
     return { status: 429, json: { error: 'rate-limited', retryAfterSeconds: 60 } };
   });
   await search(page, 'name', 'Mapfern');
-  const recovery = page.getByRole('region', { name: 'Free names close to yours' });
+  const recovery = page.getByRole('region', { name: 'Available names close to yours' });
   await recovery.getByText(breather, { exact: true }).waitFor();
   assert.equal(await recovery.locator('article').count(), 0);
   await page.locator('.best-domain').getByText('mapfern.xyz', { exact: true }).waitFor();
@@ -977,7 +985,7 @@ test('editing a taken name aborts its close-name lookups before the next search'
   await results.locator('.best-domain').getByText('trailfin.com', { exact: true }).waitFor();
   release();
   await page.waitForLoadState('networkidle');
-  assert.equal(await results.getByText('Taken. Here are free names close to yours').count(), 0);
+  assert.equal(await results.getByText('Available names close to yours').count(), 0);
   assert.equal(await results.getByRole('heading', { name: 'Mapwise' }).count(), 0);
 });
 
@@ -1012,14 +1020,18 @@ for (const width of [390, 1440]) {
     const taken = results.locator('.taken-group');
     assert.deepEqual(await taken.locator('a[href^="/watch/"]').evaluateAll(nodes =>
       nodes.map(node => new URL(node.href).searchParams.get('domain')).sort()), ['mapfern.app', 'mapfern.net']);
+    assert.equal(await page.locator('#real-search').isVisible(), false);
     const order = await results.locator('.domain-title').allTextContents();
     assert.deepEqual(order.slice(0, 3), ['mapfern.dev', 'mapfern.com', 'mapfern.io']);
     assert.match(await taken.innerText(), /owner.*offer|offer.*owner/i);
     assert.ok(await taken.locator('a[href="#install"]').isVisible());
     release();
-    await details.getByText('New Network', { exact: false }).first().waitFor();
-    assert.equal(await details.locator('a[href="https://social.example/mapfern"]').count(), 1);
-    assert.equal(await details.locator('dl > div:not(:has(a))').count(), 0);
+    await details.getByText('No public profile found', { exact: true }).waitFor();
+    assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
+    assert.deepEqual(await details.locator('.check-chip b').allTextContents(),
+      ['App Store', 'Google Play', 'LinkedIn', 'X', 'Instagram', 'TikTok', 'YouTube', 'GitHub']);
+    assert.ok(await details.evaluate(box => box.previousElementSibling.matches('.ending-list') &&
+      box.nextElementSibling.matches('.taken-group') && box.parentElement.matches('article')));
     assert.equal(await details.locator('a[href="https://www.instagram.com/mapfern"]').count(), 1);
     assert.match(await details.innerText(), /No public profile found/i);
     assert.doesNotMatch(await details.innerText(), /\bfree\b|\bavailable\b/i);
@@ -1032,7 +1044,7 @@ for (const width of [390, 1440]) {
     }
   });
 
-  test('generator checks four names automatically and the next on opening at ' + width + 'px', async t => {
+  test('generator checks each available name once at ' + width + 'px', async t => {
     const names = ['Mapfern', 'Trailfin', 'Mossfold', 'Cedarink', 'Fernpath'];
     const { page, calls } = await openPage(t, call => {
       if (call.path === '/v1/generate') {
@@ -1046,7 +1058,7 @@ for (const width of [390, 1440]) {
       }
       if (call.path === '/v1/check') {
         const stem = call.query.get('name').toLowerCase();
-        return { json: { ...bareReply(stem, { com: 'available', dev: 'available' }), details: detailToken(stem) } };
+        return { json: { ...bareReply(stem, { com: 'available', dev: 'available', xyz: 'unknown' }), details: detailToken(stem) } };
       }
       assert.equal(call.path, '/v1/check/details');
       return { json: profileChecks(call.query.get('id')) };
@@ -1054,27 +1066,22 @@ for (const width of [390, 1440]) {
     await search(page, 'idea', ideaText);
     const results = page.locator('#search-results');
     const cards = results.locator('.idea-list article');
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       const card = cards.nth(i);
       const stem = names[i].toLowerCase();
-      await card.locator('a[href="https://social.example/' + stem + '"]').waitFor();
+      await card.getByText('No public profile found').waitFor();
       assert.match(await card.innerText(), new RegExp(stem + '\\.dev|\\.dev\\b'));
       assert.doesNotMatch(await card.innerText(), /\.xyz\b/);
     }
     const queried = () => calls.filter(call => call.path === '/v1/check/details').map(call => call.query.get('id'));
-    assert.deepEqual(queried().sort(), names.slice(0, 4).map(name => name.toLowerCase()).sort());
+    assert.deepEqual(queried().sort(), names.map(name => name.toLowerCase()).sort());
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await screenshot(page, 'generator-' + width, results);
     if (width === 390) {
       await page.setViewportSize({ width: 320, height: 700 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     }
-    const last = cards.nth(4);
-    await last.locator('summary').click();
-    await last.locator('a[href="https://social.example/fernpath"]').waitFor();
-    await last.locator('summary').click();
-    await last.locator('summary').click();
-    await page.waitForLoadState('networkidle');
+    await cards.nth(4).getByText('No public profile found').waitFor();
     assert.equal(queried().length, 5);
   });
 }
@@ -1092,11 +1099,11 @@ test('all taken endings have watch links and no checkout', async t => {
   const domains = ['com', 'dev', 'app'].map(ending => domainRow('mapfern.' + ending, 'taken'));
   const { page } = await openPage(t, () => ({ json: { domains, choice: null } }));
   await search(page, 'name', 'Mapfern');
-  const taken = page.locator('.taken-group');
-  await taken.getByRole('heading', { name: 'Taken', exact: true }).waitFor();
+  const taken = page.locator('article');
+  await taken.locator('.taken-list b').waitFor();
   assert.deepEqual(await taken.locator('a[href^="/watch/"]').evaluateAll(links =>
     links.map(link => new URL(link.href).searchParams.get('domain')).sort()), domains.map(row => row.domain).sort());
-  assert.equal(await page.getByRole('link', { name: /Book it at/ }).count(), 0);
+  assert.equal(await page.getByRole('link', { name: /Buy / }).count(), 0);
 });
 
 test('rate-limited name checks can be retried without rechecking domains', async t => {
@@ -1111,7 +1118,7 @@ test('rate-limited name checks can be retried without rechecking domains', async
   await details.getByText(breather, { exact: true }).waitFor();
   assert.ok(await page.locator('.best-domain a.action').isVisible());
   await details.getByRole('button', { name: /retry/i }).click();
-  await details.locator('a[href="https://social.example/mapfern"]').waitFor();
+  await details.getByText('No public profile found').waitFor();
   assert.deepEqual(calls.map(call => call.path), ['/v1/check', '/v1/check/details', '/v1/check/details']);
 });
 
@@ -1133,9 +1140,57 @@ test('a late handle response cannot attach itself to the next name', async t => 
   await started;
   await search(page, 'name', 'Trailfin');
   const details = page.locator('.detail-checks');
-  await details.locator('a[href="https://social.example/trailfin"]').waitFor();
+  await details.locator('a[href="https://www.instagram.com/trailfin"]').waitFor();
   release();
   await page.waitForLoadState('networkidle');
-  assert.equal(await details.locator('a[href="https://social.example/mapfern"]').count(), 0);
+  assert.equal(await details.locator('a[href="https://www.instagram.com/mapfern"]').count(), 0);
   assert.ok(await page.locator('.best-domain').getByText('trailfin.com', { exact: true }).isVisible());
+});
+
+test('an all-taken name ignores a details token even when the API supplies one', async t => {
+  const { page, calls } = await openPage(t, call => ({
+    json: call.path === '/v1/check' ? {
+      domains: [domainRow('mapfern.io', 'taken')], details: detailToken('mapfern')
+    } : profileChecks('mapfern')
+  }));
+  await page.locator('#name').fill('mapfern.io');
+  await page.locator('#name').press('Enter');
+  await page.locator('a[href="/watch/?domain=mapfern.io"]').waitFor();
+  await page.waitForLoadState('networkidle');
+  assert.deepEqual(calls.map(call => call.path), ['/v1/check']);
+  assert.equal(await page.locator('.detail-checks').count(), 0);
+});
+
+test('a suggested name uses the refreshed domain variations before loading its apps and handles', async t => {
+  const { page, calls } = await openPage(t, call => {
+    if (call.path === '/v1/generate') return { json: ideas([['Mapfern', 'mapfern.dev'], ['Trailfin', 'trailfin.io']]) };
+    if (call.path === '/v1/check/details') return { json: profileChecks(call.query.get('id')) };
+    const name = call.query.get('name').toLowerCase();
+    return { json: { ...bareReply(name, name === 'mapfern' ? { dev: 'available', app: 'available' } : {}),
+      details: detailToken(name) } };
+  });
+  await search(page, 'idea', ideaText);
+  await page.waitForLoadState('networkidle');
+  const open = page.locator('article[aria-label="Mapfern"]');
+  assert.deepEqual(await open.locator('.top-taken s').allTextContents(), ['mapfern.com', 'mapfern.ai', 'mapfern.io']);
+  assert.equal(await open.getByRole('link', { name: 'Buy mapfern.app at Spaceship' }).count(), 1);
+  const taken = page.locator('article[aria-label="Trailfin"]');
+  assert.equal(await taken.locator('.detail-checks, .offer-row').count(), 0);
+  assert.deepEqual(calls.filter(call => call.path === '/v1/check/details').map(call => call.query.get('id')), ['mapfern']);
+});
+
+test('older and current shared shortlists show availability without changing the encoded status indexes', async t => {
+  const { page } = await openPage(t, () => assert.fail('A receipt should open locally'));
+  for (const version of [1, 2]) {
+    const group = ['Mapfern', 0, 'mapfern', [['.ai', 0, 13000, 14000, 2], ['.io', 8, null, null, 1]]];
+    if (version === 2) group.push({ p: 0 });
+    const encoded = deflateSync(JSON.stringify([checkedAt, [group]])).toString('base64url');
+    await page.goto(site + '/r/#' + version + '.' + encoded);
+    await page.locator('#receipt').waitFor();
+    const receipt = await page.locator('#receipt').innerText();
+    assert.match(receipt, /1 ending available at the registry/);
+    assert.match(receipt, /possibly available based on DNS/);
+    assert.match(receipt, /\$140\.00 for 2 years/);
+    assert.doesNotMatch(receipt, /\bfree\b/i);
+  }
 });
