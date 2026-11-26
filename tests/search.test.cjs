@@ -843,7 +843,8 @@ test('the best domain shows the full two-year payments inline', async t => {
   const text = await best.innerText();
   assert.match(text, /\$130\.00 for 2 years/);
   assert.match(text, /Renewal \$140\.00 for 2 years/);
-  assert.match(text, /You must use Cloudflare DNS/);
+  assert.equal(await best.locator('.action + .offer-condition').innerText(), 'Cloudflare requires its own DNS.');
+  assert.equal(await best.locator('tbody').getByText(/DNS/).count(), 0);
   assert.doesNotMatch(await page.locator('#search-results').innerText(), /No endings could be verified/);
 });
 
@@ -1067,8 +1068,7 @@ for (const width of [390, 1440]) {
     assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
     assert.deepEqual(await details.locator('.check-line b').allTextContents(),
       ['App Store', 'Google Play', 'LinkedIn', 'X', 'Instagram', 'TikTok', 'YouTube', 'GitHub']);
-    assert.ok(await details.evaluate(box => box.parentElement.matches('.ending-list') &&
-      box.previousElementSibling.dataset.domain === 'mapfern.com'));
+    assert.ok(await details.evaluate(box => box.previousElementSibling.matches('.ending-list')));
     assert.equal(await details.locator('a[href="https://www.instagram.com/mapfern"]').count(), 1);
     assert.match(await details.innerText(), /No public profile found/i);
     assert.doesNotMatch(await details.innerText(), /\bfree\b|\bavailable\b/i);
@@ -1245,7 +1245,7 @@ for (const reducedMotion of ['reduce', 'no-preference']) {
     await page.locator('#name').fill('Mapfern');
     if (reducedMotion === 'reduce') await page.locator('#name').press('Enter');
     else await page.locator('.hunt-submit').first().click();
-    await page.locator('.best-domain a').waitFor();
+    await page.locator('.best-domain a.action').waitFor();
     await page.waitForFunction(() => {
       const rect = document.querySelector('.best-domain').getBoundingClientRect();
       return rect.top >= 0 && rect.bottom <= innerHeight;
@@ -1310,7 +1310,14 @@ for (const width of [390, 1440]) {
       buyUrl: 'https://www.dynadot.com/domain/search?domain=' + row.domain }),
       price(row.domain, { shop: 'Cloudflare', threeYearUsd: 50, needsCloudflareDns: true,
         buyUrl: 'https://www.cloudflare.com/domains/search/?q=' + row.domain }));
-    reply.domains.unshift(domainRow('mapfern.io'));
+    const other = domainRow('mapfern.io');
+    other.prices[0].buyUrl = 'https://www.gandi.net/en-US/domain/tld/io';
+    other.prices[1].buyUrl = 'https://porkbun.com/checkout/search?q=' + other.domain;
+    other.prices[1].threeYearUsd = 14;
+    other.prices[1].renewalUsd = 6;
+    other.prices.push(price(other.domain, { shop: 'Namecheap', threeYearUsd: 78,
+      buyUrl: 'https://www.namecheap.com/domains/registration/results/?domain=' + other.domain }));
+    reply.domains.unshift(other);
     const details = profileChecks('mapfern');
     details.trademarks.us = { status: 'exact_match_found', marks: [
       { mark: 'MAPFERN', owner: 'Example Company', url: 'https://tsdr.uspto.gov/#caseNumber=12345678' }
@@ -1328,6 +1335,7 @@ for (const width of [390, 1440]) {
     const toggles = results.getByRole('button', { name: /^Name checks for / });
     await toggles.first().waitFor();
     assert.equal(await results.getByRole('link', { name: /^Buy / }).count(), 0);
+    assert.equal(await results.locator('a.shop-name[href]').count(), 0);
     release();
     const filing = results.getByRole('link', { name: /filing/i });
     await filing.waitFor();
@@ -1342,10 +1350,23 @@ for (const width of [390, 1440]) {
     assert.match(await card.locator('.three-year').innerText(), /\$12\.00 over 3 years at Porkbun/);
     assert.deepEqual(await card.locator('tbody th .shop-name').allTextContents(), ['Porkbun', 'Gandi', 'Spaceship', 'Cloudflare', 'Dynadot']);
     assert.match(await card.locator('tbody tr').first().innerText(), /Cheapest.*Price only/s);
-    assert.equal(await card.locator('tbody tr:visible').count(), width === 390 ? 4 : 5);
-    if (width === 390) await card.getByRole('button', { name: '+1 more' }).click();
+    assert.equal(await card.locator('tbody tr:visible').count(), 3);
+    await card.getByRole('button', { name: '+2 more shops' }).click();
     assert.equal(await card.locator('tbody tr:visible').count(), 5);
-    assert.match(await card.innerText(), /more than 3 times/i);
+    await card.getByRole('button', { name: 'Show fewer shops' }).click();
+    assert.equal(await card.locator('tbody tr:visible').count(), 3);
+    assert.equal(await card.locator('.renewal-warning').count(), 0);
+    assert.equal(await card.getByText(/DNS/).count(), 0);
+    const otherCard = results.locator('[data-domain="mapfern.io"]');
+    assert.equal(await otherCard.locator('.action').getAttribute('href'), other.prices[1].buyUrl);
+    await otherCard.getByRole('button', { name: '+1 more shop', exact: true }).click();
+    for (const quote of other.prices) {
+      assert.equal(await otherCard.getByRole('link', { name: quote.shop, exact: true }).getAttribute('href'), quote.buyUrl);
+    }
+    assert.equal(await otherCard.getByText('Price only').count(), 0);
+    assert.equal(await otherCard.locator('.renewal-warning').count(), 0, 'exactly 3x needs no warning');
+    const panel = results.locator('.detail-checks');
+    assert.ok((await panel.boundingBox()).y >= (await card.boundingBox()).y + (await card.boundingBox()).height - 1);
     assert.equal(await toggles.first().getAttribute('aria-expanded'), 'true');
     await toggles.nth(1).click();
     assert.equal(await toggles.first().getAttribute('aria-expanded'), 'false');
@@ -1356,3 +1377,36 @@ for (const width of [390, 1440]) {
     assert.match(await results.innerText(), /1 ending couldn’t be checked/);
   });
 }
+
+test('a renewal jump names only the shop linked by Buy', async t => {
+  const reply = checkReply();
+  const row = reply.domains[0];
+  row.prices[1].renewalUsd = 7;
+  row.prices[1].threeYearUsd = 16;
+  row.prices[1].buyUrl = 'https://porkbun.com/checkout/search?q=' + row.domain;
+  const { page } = await openPage(t, () => ({ json: reply }));
+  await search(page, 'name', 'Mapfern');
+  const card = page.locator('.best-domain');
+  await card.getByRole('link', { name: 'Buy mapfern.com at Porkbun' }).waitFor();
+  assert.equal(await card.locator('.renewal-warning').innerText(), 'Renewal at Porkbun costs more than 3 times the first year.');
+});
+
+test('one to six domains keep the shared checks below every card', async t => {
+  const endings = ['com', 'dev', 'net', 'app', 'io', 'co'];
+  let count = 1;
+  const { page } = await openPage(t, () => ({ json: {
+    ...checkReply(), domains: endings.slice(0, count).map(ending => domainRow('mapfern.' + ending))
+  } }), { width: 1440 });
+  for (; count <= endings.length; count++) {
+    await search(page, 'name', 'Mapfern');
+    const cards = page.locator('.ending-list .offer-row');
+    await cards.nth(count - 1).waitFor();
+    const { bounds, panelTop } = await cards.evaluateAll(nodes => ({
+      bounds: nodes.map(node => node.getBoundingClientRect().toJSON()),
+      panelTop: document.querySelector('.detail-checks').getBoundingClientRect().top
+    }));
+    const columns = count === 4 ? 2 : Math.min(count, 3);
+    assert.equal(bounds.filter(rect => rect.top === bounds[0].top).length, columns);
+    assert.ok(panelTop >= Math.max(...bounds.map(rect => rect.bottom)) - 1);
+  }
+});

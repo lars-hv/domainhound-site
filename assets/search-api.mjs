@@ -29,12 +29,6 @@ function shareUrl(share) {
     /^#[12]\.[A-Za-z0-9_-]+$/.test(href.slice(sharePage.length)) ? href : null;
 }
 
-const registrars = new Map([
-  ['Spaceship', 'https://www.spaceship.com/domain-search/?query='],
-  ['Dynadot', 'https://www.dynadot.com/domain/search?domain='],
-  ['Gandi', 'https://shop.gandi.net/en/domain/suggest?search='],
-  ['Cloudflare', 'https://www.cloudflare.com/domains/search/?q=']
-]);
 const numericPrices = ['firstYearUsd', 'renewalUsd', 'firstPaymentUsd', 'renewalPaymentUsd', 'threeYearUsd'];
 
 function validPrice(offer) {
@@ -43,9 +37,14 @@ function validPrice(offer) {
     numericPrices.every(key => Number.isFinite(offer[key]) && offer[key] >= 0);
 }
 
-function bookable(offer, domain) {
-  const base = registrars.get(offer?.shop);
-  return base && !offer.dataOnly && offer.buyUrl === base + encodeURIComponent(domain);
+function shopUrl(value) {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 function domainItem(row, cap = Infinity) {
@@ -56,10 +55,10 @@ function domainItem(row, cap = Infinity) {
   const premium = row.premium || (row.reason === 'reserved' && 'Reserved');
   const prices = confirmed && !premium && row.priceShown && Array.isArray(row.prices) ? row.prices : [];
   const quotes = prices.filter(validPrice).map(offer => ({
-    ...offer, buyUrl: bookable(offer, row.domain) ? offer.buyUrl : null
+    ...offer, buyUrl: shopUrl(offer.buyUrl)
   })).sort((a, b) => a.threeYearUsd - b.threeYearUsd || a.firstPaymentUsd - b.firstPaymentUsd);
   const offer = quotes.find(quote => quote.buyUrl && quote.threeYearUsd <= cap) || null;
-  return { domain: row.domain, status, premium, eligibility: row.eligibility, quotes, offer };
+  return { domain: row.domain, status, premium, eligibility: row.eligibility, quotes, offer, cap };
 }
 
 // The generator and personal-name endpoints also supply a compact offer for the

@@ -55,7 +55,9 @@ function showPath(selected) {
 const topEndings = ['.com', '.ai', '.io'];
 const endingOf = domain => domain.slice(domain.indexOf('.'));
 
-function shopTable(item) {
+const visibleShops = 3;
+
+function shopTable(item, canBuy) {
   const table = el('table', 'shop-table');
   table.setAttribute('aria-label', 'Shop prices for ' + item.domain);
   const header = table.createTHead().insertRow();
@@ -64,21 +66,41 @@ function shopTable(item) {
     cell.scope = 'col';
     header.append(cell);
   }
-  const body = table.createTBody();
-  for (const quote of item.quotes) {
+  let body = table.createTBody();
+  for (const [index, quote] of item.quotes.entries()) {
+    if (index === visibleShops) {
+      body = table.createTBody();
+      body.hidden = true;
+    }
     const row = body.insertRow();
     const shop = el('th');
     shop.scope = 'row';
-    shop.append(el('span', 'shop-name', quote.shop));
+    // The checks panel enables purchase links once the trademark result is shown.
+    const linked = canBuy && quote.buyUrl && quote.threeYearUsd <= item.cap;
+    const name = el(linked ? 'a' : 'span', 'shop-name', quote.shop);
+    if (linked) name.dataset.buyUrl = quote.buyUrl;
+    shop.append(name);
     if (quote.threeYearUsd === item.quotes[0].threeYearUsd) shop.append(el('small', 'lowest', 'Cheapest'));
     if (!quote.buyUrl) shop.append(el('small', '', 'Price only'));
-    if (quote.needsCloudflareDns) shop.append(el('small', '', 'Cloudflare DNS required'));
     row.append(shop);
     for (const amount of [quote.firstYearUsd, quote.renewalUsd, quote.threeYearUsd]) {
       row.insertCell().textContent = usd.format(amount);
     }
   }
-  return table;
+  if (!body.hidden) return table;
+  const extra = body.rows.length;
+  const label = '+' + extra + (extra === 1 ? ' more shop' : ' more shops');
+  const more = el('button', 'more-shops', label);
+  more.type = 'button';
+  more.setAttribute('aria-expanded', 'false');
+  more.addEventListener('click', () => {
+    body.hidden = !body.hidden;
+    more.setAttribute('aria-expanded', String(!body.hidden));
+    more.textContent = body.hidden ? label : 'Show fewer shops';
+  });
+  const comparison = document.createDocumentFragment();
+  comparison.append(table, more);
+  return comparison;
 }
 
 function domainCard(item, best) {
@@ -99,7 +121,6 @@ function domainCard(item, best) {
       card.append(el('p', 'offer-condition', usd.format(offer.firstPaymentUsd) + term +
         ' upfront. Renewal ' + usd.format(offer.renewalPaymentUsd) + term + '.'));
     }
-    if (offer.needsCloudflareDns || item.offer?.needsCloudflareDns) card.append(el('p', 'offer-condition', 'You must use Cloudflare DNS.'));
   } else {
     card.append(el('p', 'offer-condition', 'No standard price listed.'));
   }
@@ -107,27 +128,18 @@ function domainCard(item, best) {
   const condition = item.eligibility?.note || item.eligibility?.need;
   const requirement = typeof condition === 'string' && condition.trim();
   if (item.eligibility) card.append(el('p', 'offer-condition', requirement || 'Check who can buy this domain.'));
-  if (item.offer && (!item.eligibility || requirement)) {
-    const shop = item.offer;
+  const shop = (!item.eligibility || requirement) && item.offer;
+  if (shop) {
     const total = shop.threeYearUsd !== offer.threeYearUsd ? ' · ' + usd.format(shop.threeYearUsd) + ' for 3 years' : '';
     const buy = link('Buy at ' + shop.shop + total, shop.buyUrl, 'action');
     buy.setAttribute('aria-label', 'Buy ' + item.domain + ' at ' + shop.shop);
     card.append(buy);
-  }
-  if (item.quotes.length) {
-    card.append(shopTable(item));
-    if (item.quotes.length > 4) {
-      const more = el('button', 'more-shops', '+' + (item.quotes.length - 4) + ' more');
-      more.type = 'button';
-      more.setAttribute('aria-expanded', 'false');
-      card.append(more);
-    }
-    const jumps = item.quotes.filter(quote => quote.renewalUsd > 3 * quote.firstYearUsd);
-    if (jumps.length) {
-      const where = jumps.length === item.quotes.length ? '' : ' at ' + jumps.map(quote => quote.shop).join(', ');
-      card.append(el('p', 'renewal-warning', 'Renewal costs more than 3 times the first year' + where + '.'));
+    if (shop.shop === 'Cloudflare') card.append(el('p', 'offer-condition buy-note', 'Cloudflare requires its own DNS.'));
+    if (shop.renewalUsd > 3 * shop.firstYearUsd) {
+      card.append(el('p', 'renewal-warning buy-note', 'Renewal at ' + shop.shop + ' costs more than 3 times the first year.'));
     }
   }
+  if (item.quotes.length) card.append(shopTable(item, Boolean(shop)));
   const toggle = el('button', 'checks-toggle', 'Name checks');
   toggle.type = 'button';
   toggle.setAttribute('aria-label', 'Name checks for ' + item.domain);
@@ -306,11 +318,6 @@ function syncChecks() {
       button.setAttribute('aria-expanded', String(button === active));
       button.setAttribute('aria-controls', panel.id);
     }
-    if (panel.hidden) continue;
-    const offer = active.parentElement;
-    if (offer.nextElementSibling !== panel) offer.after(panel);
-    const index = [...panel.parentElement.querySelectorAll('.offer-row')].indexOf(offer);
-    panel.style.setProperty('--panel-row', Math.floor(index / 3) + 2);
   }
 }
 
@@ -320,12 +327,7 @@ pages.addEventListener('click', event => {
     const domain = button.parentElement.dataset.domain;
     selectedDomain = selectedDomain === domain ? null : domain;
     syncChecks();
-  }
-  if (button?.matches('.more-shops')) {
-    const open = button.getAttribute('aria-expanded') !== 'true';
-    button.setAttribute('aria-expanded', String(open));
-    const extra = button.parentElement.querySelector('tbody').rows.length - 4;
-    button.textContent = open ? 'Show fewer shops' : '+' + extra + ' more';
+    if (selectedDomain) document.getElementById(button.getAttribute('aria-controls'))?.scrollIntoView({ block: 'nearest' });
   }
 });
 
@@ -358,6 +360,10 @@ function checksPanel(name, source, signal) {
     else if (pending) slot.append(el('p', 'trademark-pending', 'Checking US trademarks…'));
     else if (!clear) slot.append(el('p', 'trademark-pending', 'US trademark: couldn’t check.'));
     host.toggleAttribute('data-check-pending', pending);
+    for (const link of host.querySelectorAll('a[data-buy-url]')) {
+      if (pending) link.removeAttribute('href');
+      else link.href = link.dataset.buyUrl;
+    }
     mark.textContent = clear ? 'US trademark: none found' : '';
   }
   function mount(card) {
@@ -367,7 +373,7 @@ function checksPanel(name, source, signal) {
       box.remove();
       return;
     }
-    if (box.parentElement !== offers) offers.append(box);
+    if (offers.nextElementSibling !== box) offers.after(box);
     showTrademark();
   }
   async function load() {
