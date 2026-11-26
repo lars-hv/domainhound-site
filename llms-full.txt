@@ -61,7 +61,7 @@ Registry and shop checks settled 1,701 domains on 2026-11-25. We checked 200 nam
 
 The same 200 names under 10 endings · Checked 2026-11-25 UTC
 
-| Ending | Registry free | Shop free | Unavailable | Premium | Unsettled | Free of settled |
+| Ending | Available at the registry | Available at the shop | Unavailable | Premium | Unsettled | Available among settled checks |
 | --- | --- | --- | --- | --- | --- | --- |
 | .com | 8 | 0 | 192 | 0 | 0 | 8 of 200 (4.0%) |
 | .ai | 35 | 139 | 26 | 0 | 0 | 174 of 200 (87.0%) |
@@ -75,7 +75,7 @@ The same 200 names under 10 endings · Checked 2026-11-25 UTC
 | .no | 170 | 0 | 19 | 1 | 10 | 170 of 190 (89.5%) |
 | All 10 | 950 | 258 | 491 | 2 | 299 | 1,208 of 1,701 (71.0%) |
 
-Registry free means no registration was on record. Shop free means GoDaddy offered a standard registration after the first lookup gave no answer. Unavailable includes resale listings and names the shop could not register. Premium names count as settled. The 299 unresolved checks stay out of the percentages.
+“Available at the registry” means we found no registration on record. “Available at the shop” means GoDaddy offered standard registration after the first lookup gave no answer. Unavailable includes resale listings and names the shop could not register. Premium names count as settled. The 299 unresolved checks stay out of the percentages.
 
 Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/how-to-check-domain-availability.csv) · [Registry lookups](https://domainhound.dev/data/2026-11-25/availability.csv) · [Shop rechecks for .ai and .io](https://domainhound.dev/data/2026-11-25/registrar-rechecks.csv) · [ICANN registration lookup](https://lookup.icann.org/en)
 
@@ -116,14 +116,14 @@ The hound won’t call a guess a catch.
 
 https://domainhound.dev/guides/find-an-available-startup-name/
 
-Brindle Ledger passes, Moss Loom fails 2 checks (2026-11-25). We wanted the exact .com and X handle for a bookkeeping app.
+Brindle Ledger passed. Moss Loom failed two checks on November 25, 2026. We wanted the exact .com and X handle for a bookkeeping app.
 
 A shortlist for a bookkeeping app · Checked 2026-11-25 UTC
 
 | Check | Brindle Ledger | Moss Loom |
 | --- | --- | --- |
-| .com (pass or fail) | Pass: registry free | Fail: taken |
-| X handle (pass or fail) | Pass: free | Fail: taken |
+| .com (pass or fail) | Pass: available at the registry | Fail: taken |
+| X handle (pass or fail) | Pass: available | Fail: taken |
 | US app stores (review) | No listing | No listing |
 | US word mark (review) | No close hit | Similar: MOSSLOO, review it |
 | Google results (review) | Open | Open |
@@ -343,14 +343,14 @@ https://domainhound.dev/guides/com-vs-ai-vs-io/
 
 Same names, different endings · Checked 2026-11-25 UTC
 
-| Ending | Free of settled | First year | Renewal |
+| Ending | Available among settled checks | First year | Renewal |
 | --- | --- | --- | --- |
 | .com | 8 of 200 (4.0%) | [$9.48](https://www.spaceship.com/domain-search/pricing/) | [$10.68](https://www.spaceship.com/domain-search/pricing/) |
 | .ai | 174 of 200 (87.0%) | [$79.98](https://www.spaceship.com/domains/cctld/ai/) | [$79.98](https://www.spaceship.com/domains/cctld/ai/) |
 | .io | 162 of 200 (81.0%) | [$31.98](https://www.spaceship.com/domain-search/pricing/) | [$51.75](https://www.spaceship.com/domain-search/pricing/) |
 | .dev | 85 of 112 (75.9%) | [$8.28](https://www.spaceship.com/domain-search/pricing/) | [$12.42](https://www.spaceship.com/domain-search/pricing/) |
 
-Of the 174 available .ai names, 35 had no registry record and GoDaddy offered 139 at its standard price. For .io the counts were 43 and 119. One more .io was premium. We excluded 88 unresolved .dev checks. Prices are Spaceship’s annual USD list rates before fees.
+Of the 174 available .ai names, 35 had no registry record and GoDaddy offered 139 at its standard price. For .io, the counts were 43 and 119. One more .io was premium. We excluded 88 unresolved .dev checks. Prices are Spaceship’s annual USD list rates before fees.
 
 Domain Hound measurements · [Table CSV](https://domainhound.dev/data/2026-11-25/tables/com-vs-ai-vs-io.csv) · [Registry lookups](https://domainhound.dev/data/2026-11-25/availability.csv) · [Shop rechecks for .ai and .io](https://domainhound.dev/data/2026-11-25/registrar-rechecks.csv) · [Price lists](https://domainhound.dev/data/2026-11-25/registrar-offers.csv) · [Spaceship’s .ai page](https://www.spaceship.com/domains/cctld/ai/)
 
@@ -391,7 +391,7 @@ The hound won’t pick up the renewal bill.
 
 https://domainhound.dev/guides/trademark-check-before-naming/
 
-1 of 3 returned no US word-mark hits (2026-11-25). Brindle Ledger returned no close hit. Moss Loom turned up MOSSLOO.
+On November 25, 2026, only one of three names had no close US word mark. That was Brindle Ledger. Moss Loom turned up MOSSLOO.
 
 US word mark screen for a software product · Checked 2026-11-25 UTC
 
@@ -533,9 +533,9 @@ How can I check the connection?
 
 Ask your assistant to use check_domains on example.com. Look for the tool call and a dated result.
 
-Does it need a registrar login to buy?
+Can my agent buy a domain?
 
-Yes. Connect your Spaceship account and approve the price to buy.
+You hold the leash. Direct buying requires your own Spaceship account and your permission. The default quote cap is $30. If an order’s status is unclear, the agent won’t retry it.
 
 ### Related guides
 
@@ -550,11 +550,11 @@ The hound won’t fetch your credit card.
 
 https://domainhound.dev/guides/good-startup-name/
 
-8 of 200 .com names free on 2026-11-25. Every name with five letters or fewer was taken.
+Only 8 of 200 .com names were available on November 25, 2026. Every name with five letters or fewer was taken.
 
 .com results by name length · Checked 2026-11-25 UTC
 
-| Letters | Names tried | Free | Taken |
+| Letters | Names tried | Available | Taken |
 | --- | --- | --- | --- |
 | Up to 5 | 20 | 0 | 20 |
 | 6 to 8 | 114 | 4 | 110 |
@@ -579,13 +579,13 @@ claude mcp add domain-hound -- npx -y domain-hound
 
 How short should the name be?
 
-Short enough to say over the phone once. A word people know can beat a 5 letter word you invented.
+Short enough to say over the phone once. A familiar word can beat a name you invented.
 
 Can I just leave out a vowel?
 
 Try it on someone who has never seen the word. If you spell it out every time, try another spelling.
 
-What if my favorite name is free?
+What if my favorite name is available?
 
 Search it first. An empty registry record says nothing about the brands your buyers already know.
 

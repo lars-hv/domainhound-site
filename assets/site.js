@@ -1,16 +1,6 @@
 const installers = document.querySelectorAll('.installer');
 
 function selectClient(index) {
-  const terminal = document.querySelector('.terminal');
-  const client = ['Claude Code', 'Codex', 'MCP client'][index];
-  for (const mark of terminal.querySelectorAll('.brand-mark')) {
-    mark.toggleAttribute('hidden', index !== (mark.matches('.claude-spark') ? 0 : 1));
-  }
-  for (const label of terminal.querySelectorAll('.hound-turn .speaker span')) {
-    label.textContent = index === 0 ? 'Claude' : client;
-  }
-  terminal.querySelector('.window-name span').textContent = client;
-  terminal.setAttribute('aria-label', client + ' example');
   for (const installer of installers) {
     installer.querySelectorAll('[role="tab"]').forEach((tab, position) => {
       const selected = position === index;
@@ -30,6 +20,8 @@ async function copyLine(panel, feedback) {
   try {
     await navigator.clipboard.writeText(code.textContent);
   } catch {
+    const disclosure = panel.closest('details');
+    if (disclosure) disclosure.open = true;
     const range = document.createRange();
     range.selectNodeContents(code);
     const selection = window.getSelection();
@@ -46,6 +38,28 @@ async function copyLine(panel, feedback) {
   const client = document.getElementById(panel.getAttribute('aria-labelledby'));
   feedback.textContent = client.textContent + ' setup copied.';
 }
+
+const setup = document.getElementById('install');
+const connect = document.getElementById('connect');
+setup.classList.add('interactive');
+connect.addEventListener('click', () => {
+  setup.open = !setup.open;
+  if (setup.open) setup.querySelector('[aria-selected="true"]').focus();
+});
+setup.addEventListener('toggle', () => connect.setAttribute('aria-expanded', String(setup.open)));
+
+function openLinkedInstaller() {
+  if (location.hash === '#install') setup.open = true;
+}
+openLinkedInstaller();
+window.addEventListener('hashchange', openLinkedInstaller);
+window.addEventListener('pageshow', openLinkedInstaller);
+document.addEventListener('click', event => {
+  if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (!event.target.closest('a[href="#install"]')) return;
+  setup.open = true;
+  setup.querySelector('[aria-selected="true"]').focus();
+});
 
 for (const installer of installers) {
   const tabs = [...installer.querySelectorAll('[role="tab"]')];

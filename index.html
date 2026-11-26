@@ -5,22 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>Domain Hound | Name it already.</title>
-  <meta name="description" content="Find a startup name you can actually buy. Ask Claude or Codex. Free names, trademark-checked, cheapest price first, bought and set up after you approve.">
+  <meta name="description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <link rel="canonical" href="https://domainhound.dev/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Domain Hound">
   <meta property="og:url" content="https://domainhound.dev/">
   <meta property="og:title" content="Domain Hound | Name it already.">
-  <meta property="og:description" content="Find a startup name you can actually buy. Ask Claude or Codex. Free names, trademark-checked, cheapest price first, bought and set up after you approve.">
+  <meta property="og:description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
   <meta property="og:image:alt" content="Domain Hound: Name it already.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Domain Hound | Name it already.">
-  <meta name="twitter:description" content="Find a startup name you can actually buy. Ask Claude or Codex. Free names, trademark-checked, cheapest price first, bought and set up after you approve.">
+  <meta name="twitter:description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <meta name="twitter:image" content="https://domainhound.dev/assets/social-preview.png">
   <link rel="icon" href="assets/hound-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/site.css">
   <link rel="stylesheet" href="assets/brand-b.css">
+  <link rel="stylesheet" href="assets/search.css">
+  <meta name="domain-hound-api" content="https://domainhound-mcp.domainhound.workers.dev">
+  <noscript>
+    <style>
+      .search-paths, .hunt-form, #close a[href="#name"], .installer .tabs, .installer .copy, .install-close { display: none; }
+      .installer [role="tabpanel"][hidden] { display: block !important; }
+    </style>
+  </noscript>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -85,18 +93,19 @@
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "Purchase limits?",
-            "acceptedAnswer": { "@type": "Answer", "text": "$30 default quote cap. Enable direct buying yourself. No retries on uncertain orders." }
+            "name": "Why check trademarks?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "81% of 1,000 common English words already had a US trademark (Harvard Law Review, 2018)."
+            }
           },
           {
             "@type": "Question",
-            "name": "Share with a cofounder?",
-            "acceptedAnswer": { "@type": "Answer", "text": "One link carries your shortlist. Our server never sees it." }
-          },
-          {
-            "@type": "Question",
-            "name": "Trademark screening?",
-            "acceptedAnswer": { "@type": "Answer", "text": "US automatically. EU and Norway with free keys, or by link." }
+            "name": "What’s the renewal trap?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A .co costs $3.11 the first year, then $31.05 every year. We show both prices."
+            }
           }
         ]
       }
@@ -105,207 +114,151 @@
   </script>
 </head>
 <body>
-<header class="mast" id="top">
-  <div class="wrap mast-inner">
-    <a class="brand" href="#top"><span>domainhound.dev</span></a>
-    <nav aria-label="Main"><a href="#real-search">Example</a><a href="watch/">Watch</a></nav>
-  </div>
-</header>
-<main>
+<main id="top">
   <section class="hero">
-    <div class="wrap hero-grid">
-      <div class="paper-art" aria-hidden="true">
+    <div class="wrap hero-grid search-hero">
+      <a class="paper-art" href="/" aria-label="Domain Hound home">
         <span class="paper-word first">Domain</span>
         <span class="paper-word second">Hound</span>
         <span class="paper-dog"><img src="assets/hound-mark.svg" width="180" height="180" alt=""></span>
-      </div>
+      </a>
       <div class="lead">
-        <p class="stamp">Name it already.</p>
+        <p class="kicker">For founders with an idea and no name.</p>
         <h1>Find a startup name you can actually buy.</h1>
-        <p class="subline">Ask Claude or Codex to check domains, app names and Google for free.</p>
+        <p class="subline">Say what you’re building. The Hound sniffs out names that are available everywhere, at the best price.</p>
       </div>
-      <div class="installer" id="install">
-        <div class="install-heading"><h2>Install</h2><p>Free · open source</p></div>
+      <div class="hunt-box" id="search">
+        <form class="hunt-form" data-mode="auto">
+          <label for="name" class="sr-only">Name or idea</label>
+          <input id="name" type="text" required maxlength="400" autocapitalize="none" spellcheck="false" aria-describedby="search-hint-text" placeholder="A name, or what you’re building">
+          <div class="search-buttons">
+            <button class="hunt-submit action" type="submit" disabled>Find it here</button>
+            <button class="action" type="button" id="connect" aria-controls="install" aria-expanded="false">Find it in your agent</button>
+            <small class="agent-names">In Claude, Codex or ChatGPT</small>
+          </div>
+          <p class="search-hint" hidden><span class="sr-only" id="search-hint-text" aria-live="polite"></span> <button type="button" class="hint-switch"></button></p>
+        </form>
+        <div class="search-paths" hidden>
+          <a href="#panel-personal" aria-controls="panel-personal" aria-expanded="false">Use my own name</a>
+        </div>
+        <form class="hunt-form inline-search" id="panel-personal" data-mode="personal" hidden>
+          <label for="personal">What’s your full name?</label>
+          <input id="personal" type="text" autocomplete="name" required maxlength="80" placeholder="First and last name">
+          <button class="hunt-submit action" type="submit" disabled>Find my domain</button>
+        </form>
+        <noscript><p class="hunt-notice">Turn on JavaScript to search here, or <a href="#install">open the agent setup</a>.</p></noscript>
+      </div>
+      <aside class="receipt-stage" id="real-search" aria-label="Tripfixer search receipt">
+        <div class="name-receipt">
+          <header><time datetime="2026-11-24">24 Nov 2026</time><span class="stamp">Name it already.</span></header>
+          <p class="miss">Wanted: <s>concierge.com</s> · Taken</p>
+          <p class="winner"><strong>tripfixer.app</strong> <b>Available</b></p>
+          <div class="receipt-price">
+            <p><strong>$8.28</strong> first year</p>
+            <p><strong>$14.49/yr</strong> after</p>
+          </div>
+          <p class="receipt-shop">Spaceship</p>
+          <ul class="receipt-checks">
+            <li><b>App Store:</b> no app called Tripfixer</li>
+            <li><b>US trademark:</b> none found</li>
+            <li><b>GitHub:</b> no profile found</li>
+          </ul>
+          <p class="receipt-total"><strong>360</strong> names sniffed. One winner.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+  <p class="sr-only" id="result-announcement" role="status"></p>
+  <section class="hunt-results" id="search-results" aria-label="Search results" hidden>
+    <div class="wrap" id="result-pages"></div>
+  </section>
+  <div class="setup-strip"><div class="wrap">
+    <details id="install">
+      <summary>Connect your agent</summary>
+      <div class="installer">
+        <p class="install-heading">Free · <a href="https://github.com/lars-hv/domain-hound">open source (MIT)</a>. <a href="/guides/domain-hound-claude-code-codex/#purchase">Never buys without you.</a></p>
         <div class="tabs" role="tablist" aria-label="Install for">
           <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
           <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
+          <button type="button" role="tab" id="tab-chatgpt" aria-selected="false" aria-controls="panel-chatgpt" tabindex="-1">ChatGPT</button>
           <button type="button" role="tab" id="tab-other" aria-selected="false" aria-controls="panel-other" tabindex="-1">Other MCP</button>
         </div>
         <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude">
+          <noscript><strong>Claude Code</strong></noscript>
           <p class="hint">In your terminal</p>
           <code tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
           <button type="button" class="copy action"><span>Copy command</span></button>
         </div>
         <div role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
+          <noscript><strong>Codex</strong></noscript>
           <p class="hint">In your terminal</p>
           <code tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
           <button type="button" class="copy action"><span>Copy command</span></button>
         </div>
+        <div role="tabpanel" id="panel-chatgpt" aria-labelledby="tab-chatgpt" hidden>
+          <noscript><strong>ChatGPT</strong></noscript>
+          <p class="hint">Paste this URL when adding a connector</p>
+          <code tabindex="0">https://domainhound-mcp.domainhound.workers.dev/mcp</code>
+          <button type="button" class="copy action"><span>Copy URL</span></button>
+        </div>
         <div role="tabpanel" id="panel-other" aria-labelledby="tab-other" hidden>
+          <noscript><strong>Other MCP clients</strong></noscript>
           <p class="hint">MCP configuration</p>
           <code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
           <button type="button" class="copy action"><span>Copy config</span></button>
         </div>
         <p class="feedback" role="status"></p>
       </div>
+    </details>
+  </div></div>
+  <section class="story-pain story-band">
+    <div class="wrap story-split">
+      <h2>Every good name is taken. So what the hell do you call it?</h2>
+      <div class="traps">
+        <p>The owner wants <strong>$1,311.</strong> <a href="https://www.namepros.com/threads/domain-name-sales-semi-annual-report-2025.1356912/" title="Average across 93,100 reported domain sales, January to June 2025">NamePros 2025</a></p>
+        <p>A cheap .co: <strong>$3.11</strong> today, <strong>$31.05</strong> next year. <a href="https://www.spaceship.com/domains/cctld/co/">Spaceship Nov 2026</a></p>
+      </div>
     </div>
   </section>
-  <section class="facts">
+  <section class="story-band" id="how" aria-label="How it works">
     <div class="wrap">
-      <h2>Every good name is taken.</h2>
-      <ul class="fact-list" role="list">
-        <li><strong class="number">169.8</strong><p>million .com names registered</p></li>
-        <li><strong class="number">$1,311</strong><p>Average resale price</p></li>
-        <li><strong class="number">81%</strong><p>of 1,000 common English words had a US trademark</p></li>
-      </ul>
-      <p class="sources">
-        <a href="https://investor.verisign.com/news-releases/news-release-details/dnibcom-reports-internet-has-4116-million-domain-name" title="Verisign, .com registrations as of 30 September 2026" aria-label="Verisign, .com registrations as of 30 September 2026">Verisign Q3 ’26</a> ·
-        <a href="https://www.namepros.com/threads/domain-name-sales-semi-annual-report-2025.1356912/" title="NamePros, average resale price across 93,100 reported domain sales in the first half of 2025" aria-label="NamePros, average resale price across 93,100 reported domain sales in the first half of 2025">NamePros H1 ’25</a> ·
-        <a href="https://harvardlawreview.org/print/vol-131/are-we-running-out-of-trademarks/" title="Harvard Law Review, Are We Running Out of Trademarks? (2018), US trademark data for the 1,000 most common English words in 2016" aria-label="Harvard Law Review, Are We Running Out of Trademarks? (2018), US trademark data for the 1,000 most common English words in 2016">HLR ’18</a>
-      </p>
-    </div>
-  </section>
-  <section class="steps">
-    <div class="wrap">
-      <h2>How it works</h2>
-      <ol class="step-list">
-        <li><h3>Ask</h3><p>“Name my trip app.”</p></li>
-        <li><h3>Sniff</h3><p>Every name checked: free, price, trademarks, apps.</p></li>
-        <li><h3>Grab</h3><p>Free? Your agent buys it and points it at your site. Taken? It finds the owner and drafts the offer.</p></li>
+      <ol class="hunt-steps">
+        <li><strong>You describe it.</strong><p>Here · Claude · Codex · ChatGPT</p></li>
+        <li><strong>The Hound checks the domain, the real price, both app stores, trademarks and handles.</strong>
+          <p>Compare shops and renewal prices. App Store, Google Play, LinkedIn, X, Instagram, TikTok, YouTube, GitHub.</p>
+        </li>
+        <li><strong>You pick.</strong><p>Your agent buys it and connects your site, or finds the owner and drafts an offer.</p></li>
       </ol>
     </div>
   </section>
-  <section class="name-checks" aria-labelledby="name-checks-title">
-    <div class="wrap">
-      <h2 id="name-checks-title">What the hound sniffs</h2>
-      <dl>
-        <div>
-          <dt>Domains</dt>
-          <dd class="check-note">Registry availability. Upfront and renewal prices. Country options include .co.uk and .eu.</dd>
-          <dd>.com</dd><dd>.ai</dd><dd>.io</dd><dd>.co</dd><dd>.app</dd>
-          <dd>.dev</dd><dd>.net</dd><dd>.org</dd><dd>.xyz</dd><dd>.tech</dd>
-          <dd>.me</dd><dd>.so</dd><dd>.si</dd><dd>.no</dd>
-        </div>
-        <div>
-          <dt>App names</dt>
-          <dd>App Store (iOS)</dd><dd>Google Play (Android)</dd>
-        </div>
-        <div>
-          <dt>Search visibility</dt>
-          <dd>Google presence</dd><dd>Autocomplete</dd><dd>Rank among top sites</dd>
-          <dd>Pages found by web crawlers</dd><dd>Live website on the domain</dd>
-        </div>
-        <div>
-          <dt>Trademarks and companies</dt>
-          <dd>US trademarks (USPTO)</dd><dd>EU (EUIPO, key or link)</dd><dd>Norway (Patentstyret, key or link)</dd><dd>Norwegian company register</dd><dd>US SEC company names</dd>
-        </div>
-        <div>
-          <dt>Meaning</dt>
-          <dd class="check-note">Rude words and soundalikes in 14 languages.</dd>
-        </div>
-        <div>
-          <dt>Handles</dt>
-          <dd class="check-note">GitHub, npm and Bluesky checked automatically. Others by link.</dd>
-          <dd>YouTube</dd><dd>X</dd><dd>Facebook</dd><dd>LinkedIn</dd><dd>Instagram</dd>
-          <dd>TikTok</dd><dd>GitHub</dd><dd>npm</dd><dd>Bluesky</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
-  <section class="demo" id="real-search">
-    <div class="wrap demo-grid">
-      <div class="demo-summary">
-        <header class="demo-heading"><h2>A real search.</h2><p>360 checked. 1 winner.</p></header>
-        <div class="receipt">
-          <ul class="checks" role="list">
-            <li>Free at the registry</li>
-            <li>No close US mark found</li>
-            <li>No matching app found</li>
-          </ul>
-          <del>concierge.com &nbsp;taken</del>
-        </div>
-      </div>
-      <div class="terminal" aria-label="Claude Code example">
-        <div class="term-bar"><span class="window-name"><span>Claude Code</span></span><time datetime="2026-11-24">24 Nov 2026</time></div>
-        <div class="turn"><b class="speaker">You</b><p>Trip planning app. Thinking Concierge?</p></div>
-        <div class="turn hound-turn"><b class="speaker"><span>Claude</span></b><p>Try Tripfixer.</p></div>
-        <div class="result"><strong>tripfixer.app</strong>
-          <div class="prices"><div><small>First year</small><b>$8.28</b></div><div><small>Renewal</small><b>$14.49<small>/yr</small></b></div></div>
-          <p>Bought at Spaceship. USD before tax.</p>
-        </div>
+  <section class="story-band story-agent" aria-labelledby="versus">
+    <div class="wrap story-split">
+      <h2 id="versus">Others tell you it’s taken and wish you luck. <em>The Hound brings back one you can own.</em></h2>
+      <div class="leash">
+        <p>Available? Your agent buys it. Taken? It finds the owner and drafts the offer.</p>
+        <strong>Never buys without you. You hold the leash.</strong>
       </div>
     </div>
   </section>
-  <aside class="trust"><p class="wrap">Open source. Runs on your machine. <strong>Never buys without you.</strong> You hold the leash.</p></aside>
-  <section class="watch-section">
-    <div class="wrap">
-      <form class="watch" id="watch" novalidate aria-labelledby="watch-title" autocomplete="off">
-        <h2 id="watch-title">Watch a domain</h2>
-        <p class="watch-intro">Get free domain alerts. Confirm by email to start.</p>
-        <div class="watch-controls">
-          <div class="watch-field">
-            <label for="watch-domain">Domain</label>
-            <input id="watch-domain" required type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="brightname.com">
-          </div>
-          <div class="watch-field">
-            <label for="watch-email">Email</label>
-            <input id="watch-email" required type="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="you@example.com">
-          </div>
-          <div class="watch-field">
-            <label for="watch-name">Name (optional)</label>
-            <input id="watch-name" type="text" autocomplete="name" maxlength="80">
-          </div>
-        </div>
-        <label class="watch-news"><input id="watch-news" type="checkbox" autocomplete="off"> <span>Yes, email me news about Domain Hound and other developer tools from BrightBoard AS. At most twice a month. Unsubscribe any time.</span></label>
-        <div hidden><label for="watch-website">Website</label><input id="watch-website" type="text" tabindex="-1" autocomplete="off"></div>
-        <button class="watch-submit action" type="submit" disabled>Watch it</button>
-        <noscript><p>Turn on JavaScript to request a watch.</p></noscript>
-        <p class="watch-status" id="watch-status" role="status"></p>
-        <div class="watch-help">
-          <details>
-            <summary>What emails will I get?</summary>
-            <p>Up to four per watch, including confirmation. We’ll email if the registry reports expiry or pending deletion (about five days left), and when we find the domain free to register. No scheduled digests.</p>
-            <p>News is optional. Each watch email has a private manage link. Turn off news, stop one watch or erase your address and watches.</p>
-          </details>
-          <a href="privacy/#watch">Privacy</a>
-        </div>
-      </form>
+  <section class="story-questions" id="faq" aria-label="Frequently asked questions">
+    <div class="wrap story-split">
+      <details><summary>Why check trademarks?</summary><p>81% of 1,000 common English words already had a US trademark (<a href="https://harvardlawreview.org/print/vol-131/are-we-running-out-of-trademarks/">Harvard Law Review, 2018</a>).</p></details>
+      <details><summary>What’s the renewal trap?</summary><p>A .co costs $3.11 the first year, then $31.05 every year. We show both prices.</p></details>
     </div>
   </section>
-  <section class="faq">
-    <div class="wrap faq-grid">
-      <h2>FAQ</h2>
-      <dl>
-        <div><dt>Purchase limits?</dt><dd>$30 default quote cap. Enable direct buying yourself. No retries on uncertain orders.</dd></div>
-        <div><dt>Share with a cofounder?</dt><dd>One link carries your shortlist. Our server never sees it.</dd></div>
-        <div><dt>Trademark screening?</dt><dd>US automatically. EU and Norway with free keys, or by link.</dd></div>
-      </dl>
+  <section class="story-band story-close" id="close">
+    <div class="wrap">
+      <h2>Still calling it ‘Untitled project’? <em>Name it already.</em></h2>
+      <div class="search-buttons">
+        <a class="action" href="#name">Find it here</a>
+        <a class="action" href="#install">Find it in your agent</a>
+        <small class="agent-names">In Claude, Codex or ChatGPT</small>
+      </div>
     </div>
   </section>
-  <aside class="install-close" aria-label="Install">
-    <div class="wrap">
-      <button type="button" class="copy action"><span>Copy command</span></button>
-      <span class="close-feedback" aria-hidden="true"></span>
-    </div>
-  </aside>
 </main>
-<footer><div class="wrap foot"><a href="https://domainhound.dev/">domainhound.dev</a><a href="guides/">Guides</a><a href="privacy/">Privacy</a></div></footer>
+<footer><nav class="wrap foot" aria-label="Footer"><a href="/watch/">Watch a domain</a><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a></nav></footer>
 <script src="assets/site.js"></script>
-<script src="assets/watch.js"></script>
-<script>
-  const installer = document.getElementById('install');
-  const closingCopy = document.querySelector('.install-close .copy');
-  const closingLabel = closingCopy.querySelector('span');
-  const closingFeedback = document.querySelector('.close-feedback');
-  const installFeedback = installer.querySelector('.feedback');
-  const activeCopy = () => installer.querySelector('[role="tabpanel"]:not([hidden]) .copy');
-
-  closingCopy.addEventListener('click', () => activeCopy().click());
-  // Mirror the installer. Its status region announces the result for both buttons.
-  new MutationObserver(() => {
-    closingLabel.textContent = activeCopy().textContent;
-    closingFeedback.textContent = installFeedback.textContent;
-  }).observe(installer, {subtree: true, childList: true, attributes: true, attributeFilter: ['hidden']});
-</script>
+<script type="module" src="assets/search.mjs"></script>
 </body>
 </html>

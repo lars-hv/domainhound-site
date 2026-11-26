@@ -5,7 +5,6 @@
   const endpoint = 'https://domainhound-alerts.domainhound.workers.dev/watch';
   const domainInput = document.getElementById('watch-domain');
   const emailInput = document.getElementById('watch-email');
-  const nameInput = document.getElementById('watch-name');
   const news = document.getElementById('watch-news');
   const trap = document.getElementById('watch-website');
   const button = form.querySelector('.watch-submit');
@@ -40,7 +39,7 @@
   }
 
   function clearStatus() {
-    for (const input of [domainInput, emailInput, nameInput]) {
+    for (const input of [domainInput, emailInput]) {
       input.removeAttribute('aria-invalid');
       input.removeAttribute('aria-describedby');
     }
@@ -54,17 +53,14 @@
     clearStatus();
     const domain = watchHostname(domainInput.value.trim());
     const email = emailInput.value.trim();
-    const name = nameInput.value.trim();
     if (!domain) return showStatus('Enter a domain like brightname.com.', 'error', domainInput);
-    if (!validEmail(email)) return showStatus('Enter a valid email address.', 'error', emailInput);
-    if (name.length > nameInput.maxLength) return showStatus('Use 80 characters or fewer for your name.', 'error', nameInput);
+    if (!validEmail(email)) return showStatus('Enter an email like you@example.com.', 'error', emailInput);
 
     const payload = { email, domain, source: 'site', website: trap.value };
-    if (name) payload.name = name;
     if (news.checked) payload.news = 'yes';
 
     button.setAttribute('aria-disabled', 'true');
-    domainInput.readOnly = emailInput.readOnly = nameInput.readOnly = true;
+    domainInput.readOnly = emailInput.readOnly = true;
     news.disabled = true;
     showStatus('Sending…', 'sending');
     const controller = new AbortController();
@@ -85,18 +81,18 @@
       const result = await response.json().catch(() => null);
       if (response.status === 202 && result?.ok === true) {
         form.reset();
-        showStatus('Check your inbox to confirm.', 'success');
+        showStatus('Check your email to start your watch.', 'success');
       } else if ([400, 422].includes(response.status) && typeof result?.message === 'string' && result.message) {
         const field = response.status === 422 || /domain/i.test(result.message) ? domainInput : emailInput;
         showStatus(result.message, 'error', field);
       } else {
-        showStatus('The watch service is unavailable. Try again later.', 'error');
+        showStatus('We couldn’t start your watch. Try again later.', 'error');
       }
     } catch {
-      showStatus('Couldn’t reach the server. Try again later.', 'error');
+      showStatus('We couldn’t start your watch. Try again later.', 'error');
     } finally {
       clearTimeout(timer);
-      domainInput.readOnly = emailInput.readOnly = nameInput.readOnly = false;
+      domainInput.readOnly = emailInput.readOnly = false;
       news.disabled = false;
       button.removeAttribute('aria-disabled');
     }

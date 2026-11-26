@@ -44,3 +44,7 @@
 @media (min-width: 80rem) {
   .tool-comparison caption small { display: none; }
 }
+
+.guide-evidence { margin-top: 1.25rem; border-top: 1px solid var(--blue); }
+.guide-evidence summary { padding-block: .8rem; cursor: pointer; font-weight: 850; }
+.guide-evidence summary h2 { display: inline; font-size: inherit; }
