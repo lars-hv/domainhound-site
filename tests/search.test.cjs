@@ -192,7 +192,7 @@ for (const width of [390, 1440]) {
     await page.evaluate(() => document.fonts.ready);
     assert.equal(await hero.locator('.stamp').textContent(), 'Name it already.');
     assert.equal((await hero.locator('h1').innerText()).replace(/\s+/g, ' '), 'Find a startup name you can actually buy.');
-    assert.equal(await hero.locator('.subline').textContent(), "Say what you're building. The Hound sniffs out names that are available everywhere, at the best price.");
+    assert.equal(await hero.locator('.subline').textContent(), 'Say what you’re building. The Hound sniffs out names that are available everywhere, at the best price.');
     assert.equal(await field.getAttribute('placeholder'), "A name, or what you’re building");
     assert.equal(await hero.getByRole('textbox').count(), 1);
     assert.equal(await hero.locator('.search-hint').isVisible(), false);
@@ -210,7 +210,8 @@ for (const width of [390, 1440]) {
     assert.equal(await claude.isVisible(), false);
     assert.equal(await page.locator('.search-paths').isVisible(), false);
     const receipt = hero.locator('#real-search');
-    assert.equal(await receipt.locator('s').textContent(), 'concierge.com · Taken');
+    assert.equal(await receipt.locator('.miss').textContent(), 'Wanted: concierge.com · Taken');
+    assert.equal(await receipt.locator('.miss s').textContent(), 'concierge.com');
     assert.equal(await receipt.locator('time').getAttribute('datetime'), '2026-11-24');
     assert.match(await receipt.innerText(), /360 names sniffed. One winner./);
     const how = await page.locator('#how').innerText();
@@ -231,6 +232,10 @@ for (const width of [390, 1440]) {
     }
     await page.evaluate(() => window.scrollTo(0, 0));
     const visible = await page.locator('main').innerText();
+    assert.match(await page.locator('.story-pain').innerText(), /A cheap \.co: \$3\.11 today, \$31\.05 next year\./);
+    assert.doesNotMatch(visible, /['"]/);
+    assert.deepEqual(await page.locator('.agent-names').allTextContents(),
+      ['In Claude, Codex or ChatGPT', 'In Claude, Codex or ChatGPT']);
     assert.doesNotMatch(visible, /\b(?:free|registered|unavailable|patents?|patented|triage|screening|MCP|connector|registrar|crawl|scan|query)\b|recurring fee|ongoing cost|handle available/i);
     assert.ok(await field.evaluate(node => node.getBoundingClientRect().bottom <= innerHeight));
     await screenshot(page, 'front-' + width);
