@@ -692,13 +692,18 @@ test('details use manual links for unknowns and restrict platform destinations',
     } };
   });
   await search(page, 'name', 'Mapfern');
-  await page.getByRole('link', { name: /No public profile found/ }).waitFor();
+  await page.getByRole('link', { name: /No profile found/ }).waitFor();
   const details = page.locator('.detail-checks');
   assert.match(await details.innerText(), /US trademark: none found/);
   assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
   assert.equal(await details.locator('a[href="https://reader.example/profile?name=mapfern"]').count(), 0);
-  assert.equal(await page.getByRole('link', { name: 'Google Play · Check yourself' }).getAttribute('href'),
+  assert.equal(await page.getByRole('link', { name: 'Search Google Play' }).getAttribute('href'),
     'https://play.google.com/store/search?q=mapfern');
+  assert.equal(new URL(await details.getByRole('link', { name: 'Search LinkedIn' }).getAttribute('href')).searchParams.get('keywords'), 'mapfern');
+  assert.match(await details.innerText(), /Google Play has no public search/);
+  assert.match(await details.innerText(), /LinkedIn doesn't allow checks/);
+  assert.equal(await details.getByRole('link', { name: "Instagram · Couldn't check" }).getAttribute('href'),
+    'https://www.instagram.com/mapfern');
 });
 
 test('an unconfirmed or over-budget idea never becomes a bookable suggestion', async t => {
@@ -1093,18 +1098,19 @@ for (const width of [390, 1440]) {
     assert.match(await taken.innerText(), /draft an offer/);
     assert.ok(await taken.locator('a[href="#install"]').isVisible());
     release();
-    await details.getByRole('link', { name: /No public profile found/ }).waitFor();
+    await details.getByRole('link', { name: /No profile found/ }).waitFor();
     assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
     assert.deepEqual(await details.locator('.check-line b').allTextContents(),
-      ['App Store', 'Google Play', 'LinkedIn', 'X', 'Instagram', 'TikTok', 'YouTube', 'GitHub']);
+      ['App Store', 'Google Play has no public search', "LinkedIn doesn't allow checks", 'X', 'Instagram', 'TikTok', 'YouTube', 'GitHub']);
     assert.ok(await details.evaluate(box => box.previousElementSibling.matches('.ending-list')));
     assert.equal(await details.locator('a[href="https://www.instagram.com/mapfern"]').count(), 1);
-    assert.match(await details.innerText(), /No public profile found/i);
+    assert.match(await details.innerText(), /No profile found/i);
     assert.doesNotMatch(await details.innerText(), /\bfree\b|\bavailable\b/i);
     assert.equal(calls.filter(call => call.path === '/v1/check/details').length, 1);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await screenshot(page, 'mixed-' + width, results);
     if (width === 390) {
+      await screenshot(page, 'handle-checks-390', details);
       await page.setViewportSize({ width: 320, height: 700 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     }
@@ -1137,7 +1143,7 @@ for (const width of [390, 1440]) {
       const stem = names[i].toLowerCase();
       const toggle = card.getByRole('button', { name: 'Name checks for ' + stem + '.com' });
       if (await toggle.getAttribute('aria-expanded') !== 'true') await toggle.click();
-      await card.getByRole('link', { name: /No public profile found/ }).waitFor();
+      await card.getByRole('link', { name: /No profile found/ }).waitFor();
       assert.match(await card.innerText(), new RegExp(stem + '\\.dev|\\.dev\\b'));
       assert.doesNotMatch(await card.innerText(), /\.xyz\b/);
     }
@@ -1149,7 +1155,7 @@ for (const width of [390, 1440]) {
       await page.setViewportSize({ width: 320, height: 700 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     }
-    await cards.nth(4).getByRole('link', { name: /No public profile found/ }).waitFor();
+    await cards.nth(4).getByRole('link', { name: /No profile found/ }).waitFor();
     assert.equal(queried().length, 5);
   });
 }
@@ -1186,7 +1192,7 @@ test('rate-limited name checks can be retried without rechecking domains', async
   await details.getByText(breather, { exact: true }).waitFor();
   assert.ok(await page.locator('.best-domain a.action').isVisible());
   await details.getByRole('button', { name: /retry/i }).click();
-  await details.getByRole('link', { name: /No public profile found/ }).waitFor();
+  await details.getByRole('link', { name: /No profile found/ }).waitFor();
   assert.deepEqual(calls.map(call => call.path), ['/v1/check', '/v1/check/details', '/v1/check/details']);
 });
 

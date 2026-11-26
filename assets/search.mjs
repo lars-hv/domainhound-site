@@ -251,15 +251,16 @@ function sourceLink(label, href, hosts) {
 }
 
 const platforms = [
-  ['LinkedIn', 'www.linkedin.com/company/'], ['X', 'x.com/'], ['Instagram', 'www.instagram.com/'],
+  ['LinkedIn'], ['X', 'x.com/'], ['Instagram', 'www.instagram.com/'],
   ['TikTok', 'www.tiktok.com/@'], ['YouTube', 'www.youtube.com/@'], ['GitHub', 'github.com/']
 ];
 
-function checkLine(title, outcome, target) {
+function checkLine(title, outcome, target, linkLabel) {
   const line = el('div', 'check-line');
-  target.textContent = outcome;
-  target.setAttribute('aria-label', title + ' · ' + outcome);
-  line.append(el('b', '', title), target);
+  target.textContent = linkLabel ?? outcome;
+  if (linkLabel) target.classList.add('check-search-link');
+  else target.setAttribute('aria-label', title + ' · ' + outcome);
+  line.append(el('b', '', linkLabel ? outcome : title), target);
   return line;
 }
 
@@ -271,23 +272,28 @@ function checkGroups(data, name) {
   const apple = data.appStore;
   const match = (Array.isArray(apple?.matches) ? apple.matches : [])
     .map(item => sourceLink('', item?.url, ['apps.apple.com'])).find(Boolean);
-  const appStates = { taken: 'Taken', exact_match_found: 'Taken', no_match_found: 'No app found', check: 'Check yourself' };
-  apps.append(checkLine('App Store', appStates[apple?.status] || 'Couldn’t check',
+  const appStates = { taken: 'Taken', exact_match_found: 'Taken', no_match_found: 'No app found' };
+  apps.append(checkLine('App Store', appStates[apple?.status] || "Couldn't check",
     match || link('', 'https://apps.apple.com/us/iphone/search?term=' + key)),
-    checkLine('Google Play', appStates[data.googlePlay?.status] || (data.googlePlay ? 'Couldn’t check' : 'Check yourself'),
+    checkLine('Google Play', 'Google Play has no public search',
       sourceLink('', data.googlePlay?.link, ['play.google.com']) ||
-      link('', 'https://play.google.com/store/search?c=apps&q=' + key)));
+      link('', 'https://play.google.com/store/search?c=apps&q=' + key), 'Search Google Play'));
   const handles = el('div');
   handles.append(el('h5', '', 'Handles'));
   const list = el('div', 'handle-list');
   const rows = Array.isArray(data.handles) ? data.handles : [];
+  const outcomes = { taken: 'Taken', 'not-found': 'No profile found' };
   for (const [title, base] of platforms) {
+    if (title === 'LinkedIn') {
+      const search = 'https://www.linkedin.com/search/results/companies/?' + new URLSearchParams({ keywords: name });
+      list.append(checkLine(title, "LinkedIn doesn't allow checks", link('', search), 'Search LinkedIn'));
+      continue;
+    }
     const row = rows.find(item => String(item?.platform).trim().toLowerCase() === title.toLowerCase());
     const hosts = [base.split('/')[0].replace(/^www\./, '')];
     if (title === 'X') hosts.push('twitter.com');
     const target = sourceLink('', row?.link, hosts) || link('', 'https://' + base + handle);
-    const outcomes = { taken: 'Taken', 'not-found': 'No public profile found', check: 'Check yourself' };
-    list.append(checkLine(title, row ? outcomes[row.state] || 'Couldn’t check' : 'Check yourself', target));
+    list.append(checkLine(title, outcomes[row?.state] ?? "Couldn't check", target));
   }
   handles.append(list);
   return [apps, handles];
