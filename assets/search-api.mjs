@@ -29,19 +29,22 @@ function shareUrl(share) {
     /^#[12]\.[A-Za-z0-9_-]+$/.test(href.slice(sharePage.length)) ? href : null;
 }
 
-const registrars = new Map([
-  ['Spaceship', 'https://www.spaceship.com/domain-search/?query='],
-  ['Dynadot', 'https://www.dynadot.com/domain/search?domain='],
-  ['Gandi', 'https://shop.gandi.net/en/domain/suggest?search='],
-  ['Cloudflare', 'https://www.cloudflare.com/domains/search/?q=']
-]);
 const numericPrices = ['firstYearUsd', 'renewalUsd', 'firstPaymentUsd', 'renewalPaymentUsd', 'threeYearUsd'];
 
-function bookable(offer, domain) {
-  const base = registrars.get(offer?.shop);
-  return base && !offer.dataOnly && offer.buyUrl === base + encodeURIComponent(domain) &&
+function validPrice(offer) {
+  return typeof offer?.shop === 'string' && offer.shop.trim() &&
     Number.isInteger(offer.minimumYears) && offer.minimumYears >= 1 &&
     numericPrices.every(key => Number.isFinite(offer[key]) && offer[key] >= 0);
+}
+
+function shopUrl(value) {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 function domainItem(row, cap = Infinity) {
@@ -51,9 +54,11 @@ function domainItem(row, cap = Infinity) {
   const status = confirmed ? 'available' : row.status === 'taken' ? 'taken' : 'unknown';
   const premium = row.premium || (row.reason === 'reserved' && 'Reserved');
   const prices = confirmed && !premium && row.priceShown && Array.isArray(row.prices) ? row.prices : [];
-  const offers = prices.filter(offer => bookable(offer, row.domain) && offer.threeYearUsd <= cap);
-  offers.sort((a, b) => a.firstPaymentUsd - b.firstPaymentUsd || a.threeYearUsd - b.threeYearUsd);
-  return { domain: row.domain, status, premium, eligibility: row.eligibility, offer: offers[0] || null };
+  const quotes = prices.filter(validPrice).map(offer => ({
+    ...offer, buyUrl: shopUrl(offer.buyUrl)
+  })).sort((a, b) => a.threeYearUsd - b.threeYearUsd || a.firstPaymentUsd - b.firstPaymentUsd);
+  const offer = quotes.find(quote => quote.buyUrl && quote.threeYearUsd <= cap) || null;
+  return { domain: row.domain, status, premium, eligibility: row.eligibility, quotes, offer, cap };
 }
 
 // The generator and personal-name endpoints also supply a compact offer for the
@@ -109,10 +114,11 @@ function bestItem(data) {
   const row = data.domains.find(candidate => candidate?.domain === pick.domain);
   const item = row && !row.eligibility ? domainItem(row) : null;
   if (item?.status !== 'available' || item.premium || !row.priceShown || !Array.isArray(row.prices)) return null;
-  const offer = row.prices.find(offer => bookable(offer, row.domain) && offer.shop === pick.shop &&
+  const matched = item.quotes.some(offer => offer.buyUrl && offer.shop === pick.shop &&
     offer.buyUrl === pick.buyUrl && pickTerms.every(key => offer[key] === pick[key]) &&
     Boolean(offer.needsCloudflareDns) === Boolean(pick.needsCloudflareDns));
-  return offer ? { ...item, offer } : null;
+  const cap = data.choice.capUsd;
+  return matched ? { ...item, pickBudget: Number.isFinite(cap) && cap >= pick.threeYearUsd ? cap : null } : null;
 }
 
 const asciiLabel = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
@@ -202,11 +208,42 @@ export async function finishIdeas(result, signal) {
   }
 }
 
+function checkName(name, signal) {
+  return request('/v1/check?' + new URLSearchParams({ name }), signal);
+}
+
+async function checkEndings(input, signal) {
+  const exact = await checkName(input, signal);
+  // Older replies can omit query metadata. Match the input to a returned
+  // domain before treating it as an exact check.
+  const typed = input.toLowerCase();
+  const requested = exact.domains.find(row => row?.domain === (exact.query?.exactDomain || typed));
+  const query = checkedQuery(exact.query) || (requested && checkedQuery({
+    ascii: typed.split('.')[0], exactDomain: typed
+  }));
+  if (!query?.exactDomain) return exact;
+
+  // The exact check also covers endings outside the standard list.
+  try {
+    const bare = await checkName(query.ascii, signal);
+    const duplicate = bare.domains.find(row => row.domain === query.exactDomain);
+    const exactStatus = domainItem(requested)?.status;
+    const first = exactStatus && exactStatus !== 'unknown' ? requested : duplicate || requested;
+    const others = bare.domains.filter(row => row.domain !== query.exactDomain);
+    return { ...bare, query, domains: first ? [first, ...others] : others,
+      details: detailsPath.test(bare.details?.path) ? bare.details : exact.details,
+      share: duplicate && first?.status === duplicate.status ? bare.share : exact.share };
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    return { ...exact, query, endingsError: error.status === 429 ? 'rate-limited' : 'failed' };
+  }
+}
+
 export async function runSearch(mode, input, signal, cap = Infinity) {
   let data;
   if (mode === 'idea') data = await request('/v1/generate', signal, { ...input, idea: input.idea.replace(/\s+/g, ' ').trim() });
   else if (mode === 'personal') data = await request('/v1/personal', signal, input);
-  else if (mode === 'name') data = await request('/v1/check?' + new URLSearchParams({ name: input.name }), signal);
+  else if (mode === 'name') data = await checkEndings(input.name, signal);
   else throw new Error('Unknown search mode');
   if (mode === 'idea') return ideaResult(data);
 
@@ -214,12 +251,14 @@ export async function runSearch(mode, input, signal, cap = Infinity) {
   const result = {
     items: items.filter(Boolean), complete: data.complete,
     shareUrl: shareUrl(data.share), generationSource: data.path,
-    detailsPath: mode === 'name' && items.some(item => item?.status === 'available' && !item.premium) &&
+    detailsPath: mode === 'name' && items.some(item => item?.status === 'available') &&
       detailsPath.test(data.details?.path) ? data.details.path : null
   };
   if (mode === 'name') {
     result.best = bestItem(data);
+    result.priceDate = data.priceSnapshot?.checkedAt;
     result.query = checkedQuery(data.query);
+    result.endingsError = data.endingsError;
     result.leadingTaken = !!result.query && leadingTaken(result.items, result.query.ascii);
   }
   return result;
