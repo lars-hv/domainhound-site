@@ -10,6 +10,8 @@ Use Node.js 20 or later. Add the server in your terminal and start a fresh clien
 - Codex: `codex mcp add domain-hound -- npx -y domain-hound`
 - Other local MCP clients: command `npx`, arguments `-y` and `domain-hound`, transport stdio.
 
+For Claude on the web, [add the hosted Domain Hound connector](https://domainhound.dev/docs/claude/). It checks availability, list prices and names.
+
 ## Tools
 
 - `check_domains`: Check one domain or up to 20 names for availability and prices. Bare names cover fourteen default endings. Results label list prices and confirmed quotes separately.

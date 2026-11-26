@@ -56,7 +56,14 @@
 
 <section aria-labelledby="hosted">
 <h2 id="hosted">Search with an online assistant</h2>
-<p>ChatGPT, Claude on the web and other online-only apps send us the names you check. Our tool looks them up using the same domain records and price lists as the local tool. We keep the names only briefly to reuse results. For domain checks, we save the result alongside a one-way code made from the domain name. We keep no other logs of those names. Cloudflare runs the tool. You need no account, email or cookie.</p>
+<p>ChatGPT, Claude on the web and other online-only apps send us the names you check. Cloudflare runs the online tool and its website search. You need no account, email or cookie. For a domain check, we save the result alongside a one-way code made from the domain name. We keep no other logs of the names.</p>
+<p>The online tool sends the name or domain to the services it needs to answer your search. Each service’s privacy policy applies to the lookups it receives.</p>
+<ul>
+<li><strong>Domains.</strong> The tool checks public RDAP and WHOIS records from domain registries and IANA, and DNS records through Cloudflare and Google.</li>
+<li><strong>Prices.</strong> The tool uses saved list prices from public pricing pages at Spaceship, Porkbun, Namecheap, Dynadot, Cloudflare and Gandi. A shop receives the domain if you open its search link.</li>
+<li><strong>Apps and trademarks.</strong> The tool looks up names in Apple’s US App Store catalog, Google Play and the US Patent and Trademark Office’s public search.</li>
+<li><strong>Public profiles and projects.</strong> The tool looks at public pages, embeds and records from TikTok, Instagram, X, YouTube, Threads, Facebook, Twitch and GitHub. The tool can also check npm and Bluesky. For LinkedIn and Reddit, the tool checks the Internet Archive’s Wayback Machine and Common Crawl for public pages.</li>
+</ul>
 </section>
 
 <section aria-labelledby="sources">
@@ -145,7 +152,7 @@
 <h2 id="contact">Source code</h2>
 <p><a href="https://github.com/lars-hv/domain-hound">Domain Hound’s source code</a> uses the MIT license.</p>
 </section>
-<p class="updated">Last updated <time datetime="2026-11-25">25 November 2026</time></p>
+<p class="updated">Last updated <time datetime="2026-11-26">26 November 2026</time></p>
 </main>
 <footer><div class="wrap foot"><a href="../">domainhound.dev</a><a href="../guides/">Guides</a><a href="./" aria-current="page">Privacy</a></div></footer>
 </body>
