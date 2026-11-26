@@ -37,11 +37,15 @@ const registrars = new Map([
 ]);
 const numericPrices = ['firstYearUsd', 'renewalUsd', 'firstPaymentUsd', 'renewalPaymentUsd', 'threeYearUsd'];
 
-function bookable(offer, domain) {
-  const base = registrars.get(offer?.shop);
-  return base && !offer.dataOnly && offer.buyUrl === base + encodeURIComponent(domain) &&
+function validPrice(offer) {
+  return typeof offer?.shop === 'string' && offer.shop.trim() &&
     Number.isInteger(offer.minimumYears) && offer.minimumYears >= 1 &&
     numericPrices.every(key => Number.isFinite(offer[key]) && offer[key] >= 0);
+}
+
+function bookable(offer, domain) {
+  const base = registrars.get(offer?.shop);
+  return base && !offer.dataOnly && offer.buyUrl === base + encodeURIComponent(domain);
 }
 
 function domainItem(row, cap = Infinity) {
@@ -51,9 +55,11 @@ function domainItem(row, cap = Infinity) {
   const status = confirmed ? 'available' : row.status === 'taken' ? 'taken' : 'unknown';
   const premium = row.premium || (row.reason === 'reserved' && 'Reserved');
   const prices = confirmed && !premium && row.priceShown && Array.isArray(row.prices) ? row.prices : [];
-  const offers = prices.filter(offer => bookable(offer, row.domain) && offer.threeYearUsd <= cap);
-  offers.sort((a, b) => a.firstPaymentUsd - b.firstPaymentUsd || a.threeYearUsd - b.threeYearUsd);
-  return { domain: row.domain, status, premium, eligibility: row.eligibility, offer: offers[0] || null };
+  const quotes = prices.filter(validPrice).map(offer => ({
+    ...offer, buyUrl: bookable(offer, row.domain) ? offer.buyUrl : null
+  })).sort((a, b) => a.threeYearUsd - b.threeYearUsd || a.firstPaymentUsd - b.firstPaymentUsd);
+  const offer = quotes.find(quote => quote.buyUrl && quote.threeYearUsd <= cap) || null;
+  return { domain: row.domain, status, premium, eligibility: row.eligibility, quotes, offer };
 }
 
 // The generator and personal-name endpoints also supply a compact offer for the
@@ -109,10 +115,10 @@ function bestItem(data) {
   const row = data.domains.find(candidate => candidate?.domain === pick.domain);
   const item = row && !row.eligibility ? domainItem(row) : null;
   if (item?.status !== 'available' || item.premium || !row.priceShown || !Array.isArray(row.prices)) return null;
-  const offer = row.prices.find(offer => bookable(offer, row.domain) && offer.shop === pick.shop &&
+  const matched = item.quotes.some(offer => offer.buyUrl && offer.shop === pick.shop &&
     offer.buyUrl === pick.buyUrl && pickTerms.every(key => offer[key] === pick[key]) &&
     Boolean(offer.needsCloudflareDns) === Boolean(pick.needsCloudflareDns));
-  return offer ? { ...item, offer } : null;
+  return matched ? item : null;
 }
 
 const asciiLabel = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
@@ -214,11 +220,12 @@ export async function runSearch(mode, input, signal, cap = Infinity) {
   const result = {
     items: items.filter(Boolean), complete: data.complete,
     shareUrl: shareUrl(data.share), generationSource: data.path,
-    detailsPath: mode === 'name' && items.some(item => item?.status === 'available' && !item.premium) &&
+    detailsPath: mode === 'name' && items.some(item => item?.status === 'available') &&
       detailsPath.test(data.details?.path) ? data.details.path : null
   };
   if (mode === 'name') {
     result.best = bestItem(data);
+    result.priceDate = data.priceSnapshot?.checkedAt;
     result.query = checkedQuery(data.query);
     result.leadingTaken = !!result.query && leadingTaken(result.items, result.query.ascii);
   }

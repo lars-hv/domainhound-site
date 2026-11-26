@@ -1,6 +1,7 @@
 import { guessMode, normalize } from './search-mode.mjs';
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+const priceDay = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
 const rateLimit = 'Too many searches. Try again in a few minutes.';
 const moreNames = 'Sniffing out more names…';
 const region = document.getElementById('search-results');
@@ -54,105 +55,143 @@ function showPath(selected) {
 const topEndings = ['.com', '.ai', '.io'];
 const endingOf = domain => domain.slice(domain.indexOf('.'));
 
-function availableRow(item, best) {
-  const row = el('div', best ? 'offer-row best-domain' : 'offer-row');
+function shopTable(item) {
+  const table = el('table', 'shop-table');
+  table.setAttribute('aria-label', 'Shop prices for ' + item.domain);
+  const header = table.createTHead().insertRow();
+  for (const title of ['Shop', 'Year 1', 'Per year', '3 years']) {
+    const cell = el('th', '', title);
+    cell.scope = 'col';
+    header.append(cell);
+  }
+  const body = table.createTBody();
+  for (const quote of item.quotes) {
+    const row = body.insertRow();
+    const shop = el('th');
+    shop.scope = 'row';
+    shop.append(el('span', 'shop-name', quote.shop));
+    if (quote.threeYearUsd === item.quotes[0].threeYearUsd) shop.append(el('small', 'lowest', 'Cheapest'));
+    if (!quote.buyUrl) shop.append(el('small', '', 'Price only'));
+    if (quote.needsCloudflareDns) shop.append(el('small', '', 'Cloudflare DNS required'));
+    row.append(shop);
+    for (const amount of [quote.firstYearUsd, quote.renewalUsd, quote.threeYearUsd]) {
+      row.insertCell().textContent = usd.format(amount);
+    }
+  }
+  return table;
+}
+
+function domainCard(item, best) {
+  const card = el('section', best ? 'offer-row best-domain' : 'offer-row');
+  card.dataset.domain = item.domain;
+  const head = el('div', 'offer-head');
+  head.append(el('h4', 'domain-title', item.domain), el('span', 'verdict', 'Available'));
+  card.append(head);
+  if (best) card.append(el('b', 'pick-label', 'Hound’s pick'));
+  const offer = item.quotes[0];
+  if (offer) {
+    const first = el('p', 'first-price');
+    first.append(el('strong', '', usd.format(offer.firstYearUsd)), ' first year');
+    const total = el('p', 'three-year', usd.format(offer.threeYearUsd) + ' over 3 years at ' + offer.shop);
+    card.append(first, el('p', 'renewal', 'Renewal ' + usd.format(offer.renewalUsd) + '/year'), total);
+    if (offer.minimumYears > 1) {
+      const term = ' for ' + offer.minimumYears + ' years';
+      card.append(el('p', 'offer-condition', usd.format(offer.firstPaymentUsd) + term +
+        ' upfront. Renewal ' + usd.format(offer.renewalPaymentUsd) + term + '.'));
+    }
+    if (offer.needsCloudflareDns || item.offer?.needsCloudflareDns) card.append(el('p', 'offer-condition', 'You must use Cloudflare DNS.'));
+  } else {
+    card.append(el('p', 'offer-condition', 'No standard price listed.'));
+  }
+  if (item.premium) card.append(el('p', 'offer-condition', item.premium));
   const condition = item.eligibility?.note || item.eligibility?.need;
   const requirement = typeof condition === 'string' && condition.trim();
-  const verdict = item.premium || (item.eligibility ? 'Eligibility rules' : 'Available');
-  row.append(el('strong', 'domain-title', item.domain),
-    el('span', verdict === 'Available' ? 'verdict available' : 'verdict', verdict));
-  const offer = item.offer;
-  if (offer) {
-    const term = offer.minimumYears > 1 ? ' for ' + offer.minimumYears + ' years' : '';
-    row.append(el('span', 'price', usd.format(offer.firstPaymentUsd) + (term || ' first year')),
-      el('span', 'price', 'Renewal ' + usd.format(offer.renewalPaymentUsd) + (term || '/year')),
-      el('span', 'shop', offer.shop));
-    const buy = link('Buy', offer.buyUrl, 'action');
-    buy.setAttribute('aria-label', 'Buy ' + item.domain + ' at ' + offer.shop);
-    if (!item.eligibility || requirement) row.append(buy);
-    if (offer.needsCloudflareDns) row.append(el('small', 'offer-condition', 'You must use Cloudflare DNS.'));
-    const date = offer.checkedAt || offer.snapshotDate;
-    const dated = date && Number.isFinite(Date.parse(date));
-    row.dataset.quote = 'USD before tax · ' + (dated
-      ? (offer.checkedAt ? 'Checked ' : 'Price list dated ') + new Date(date).toISOString().slice(0, 10)
-      : 'Price date unknown');
-  } else {
-    row.append(el('span', 'price', 'Price unavailable'));
+  if (item.eligibility) card.append(el('p', 'offer-condition', requirement || 'Check who can buy this domain.'));
+  if (item.offer && (!item.eligibility || requirement)) {
+    const shop = item.offer;
+    const total = shop.threeYearUsd !== offer.threeYearUsd ? ' · ' + usd.format(shop.threeYearUsd) + ' for 3 years' : '';
+    const buy = link('Buy at ' + shop.shop + total, shop.buyUrl, 'action');
+    buy.setAttribute('aria-label', 'Buy ' + item.domain + ' at ' + shop.shop);
+    card.append(buy);
   }
-  if (item.eligibility) {
-    row.append(el('small', 'offer-condition', requirement || 'Check who can buy this domain.'));
+  if (item.quotes.length) {
+    card.append(shopTable(item));
+    if (item.quotes.length > 4) {
+      const more = el('button', 'more-shops', '+' + (item.quotes.length - 4) + ' more');
+      more.type = 'button';
+      more.setAttribute('aria-expanded', 'false');
+      card.append(more);
+    }
+    const jumps = item.quotes.filter(quote => quote.renewalUsd > 3 * quote.firstYearUsd);
+    if (jumps.length) {
+      const where = jumps.length === item.quotes.length ? '' : ' at ' + jumps.map(quote => quote.shop).join(', ');
+      card.append(el('p', 'renewal-warning', 'Renewal costs more than 3 times the first year' + where + '.'));
+    }
   }
-  return row;
+  const toggle = el('button', 'checks-toggle', 'Name checks');
+  toggle.type = 'button';
+  toggle.setAttribute('aria-label', 'Name checks for ' + item.domain);
+  toggle.setAttribute('aria-expanded', 'false');
+  card.append(toggle);
+  return card;
 }
 
-// Keep one dated caption for each group as new offers arrive or change order.
-function labelQuotes() {
-  const groups = new Map();
-  for (const row of pages.querySelectorAll('[data-quote]')) {
-    const caption = row.dataset.quote;
-    if (!groups.has(caption)) groups.set(caption, []);
-    groups.get(caption).push(row);
-  }
-  let number = 0;
-  for (const [caption, rows] of groups) {
-    const id = 'quote-' + ++number;
-    rows.forEach((row, index) => {
-      const previous = row.querySelector('.quote-caption, .quote-reference');
-      const numbered = groups.size > 1;
-      const text = (numbered ? number + '. ' : '') + caption;
-      if (index === 0 && previous?.id === id && previous.textContent === text) return;
-      if (index > 0 && previous?.hash === '#' + id && numbered && previous.getAttribute('aria-label') === caption) return;
-      previous?.remove();
-      row.setAttribute('aria-describedby', id);
-      if (index === 0) {
-        const note = el('small', 'quote-caption', text);
-        note.id = id;
-        row.append(note);
-      } else if (numbered) {
-        const ref = link(String(number), '#' + id, 'quote-reference');
-        ref.setAttribute('aria-label', caption);
-        row.querySelector('.shop').append(ref);
-      }
-    });
-  }
+function dateOf(value) {
+  return Number.isFinite(Date.parse(value)) ? new Date(value).toISOString().slice(0, 10) : 'unknown';
 }
 
-function watchChip(item, prominent) {
-  const chip = link('', '/watch/?domain=' + encodeURIComponent(item.domain), 'taken-chip');
-  chip.setAttribute('aria-label', 'Watch ' + item.domain);
-  if (prominent) chip.append(el('s', 'domain-title', item.domain), ' Taken · ', el('u', '', 'Watch'));
-  else chip.textContent = endingOf(item.domain);
-  return chip;
+function updateFootnote() {
+  const note = pages.querySelector('.quote-caption');
+  if (!note) return;
+  const dates = new Set();
+  let unknown = 0;
+  for (const group of pages.querySelectorAll('.hunt-card')) {
+    for (const date of (group.dataset.priceDates || '').split(' ').filter(Boolean)) dates.add(date);
+    unknown += Number(group.dataset.unknown || 0);
+  }
+  const parts = [];
+  if (dates.size) {
+    const missing = dates.delete('unknown');
+    const dated = [...dates].sort().map(date => priceDay.format(new Date(date)));
+    if (dated.length) parts.push('Price list dated ' + dated.join(' and ') + '.');
+    if (missing) parts.push(dated.length ? 'Some prices are undated.' : 'Price date unknown.');
+    parts.push('USD before tax.');
+  }
+  if (unknown) parts.push(unknown + (unknown === 1 ? ' ending' : ' endings') + ' couldn’t be checked.');
+  note.textContent = parts.join(' ');
 }
 
-function nameCard(name, items, best, suggestion) {
+function nameCard(name, items, best, { suggestion, priceDate, showName = Boolean(suggestion) } = {}) {
   const card = el('article', 'hunt-card');
   card.setAttribute('aria-label', name);
-  if (suggestion) card.append(el('h3', '', name));
-  const taken = items.filter(item => item.status === 'taken');
-  const priority = topEndings.flatMap(ending => taken.filter(item => endingOf(item.domain) === ending));
-  if (!priority.length && taken.length && !items.some(item => item.status === 'available')) priority.push(taken[0]);
-  const top = el('div', 'top-taken');
-  for (const item of priority) top.append(watchChip(item, item === priority[0]));
-  if (top.childElementCount) card.append(top);
-  const offers = el('div', 'ending-list');
-  if (best) offers.append(availableRow(best, true));
-  for (const item of items) {
-    if (item.status === 'available' && item.domain !== best?.domain) offers.append(availableRow(item, false));
+  if (showName) card.append(el('h3', '', name));
+  const available = items.filter(item => item.status === 'available');
+  const dates = available.flatMap(item => item.quotes.map(quote => dateOf(priceDate || quote.checkedAt || quote.snapshotDate)));
+  card.dataset.priceDates = [...new Set(dates)].join(' ');
+  card.dataset.unknown = items.filter(item => item.status === 'unknown').length;
+  if (available.length) {
+    const notice = el('div', 'trademark-slot');
+    card.append(notice, el('p', 'offer-count', available.length + ' available domain' + (available.length === 1 ? '' : 's')));
+    const offers = el('div', 'ending-list');
+    for (const item of available) offers.append(domainCard(item, item.domain === best?.domain));
+    card.append(offers);
   }
-  if (offers.childElementCount) card.append(offers);
+  const taken = items.filter(item => item.status === 'taken');
   if (taken.length) {
+    const priority = topEndings.flatMap(ending => taken.filter(item => endingOf(item.domain) === ending));
+    const sorted = [...priority, ...taken.filter(item => !priority.includes(item))];
     const group = el('div', 'taken-group');
-    const lesser = taken.filter(item => !priority.includes(item));
-    if (lesser.length) {
-      const line = el('div', 'taken-list');
-      line.append(el('b', '', 'Taken'), ...lesser.map(item => watchChip(item, false)));
-      group.append(line);
+    const line = el('p', 'taken-list');
+    line.append(el('b', '', 'Taken'));
+    for (const item of sorted) {
+      const watch = link(endingOf(item.domain), '/watch/?domain=' + encodeURIComponent(item.domain));
+      watch.setAttribute('aria-label', 'Watch ' + item.domain);
+      line.append(' ', watch);
     }
-    const next = el('p', '', 'Read ');
-    next.append(link('how to buy a taken domain', '/guides/buy-a-taken-domain/'), ', or ',
-      link('connect your agent', '#install'), ' to draft an offer.');
-    group.append(next);
+    const next = el('span', 'taken-next', 'Watch an ending, ');
+    next.append(link('ask your agent to draft an offer', '#install'), ', or ', link('hunt for another name', '#name'), '.');
+    line.append(' ', next);
+    group.append(line);
     card.append(group);
   }
   if (suggestion) {
@@ -180,7 +219,7 @@ function nameCard(name, items, best, suggestion) {
 
 function ideaCard(item) {
   const row = el('li');
-  row.append(nameCard(item.name, [item, ...(item.endings || [])], item, item));
+  row.append(nameCard(item.name, [item, ...(item.endings || [])], item, { suggestion: item }));
   return row;
 }
 
@@ -202,62 +241,147 @@ const platforms = [
   ['TikTok', 'www.tiktok.com/@'], ['YouTube', 'www.youtube.com/@'], ['GitHub', 'github.com/']
 ];
 
-function checkChip(title, state, target) {
-  const status = state || 'Check';
-  target.className = 'check-chip';
-  target.dataset.state = !state ? 'manual' : ['Match found', 'Profile found'].includes(state) ? 'found' : 'absent';
-  target.textContent = title;
-  target.title = title + ' · ' + status;
-  target.setAttribute('aria-label', target.title);
-  return target;
+function checkLine(title, outcome, target) {
+  const line = el('div', 'check-line');
+  target.textContent = outcome;
+  target.setAttribute('aria-label', title + ' · ' + outcome);
+  line.append(el('b', '', title), target);
+  return line;
 }
 
 function checkGroups(data, name) {
   const key = encodeURIComponent(name);
   const handle = encodeURIComponent(name.toLowerCase().replace(/\s+/g, ''));
+  const apps = el('div');
+  apps.append(el('h5', '', 'App stores · US'));
   const apple = data.appStore;
   const match = (Array.isArray(apple?.matches) ? apple.matches : [])
-    .map(item => sourceLink('App Store', item?.url, ['apps.apple.com'])).find(Boolean);
-  const apps = el('div', 'check-line');
-  apps.append(el('strong', '', 'Apps'), checkChip('App Store',
-    { taken: 'Match found', no_match_found: 'No match found' }[apple?.status],
+    .map(item => sourceLink('', item?.url, ['apps.apple.com'])).find(Boolean);
+  const appStates = { taken: 'Taken', exact_match_found: 'Taken', no_match_found: 'No app found', check: 'Check yourself' };
+  apps.append(checkLine('App Store', appStates[apple?.status] || 'Couldn’t check',
     match || link('', 'https://apps.apple.com/us/iphone/search?term=' + key)),
-    checkChip('Google Play', null, sourceLink('', data.googlePlay?.link, ['play.google.com']) ||
+    checkLine('Google Play', appStates[data.googlePlay?.status] || (data.googlePlay ? 'Couldn’t check' : 'Check yourself'),
+      sourceLink('', data.googlePlay?.link, ['play.google.com']) ||
       link('', 'https://play.google.com/store/search?c=apps&q=' + key)));
-  const handles = el('div', 'check-line');
-  handles.append(el('strong', '', 'Handles'));
+  const handles = el('div');
+  handles.append(el('h5', '', 'Handles'));
+  const list = el('div', 'handle-list');
   const rows = Array.isArray(data.handles) ? data.handles : [];
   for (const [title, base] of platforms) {
     const row = rows.find(item => String(item?.platform).trim().toLowerCase() === title.toLowerCase());
     const hosts = [base.split('/')[0].replace(/^www\./, '')];
     if (title === 'X') hosts.push('twitter.com');
     const target = sourceLink('', row?.link, hosts) || link('', 'https://' + base + handle);
-    handles.append(checkChip(title, { taken: 'Profile found', 'not-found': 'No public profile found' }[row?.state], target));
+    const outcomes = { taken: 'Taken', 'not-found': 'No public profile found', check: 'Check yourself' };
+    list.append(checkLine(title, row ? outcomes[row.state] || 'Couldn’t check' : 'Check yourself', target));
   }
+  handles.append(list);
   return [apps, handles];
 }
 
+function trademarkNotice(us, name) {
+  const notice = el('aside', 'trademark-warning');
+  notice.append(el('strong', '', 'Exact US trademark match for “' + name + '”.'));
+  for (const mark of Array.isArray(us.marks) ? us.marks : []) {
+    if (!mark) continue;
+    const filing = sourceLink('Read the filing', mark.url, ['tsdr.uspto.gov']);
+    const line = el('p', '', mark.owner ? mark.owner + ' filed for ' + (mark.mark || name) + '. ' : '');
+    if (filing) line.append(filing);
+    if (line.textContent) notice.append(line);
+  }
+  return notice;
+}
+
+let panelNumber = 0;
+let selectedDomain;
+
+function syncChecks() {
+  const buttons = [...pages.querySelectorAll('.checks-toggle')];
+  const active = buttons.find(button => button.parentElement.dataset.domain === selectedDomain) ||
+    (selectedDomain !== null && buttons[0]);
+  if (active) selectedDomain = active.parentElement.dataset.domain;
+  for (const panel of pages.querySelectorAll('.detail-checks')) {
+    panel.hidden = !active || !panel.parentElement.contains(active);
+    for (const button of panel.parentElement.querySelectorAll('.checks-toggle')) {
+      button.setAttribute('aria-expanded', String(button === active));
+      button.setAttribute('aria-controls', panel.id);
+    }
+    if (panel.hidden) continue;
+    const offer = active.parentElement;
+    if (offer.nextElementSibling !== panel) offer.after(panel);
+    const index = [...panel.parentElement.querySelectorAll('.offer-row')].indexOf(offer);
+    panel.style.setProperty('--panel-row', Math.floor(index / 3) + 2);
+  }
+}
+
+pages.addEventListener('click', event => {
+  const button = event.target.closest('button');
+  if (button?.matches('.checks-toggle')) {
+    const domain = button.parentElement.dataset.domain;
+    selectedDomain = selectedDomain === domain ? null : domain;
+    syncChecks();
+  }
+  if (button?.matches('.more-shops')) {
+    const open = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', String(open));
+    const extra = button.parentElement.querySelector('tbody').rows.length - 4;
+    button.textContent = open ? 'Show fewer shops' : '+' + extra + ' more';
+  }
+});
+
 function checksPanel(name, source, signal) {
   const box = el('section', 'detail-checks');
+  box.hidden = true;
+  box.id = 'name-checks-' + ++panelNumber;
   box.setAttribute('aria-label', 'Name checks for ' + name);
-  const list = el('div');
-  list.append(...checkGroups({}, name));
+  const list = el('div', 'check-grid');
+  const mark = el('p', 'mark-result');
   const status = statusLine();
   const retry = el('button', 'hint-switch', 'Retry checks');
   retry.type = 'button';
   retry.hidden = true;
-  box.append(list, status, retry);
+  box.append(el('h4', '', 'Name checks for “' + name + '”'), list, mark, status, retry);
+  let host;
   let path;
+  let data = {};
+  let pending = Boolean(source);
+  list.append(...checkGroups(data, name));
+
+  function showTrademark() {
+    const slot = host?.querySelector('.trademark-slot');
+    if (!slot) return;
+    const us = data.trademarks?.us;
+    const exact = us?.status === 'exact_match_found';
+    const clear = us?.status === 'no_exact_match_found';
+    slot.replaceChildren();
+    if (exact) slot.append(trademarkNotice(us, name));
+    else if (pending) slot.append(el('p', 'trademark-pending', 'Checking US trademarks…'));
+    else if (!clear) slot.append(el('p', 'trademark-pending', 'US trademark: couldn’t check.'));
+    host.toggleAttribute('data-check-pending', pending);
+    mark.textContent = clear ? 'US trademark: none found' : '';
+  }
+  function mount(card) {
+    host = card;
+    const offers = card.querySelector('.ending-list');
+    if (!offers) {
+      box.remove();
+      return;
+    }
+    if (box.parentElement !== offers) offers.append(box);
+    showTrademark();
+  }
   async function load() {
     if (!source || signal.aborted) return;
     retry.hidden = true;
+    pending = true;
+    showTrademark();
     status.textContent = 'Checking apps and handles…';
     try {
       const api = await import('./search-api.mjs');
       path ??= await source(api);
       if (signal.aborted) return;
       if (path) {
-        const data = await api.loadDetails(path, signal);
+        data = await api.loadDetails(path, signal);
         if (signal.aborted) return;
         list.replaceChildren(...checkGroups(data, name));
         retry.hidden = data.complete !== false;
@@ -266,12 +390,15 @@ function checksPanel(name, source, signal) {
     } catch (error) {
       if (signal.aborted) return;
       status.textContent = error.status === 410 ? 'These checks expired. Search the name again.' :
-        error.status === 429 ? rateLimit : 'Couldn’t load these checks. Your domain results are above.';
+        error.status === 429 ? rateLimit : 'Couldn’t load these checks.';
       retry.hidden = [400, 410].includes(error.status);
+    } finally {
+      pending = false;
+      if (!signal.aborted) showTrademark();
     }
   }
   retry.addEventListener('click', load);
-  return { box, load };
+  return { box, load, mount };
 }
 
 // The generator may know only the winning ending. Reuse the domain lookup
@@ -279,41 +406,39 @@ function checksPanel(name, source, signal) {
 function refreshDomains(card, item, response, panel) {
   const generated = Boolean(item.domain);
   const initial = generated ? [item, ...item.endings] : item.endings;
-  const rows = new Map(initial.map(row => [row.domain, row]));
-  for (const row of response.items) {
-    if (generated || rows.has(row.domain)) rows.set(row.domain, row);
-  }
+  const requested = new Set(initial.map(row => row.domain));
+  const rows = new Map(response.items.filter(row => generated || requested.has(row.domain)).map(row => [row.domain, row]));
+  for (const row of initial) if (!rows.has(row.domain)) rows.set(row.domain, row);
   const selected = rows.get(item.domain);
-  const best = selected?.status === 'available' && selected.offer ? selected : null;
+  const best = response.best || (selected?.status === 'available' && selected.offer ? selected : null);
   const summary = generated ? item : null;
-  const fresh = nameCard(item.name, [...rows.values()], best, summary);
+  const fresh = nameCard(item.name, [...rows.values()], best, { suggestion: summary, priceDate: response.priceDate, showName: true });
   const focused = card.contains(document.activeElement) ? document.activeElement : null;
-  refreshCard(card, fresh, panel);
-  const offers = card.querySelector('.ending-list');
-  if ([...rows.values()].some(item => item.status === 'available' && !item.premium)) offers.after(panel);
-  else panel.remove();
-  labelQuotes();
-  if (focused?.href && !focused.isConnected) {
-    [...card.querySelectorAll('a')].find(node => node.href === focused.href)?.focus({ preventScroll: true });
-  }
+  refreshCard(card, fresh);
+  panel.mount(card);
+  syncChecks();
+  updateFootnote();
+  restoreControl(card, focused);
 }
 
-function attachChecks(card, item, checks) {
+function attachChecks(card, item, checks, load = true) {
   const key = nameKey(item.name);
   let panel = checks.panels.get(key);
-  if (!panel) {
+  if (!panel?.queued) {
     const source = Object.hasOwn(item, 'detailsPath') ? () => item.detailsPath : async api => {
       const response = await api.runSearch('name', { name: item.name }, checks.signal, item.domain ? 60 : Infinity);
       if (checks.signal.aborted) return null;
-      refreshDomains(card, item, response, panel.box);
-      return panel.box.parentElement === card ? response.detailsPath : null;
+      refreshDomains(card, item, response, panel);
+      return card.contains(panel.box) ? response.detailsPath : null;
     };
     panel = checksPanel(item.name, source, checks.signal);
     checks.panels.set(key, panel);
+  }
+  panel.mount(card);
+  if (load && !panel.queued) {
+    panel.queued = true;
     checks.queue.push(panel);
   }
-  const offers = card.querySelector('.ending-list');
-  if (offers.nextElementSibling !== panel.box) offers.after(panel.box);
   drainChecks(checks);
 }
 
@@ -373,17 +498,19 @@ function steering(items, idea) {
 
 const nameKey = name => String(name).toLowerCase().replace(/[\s-]/g, '');
 
-// Keep the existing controls when the content has not changed.
-function refreshCard(old, fresh, kept) {
-  const current = old.cloneNode(true);
-  for (const note of current.querySelectorAll('.quote-reference, .quote-caption')) note.remove();
-  for (const row of current.querySelectorAll('[data-quote]')) row.removeAttribute('aria-describedby');
-  for (const details of current.querySelectorAll('details[open]')) details.open = false;
-  current.querySelector(':scope > .detail-checks')?.remove();
-  if (current.isEqualNode(fresh)) return;
+function restoreControl(container, focused) {
+  if (!focused || focused === document.activeElement || !container?.isConnected) return;
+  const label = focused.getAttribute('aria-label');
+  const control = focused.isConnected ? focused : [...container.querySelectorAll('a, button, summary')].find(node =>
+    (label && node.getAttribute('aria-label') === label) || (focused.href && node.href === focused.href) ||
+    (node.tagName === 'SUMMARY' && focused.tagName === 'SUMMARY' && node.textContent === focused.textContent));
+  control?.focus({ preventScroll: true });
+}
+
+function refreshCard(old, fresh) {
   if (old.querySelector('.suggestion-foot details[open]')) fresh.querySelector('.suggestion-foot details')?.setAttribute('open', '');
-  for (const child of [...old.childNodes]) if (child !== kept) child.remove();
-  old.prepend(...fresh.childNodes);
+  Object.assign(old.dataset, fresh.dataset);
+  old.replaceChildren(...fresh.childNodes);
 }
 
 function updateIdeaCards(list, items, settling, checks, loadChecks) {
@@ -391,7 +518,6 @@ function updateIdeaCards(list, items, settling, checks, loadChecks) {
   const focused = document.activeElement;
   let focusedRow = focused;
   while (focusedRow && focusedRow.parentElement !== list) focusedRow = focusedRow.parentElement;
-  const linkIndex = focusedRow ? [...focusedRow.querySelectorAll('a')].indexOf(focused) : -1;
   const motion = settling && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const before = new Map(motion ? [...existing.values()].map(row => [row, row.getBoundingClientRect()]) : []);
   let next = list.firstElementChild;
@@ -401,19 +527,18 @@ function updateIdeaCards(list, items, settling, checks, loadChecks) {
     const row = existing.get(key) || card;
     existing.delete(key);
     row.dataset.name = key;
-    if (row !== card) refreshCard(row.firstElementChild, card.firstElementChild, checks.panels.get(key)?.box);
+    if (row !== card) refreshCard(row.firstElementChild, card.firstElementChild);
     if (row === next) next = next.nextElementSibling;
     else list.insertBefore(row, next);
-    if (loadChecks) attachChecks(row.firstElementChild, item, checks);
+    attachChecks(row.firstElementChild, item, checks, loadChecks);
   });
   for (const row of existing.values()) row.remove();
   list.hidden = !list.childElementCount;
-  if (list.isConnected) labelQuotes();
-  if (document.activeElement !== focused && focused?.isConnected && list.contains(focused)) {
-    focused.focus({ preventScroll: true });
-  } else if (linkIndex !== -1 && document.activeElement !== focused && focusedRow.parentElement === list) {
-    focusedRow.querySelectorAll('a')[linkIndex]?.focus({ preventScroll: true });
+  if (list.isConnected) {
+    syncChecks();
+    updateFootnote();
   }
+  if (focusedRow && list.contains(focusedRow)) restoreControl(focusedRow, focused);
   const nudge = value => Math.max(-8, Math.min(8, value));
   for (const [row, start] of before) {
     if (row.parentElement !== list) continue;
@@ -499,10 +624,10 @@ function uniqueIdeas(items, excludedDomains = [], excludedNames = []) {
 }
 
 function nameSlots(response, name, signal) {
-  const card = nameCard(name, response.items, response.best);
-  if (response.items.some(item => item.status === 'available' && !item.premium)) {
+  const card = nameCard(name, response.items, response.best, { priceDate: response.priceDate });
+  if (response.items.some(item => item.status === 'available')) {
     const panel = checksPanel(name, response.detailsPath && (() => response.detailsPath), signal);
-    card.querySelector('.ending-list').after(panel.box);
+    panel.mount(card);
     panel.load();
   }
   const more = statusLine();
@@ -541,12 +666,11 @@ async function followUp(response, signal, slots) {
   const best = bare.best && others.some(item => item.domain === bare.best.domain) ? bare.best : null;
   const merged = nameSlots({ ...bare, items: [...response.items, ...others], best }, query.name, signal);
   slots.card.replaceWith(merged.card);
-  labelQuotes();
+  syncChecks();
+  updateFootnote();
   if (!others.some(item => item.status !== 'unknown')) status.textContent = 'No other endings confirmed.';
   if (bare.leadingTaken) await recover(query, signal, slots.recovery, seen);
 }
-
-const incomplete = 'Some domains couldn’t be checked.';
 
 function renderIdeas(page, sharing, input, response, signal) {
   const list = el('ul', 'hunt-list idea-list');
@@ -578,7 +702,6 @@ function renderIdeas(page, sharing, input, response, signal) {
       followUp.append(refine);
     }
     if (!items.length && !error) status.textContent = 'No available names confirmed at $60 or less for 3 years. Try another description.';
-    if (!error && items.length && result.complete === false) followUp.append(el('p', 'results-intro', incomplete));
   }
 
   render(response, !pending);
@@ -618,7 +741,7 @@ function renderPage(mode, input, response, signal) {
   } else {
     const groups = new Map();
     const checks = checkQueue(signal);
-    for (const item of items.filter(item => item.status !== 'unknown')) {
+    for (const item of items) {
       const name = item.domain.split('.')[0];
       if (!groups.has(name)) groups.set(name, []);
       groups.get(name).push(item);
@@ -626,18 +749,18 @@ function renderPage(mode, input, response, signal) {
     const availableFirst = [...groups].sort(([, a], [, b]) =>
       Number(b.some(item => item.offer)) - Number(a.some(item => item.offer)));
     for (const [name, endings] of availableFirst) {
-      const card = nameCard(name, endings, null);
+      const showName = endings.some(item => item.status !== 'unknown');
+      const card = nameCard(name, endings, null, { priceDate: response.priceDate, showName });
       page.append(card);
-      if (endings.some(item => item.status === 'available' && !item.premium)) attachChecks(card, { name, endings }, checks);
+      if (endings.some(item => item.status === 'available')) attachChecks(card, { name, endings }, checks);
     }
   }
-  if (mode !== 'idea' && (response.complete === false || items.some(item => item.status === 'unknown'))) {
-    page.append(el('p', 'results-intro', incomplete));
-  }
-
+  sharing.prepend(el('small', 'quote-caption'));
   page.append(sharing);
   pages.replaceChildren(page);
-  labelQuotes();
+  selectedDomain = undefined;
+  syncChecks();
+  updateFootnote();
   region.hidden = false;
   document.getElementById('real-search').hidden = true;
   if (slots) followUp(response, signal, slots).catch(() => {});
@@ -693,16 +816,13 @@ async function search(mode, input, status, submit) {
     const { heading, finish } = renderPage(mode, input, response, controller.signal);
     status.textContent = '';
     const firstCard = pages.querySelector('.hunt-card:not([hidden])');
-    const answer = firstCard?.querySelector('.offer-row') || firstCard?.querySelector('.top-taken a');
-    if (answer) {
-      const domain = answer.querySelector('.domain-title').textContent;
-      const verdict = answer.querySelector('.verdict')?.textContent || 'Taken';
-      announcement.textContent = domain + ': ' + verdict + '.';
-    }
+    const offer = firstCard?.querySelector('.offer-row');
+    const watch = firstCard?.querySelector('.taken-list a');
+    if (offer) announcement.textContent = offer.dataset.domain + ': Available.';
+    else if (watch) announcement.textContent = watch.getAttribute('aria-label').slice(6) + ': Taken.';
     if (focusResult) {
       heading.focus({ preventScroll: true });
-      const end = answer?.getBoundingClientRect().bottom || 0;
-      scrollToAnswer(end - heading.getBoundingClientRect().top > innerHeight - 32 ? answer : heading);
+      scrollToAnswer(heading);
     }
     await finish?.(finishIdeas);
     return heading;
