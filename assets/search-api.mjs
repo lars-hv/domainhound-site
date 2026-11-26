@@ -207,11 +207,42 @@ export async function finishIdeas(result, signal) {
   }
 }
 
+function checkName(name, signal) {
+  return request('/v1/check?' + new URLSearchParams({ name }), signal);
+}
+
+async function checkEndings(input, signal) {
+  const exact = await checkName(input, signal);
+  // Older replies can omit query metadata. Match the input to a returned
+  // domain before treating it as an exact check.
+  const typed = input.toLowerCase();
+  const requested = exact.domains.find(row => row?.domain === (exact.query?.exactDomain || typed));
+  const query = checkedQuery(exact.query) || (requested && checkedQuery({
+    ascii: typed.split('.')[0], exactDomain: typed
+  }));
+  if (!query?.exactDomain) return exact;
+
+  // The exact check also covers endings outside the standard list.
+  try {
+    const bare = await checkName(query.ascii, signal);
+    const duplicate = bare.domains.find(row => row.domain === query.exactDomain);
+    const exactStatus = domainItem(requested)?.status;
+    const first = exactStatus && exactStatus !== 'unknown' ? requested : duplicate || requested;
+    const others = bare.domains.filter(row => row.domain !== query.exactDomain);
+    return { ...bare, query, domains: first ? [first, ...others] : others,
+      details: detailsPath.test(bare.details?.path) ? bare.details : exact.details,
+      share: duplicate && first?.status === duplicate.status ? bare.share : exact.share };
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    return { ...exact, query, endingsError: error.status === 429 ? 'rate-limited' : 'failed' };
+  }
+}
+
 export async function runSearch(mode, input, signal, cap = Infinity) {
   let data;
   if (mode === 'idea') data = await request('/v1/generate', signal, { ...input, idea: input.idea.replace(/\s+/g, ' ').trim() });
   else if (mode === 'personal') data = await request('/v1/personal', signal, input);
-  else if (mode === 'name') data = await request('/v1/check?' + new URLSearchParams({ name: input.name }), signal);
+  else if (mode === 'name') data = await checkEndings(input.name, signal);
   else throw new Error('Unknown search mode');
   if (mode === 'idea') return ideaResult(data);
 
@@ -226,6 +257,7 @@ export async function runSearch(mode, input, signal, cap = Infinity) {
     result.best = bestItem(data);
     result.priceDate = data.priceSnapshot?.checkedAt;
     result.query = checkedQuery(data.query);
+    result.endingsError = data.endingsError;
     result.leadingTaken = !!result.query && leadingTaken(result.items, result.query.ascii);
   }
   return result;

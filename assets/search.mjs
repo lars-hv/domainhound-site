@@ -103,13 +103,14 @@ function shopTable(item, canBuy) {
   return comparison;
 }
 
-function domainCard(item, best) {
+function domainCard(item, best, requested) {
   const card = el('section', best ? 'offer-row best-domain' : 'offer-row');
   card.dataset.domain = item.domain;
   const head = el('div', 'offer-head');
   head.append(el('h4', 'domain-title', item.domain), el('span', 'verdict', 'Available'));
   card.append(head);
-  if (best) card.append(el('b', 'pick-label', 'Hound’s pick'));
+  const labels = [requested && 'You asked for this', best && 'Hound’s pick'].filter(Boolean);
+  if (labels.length) card.append(el('b', 'pick-label', labels.join(' · ')));
   const offer = item.quotes[0];
   if (offer) {
     const first = el('p', 'first-price');
@@ -173,7 +174,7 @@ function updateFootnote() {
   note.textContent = parts.join(' ');
 }
 
-function nameCard(name, items, best, { suggestion, priceDate, showName = Boolean(suggestion) } = {}) {
+function nameCard(name, items, best, { suggestion, priceDate, requested, showName = Boolean(suggestion) } = {}) {
   const card = el('article', 'hunt-card');
   card.setAttribute('aria-label', name);
   if (showName) card.append(el('h3', '', name));
@@ -183,12 +184,13 @@ function nameCard(name, items, best, { suggestion, priceDate, showName = Boolean
   card.dataset.unknown = items.filter(item => item.status === 'unknown').length;
   if (available.length) {
     const notice = el('div', 'trademark-slot');
-    card.append(notice, el('p', 'offer-count', available.length + ' available domain' + (available.length === 1 ? '' : 's')));
+    if (requested?.status === 'taken') card.append(el('h3', 'alternatives-title', 'Available instead'), notice);
+    else card.append(notice, el('p', 'offer-count', available.length + ' available domain' + (available.length === 1 ? '' : 's')));
     const offers = el('div', 'ending-list');
-    for (const item of available) offers.append(domainCard(item, item.domain === best?.domain));
+    for (const item of available) offers.append(domainCard(item, item.domain === best?.domain, item === requested));
     card.append(offers);
   }
-  const taken = items.filter(item => item.status === 'taken');
+  const taken = items.filter(item => item.status === 'taken' && item !== requested);
   if (taken.length) {
     const priority = topEndings.flatMap(ending => taken.filter(item => endingOf(item.domain) === ending));
     const sorted = [...priority, ...taken.filter(item => !priority.includes(item))];
@@ -629,53 +631,33 @@ function uniqueIdeas(items, excludedDomains = [], excludedNames = []) {
   });
 }
 
-function nameSlots(response, name, signal) {
-  const card = nameCard(name, response.items, response.best, { priceDate: response.priceDate });
+function renderName(page, response, name, requested, signal) {
+  const card = nameCard(name, response.items, response.best, { priceDate: response.priceDate, requested });
+  page.append(card);
   if (response.items.some(item => item.status === 'available')) {
     const panel = checksPanel(name, response.detailsPath && (() => response.detailsPath), signal);
     panel.mount(card);
     panel.load();
+  } else if (response.query?.exactDomain && !response.endingsError) {
+    const taken = response.complete && requested?.status === 'taken' && response.items.every(item => item.status === 'taken');
+    const line = el('p', 'ending-summary', taken ? 'All checked endings are taken.' : 'No available endings confirmed.');
+    const ideas = el('button', 'hint-switch', 'Find new names');
+    ideas.type = 'submit';
+    ideas.setAttribute('form', 'main-search');
+    ideas.dataset.seed = response.query.name;
+    line.append(' ', ideas);
+    card.prepend(line);
   }
-  const more = statusLine();
-  const recovery = el('section', 'recovery');
-  recovery.setAttribute('aria-label', 'Similar names');
-  recovery.hidden = true;
-  return { card, more, recovery };
-}
-
-async function followUp(response, signal, slots) {
-  const query = response.query;
-  if (!query) return;
-  const seen = new Set(response.items.map(item => item.domain));
-  if (!query.exactDomain) {
-    if (response.leadingTaken) await recover(query, signal, slots.recovery, seen);
-    return;
+  if (response.endingsError) {
+    page.append(el('p', 'hunt-status', response.endingsError === 'rate-limited' ? rateLimit : 'Couldn’t check other endings.'));
   }
-  const exact = response.items.find(item => item.domain === query.exactDomain);
-  if (!query.exactDomain.endsWith('.com') || exact?.status !== 'taken') return;
-  // Learn the other endings from the bare label and merge them into the same
-  // name card without duplicating the exact answer.
-  const status = slots.more;
-  status.textContent = 'Checking other endings…';
-  let bare;
-  try {
-    const api = await import('./search-api.mjs');
-    bare = await api.runSearch('name', { name: query.ascii }, signal);
-  } catch (error) {
-    if (!signal.aborted) status.textContent = error.status === 429 ? rateLimit : 'Couldn’t check other endings.';
-    return;
+  if (response.leadingTaken && !response.query.exactDomain) {
+    const recovery = el('section', 'recovery');
+    recovery.setAttribute('aria-label', 'Similar names');
+    recovery.hidden = true;
+    page.append(recovery);
+    recover(response.query, signal, recovery, new Set(response.items.map(item => item.domain))).catch(() => {});
   }
-  if (signal.aborted) return;
-  status.textContent = '';
-  const others = bare.items.filter(item => !seen.has(item.domain));
-  for (const item of others) seen.add(item.domain);
-  const best = bare.best && others.some(item => item.domain === bare.best.domain) ? bare.best : null;
-  const merged = nameSlots({ ...bare, items: [...response.items, ...others], best }, query.name, signal);
-  slots.card.replaceWith(merged.card);
-  syncChecks();
-  updateFootnote();
-  if (!others.some(item => item.status !== 'unknown')) status.textContent = 'No other endings confirmed.';
-  if (bare.leadingTaken) await recover(query, signal, slots.recovery, seen);
 }
 
 function renderIdeas(page, sharing, input, response, signal) {
@@ -730,20 +712,30 @@ function renderPage(mode, input, response, signal) {
   const items = response.items;
   const head = el('header', 'results-head');
   const titles = { idea: input.round === 2 ? 'More name ideas' : 'Name ideas', name: input.name, personal: 'Domains for ' + input.fullName };
-  const heading = el('h2', '', titles[mode]);
+  const exact = response.query?.exactDomain;
+  const requested = exact && items.find(item => item.domain === exact);
+  const taken = requested?.status === 'taken';
+  const heading = el('h2', '', taken ? exact + ' is taken.' : titles[mode]);
   heading.tabIndex = -1;
   head.append(heading);
   const sharing = el('div', 'result-sharing');
   if (response.shareUrl) sharing.append(link('Share results', response.shareUrl));
   const page = document.createDocumentFragment();
   page.append(head);
-  let slots = null;
+  if (taken) {
+    const watch = link('Watch it', '/watch/?domain=' + encodeURIComponent(exact));
+    watch.setAttribute('aria-label', 'Watch ' + exact);
+    const actions = el('p', 'requested-actions');
+    actions.append(watch, ' or ', link('ask your agent to draft an offer', '#install'), '.');
+    head.append(actions);
+  } else if (exact && requested?.status !== 'available') {
+    page.append(el('p', 'hunt-status', 'Couldn’t confirm ' + exact + '.'));
+  }
   let finish = null;
   if (mode === 'idea') {
     finish = renderIdeas(page, sharing, input, response, signal);
   } else if (mode === 'name') {
-    slots = nameSlots(response, response.query?.ascii || input.name.split('.')[0], signal);
-    page.append(slots.card, slots.more, slots.recovery);
+    renderName(page, response, response.query?.ascii || input.name.split('.')[0], requested, signal);
   } else {
     const groups = new Map();
     const checks = checkQueue(signal);
@@ -769,7 +761,7 @@ function renderPage(mode, input, response, signal) {
   updateFootnote();
   region.hidden = false;
   document.getElementById('real-search').hidden = true;
-  if (slots) followUp(response, signal, slots).catch(() => {});
+
   return { heading, finish };
 }
 
@@ -810,7 +802,7 @@ async function search(mode, input, status, submit) {
       response = await finishIdeas(response, controller.signal);
       if (controller.signal.aborted) return;
     }
-    if (!response.items.some(item => item.status !== 'unknown')) {
+    if (!response.query?.exactDomain && !response.items.some(item => item.status !== 'unknown')) {
       if (mode === 'idea') status.textContent = 'No available names confirmed at $60 or less for 3 years. Try another description.';
       else if (mode === 'personal' && response.complete !== false && !response.items.length) {
         status.textContent = 'No domains found for this spelling. Try another spelling.';
@@ -824,7 +816,11 @@ async function search(mode, input, status, submit) {
     const firstCard = pages.querySelector('.hunt-card:not([hidden])');
     const offer = firstCard?.querySelector('.offer-row');
     const watch = firstCard?.querySelector('.taken-list a');
-    if (offer) announcement.textContent = offer.dataset.domain + ': Available.';
+    if (response.query?.exactDomain) {
+      const exact = response.items.find(item => item.domain === response.query.exactDomain);
+      const verdict = { available: 'Available', taken: 'Taken' }[exact?.status] || 'Couldn’t confirm';
+      announcement.textContent = response.query.exactDomain + ': ' + verdict + '.';
+    } else if (offer) announcement.textContent = offer.dataset.domain + ': Available.';
     else if (watch) announcement.textContent = watch.getAttribute('aria-label').slice(6) + ': Taken.';
     if (focusResult) {
       heading.focus({ preventScroll: true });
@@ -906,6 +902,12 @@ for (const form of document.querySelectorAll('.hunt-form')) {
 
   form.addEventListener('submit', event => {
     event.preventDefault();
+    const seed = event.submitter?.dataset.seed;
+    if (seed) {
+      field.value = 'names like ' + seed;
+      override = 'idea';
+      updateHint();
+    }
     run(modeNow());
   });
   switcher?.addEventListener('click', () => {

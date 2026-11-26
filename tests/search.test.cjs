@@ -282,15 +282,24 @@ for (const width of [390, 1440]) {
   });
 }
 
-test('a dotted name reaches the API as an exact domain', async t => {
-  const { page } = await openPage(t, call => {
-    assert.equal(call.path, '/v1/check');
-    assert.equal(call.query.get('name'), 'mapfern.com');
-    return { json: { ...checkReply(), query: { name: 'mapfern', ascii: 'mapfern', exactDomain: 'mapfern.com' },
-      domains: [domainRow('mapfern.com')], choice: null } };
+function exactReply(domain, status) {
+  const ascii = domain.split('.')[0];
+  return { query: { name: ascii, ascii, exactDomain: domain }, domains: [domainRow(domain, status)] };
+}
+
+test('the requested available domain comes first, even when another ending is the pick', async t => {
+  const { page, calls } = await openPage(t, call => {
+    const name = call.query.get('name');
+    if (name === 'Mapfern.dev') return { json: exactReply('mapfern.dev', 'available') };
+    assert.equal(name, 'mapfern');
+    return { json: bareReply(name, { com: 'available', dev: 'available', so: 'available' }) };
   });
-  await search(page, 'name', 'mapfern.com');
-  await page.getByRole('link', { name: /Buy .* at Gandi/ }).waitFor();
+  await search(page, 'name', 'Mapfern.dev');
+  await page.getByText('You asked for this', { exact: true }).waitFor();
+  assert.deepEqual(await page.locator('.domain-title').allTextContents(), ['mapfern.dev', 'mapfern.com', 'mapfern.so']);
+  assert.match(await page.locator('.offer-row').first().innerText(), /You asked for this/);
+  assert.equal(await page.locator('.best-domain .domain-title').innerText(), 'mapfern.com');
+  assert.deepEqual(calls.map(call => call.query.get('name')), ['Mapfern.dev', 'mapfern']);
 });
 
 test('confirmed endings remain usable when automatic details have expired', async t => {
@@ -961,27 +970,47 @@ test('taken hyphenated international names get four variants without added separ
     [name, 'getblåfuru', 'tryblåfuru', 'blåfuruhq', 'blåfuruapp'].sort());
 });
 
-test('an exact taken .com checks other endings and shows its watch link once below available endings', async t => {
+test('a taken exact domain leads with watch and offer actions, then normal alternative cards', async t => {
   const { page, calls } = await openPage(t, call => {
-    if (call.path === '/v1/check' && call.query.get('name') === 'mapfern.com') {
-      return { json: { ...bareReply('mapfern', {}, 'mapfern'), query: { name: 'mapfern', ascii: 'mapfern', exactDomain: 'mapfern.com' },
-        domains: [domainRow('mapfern.com', 'taken')], choice: choiceFor(null) } };
-    }
-    return takenHandler({ seed: 'mapfern', generate: () => ({ status: 503, json: { error: 'unavailable' } }) })(call);
+    if (call.path === '/v1/check/details') return { json: profileChecks('mapfern') };
+    if (call.query.get('name') === 'mapfern.ai') return { json: exactReply('mapfern.ai', 'taken') };
+    assert.equal(call.query.get('name'), 'mapfern');
+    return { json: { ...bareReply('mapfern', { ai: 'available', dev: 'available', so: 'available' }),
+      details: detailToken('mapfern') } };
   });
-  await search(page, 'name', 'mapfern.com');
+  await search(page, 'name', 'mapfern.ai');
   const results = page.locator('#search-results');
-  const recovery = results.getByRole('region', { name: 'Similar names' });
-  await recovery.getByText('Couldn’t load name ideas.', { exact: true }).waitFor();
-  assert.equal(calls[0].query.get('name'), 'mapfern.com');
-  assert.equal(calls[1].query.get('name'), 'mapfern');
-  const watch = results.getByRole('link', { name: 'Watch mapfern.com', exact: true });
-  await watch.waitFor();
-  assert.equal(await watch.count(), 1);
-  assert.deepEqual(await recovery.locator('article h3').allTextContents(), ['getmapfern', 'mapfernhq']);
-  assert.equal(await results.locator(':scope > .wrap > article').getByRole('link', { name: 'ask your agent to draft an offer' })
-    .getAttribute('href'), '#install');
-  assert.ok(await watch.evaluate(node => !!(node.closest('article').querySelector('.ending-list').compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
+  await results.getByRole('heading', { name: 'mapfern.ai is taken.' }).waitFor();
+  const watch = results.getByRole('link', { name: 'Watch mapfern.ai' });
+  assert.equal(await watch.innerText(), 'Watch it');
+  assert.equal(await results.locator('header').getByRole('link', { name: 'ask your agent to draft an offer' }).getAttribute('href'), '#install');
+  assert.equal(await watch.getAttribute('href'), '/watch/?domain=mapfern.ai');
+  await results.getByRole('heading', { name: 'Available instead' }).waitFor();
+  assert.equal(await results.locator('.taken-list').getByText('.ai', { exact: true }).count(), 0);
+  assert.deepEqual(await results.locator('.domain-title').allTextContents(), ['mapfern.dev', 'mapfern.so']);
+  assert.equal(await results.locator('.best-domain .domain-title').innerText(), 'mapfern.dev');
+  assert.equal(await results.locator('.offer-row .shop-table').count(), 2);
+  await results.getByRole('button', { name: 'Name checks for mapfern.so' }).click();
+  await results.getByText('US trademark: none found').waitFor();
+  assert.equal(calls.length, 3);
+});
+
+test('when all checked endings are taken, Find new names runs an idea search for the same word', async t => {
+  const { page, calls } = await openShortlistPage(t, call => {
+    if (call.path === '/v1/generate') {
+      assert.equal(call.body.idea, 'names like mapfern');
+      return { json: ideas([['Fernpath', 'fernpath.dev', 'available', 80]]) };
+    }
+    if (call.query.get('name') === 'mapfern.org') return { json: exactReply('mapfern.org', 'taken') };
+    assert.equal(call.query.get('name'), 'mapfern');
+    return { json: bareReply('mapfern') };
+  });
+  await search(page, 'name', 'mapfern.org');
+  await page.getByText(/^All checked endings are taken\./).waitFor();
+  assert.equal(calls.length, 2);
+  await page.getByRole('button', { name: 'Find new names' }).click();
+  await page.locator('.domain-title').getByText('fernpath.dev').waitFor();
+  assert.equal(await page.locator('#search-hint-text').innerText(), 'Name ideas');
 });
 
 test('failed close-name lookups say so and never hide the ending rows', async t => {
@@ -1196,7 +1225,9 @@ test('an all-taken name ignores a details token even when the API supplies one',
   await page.locator('#name').press('Enter');
   await page.locator('a[href="/watch/?domain=mapfern.io"]').waitFor();
   await page.waitForLoadState('networkidle');
-  assert.deepEqual(calls.map(call => call.path), ['/v1/check']);
+  assert.deepEqual(calls.map(call => [call.path, call.query.get('name')]), [
+    ['/v1/check', 'mapfern.io'], ['/v1/check', 'mapfern']
+  ]);
   assert.equal(await page.locator('.detail-checks').count(), 0);
 });
 
@@ -1263,14 +1294,15 @@ for (const reducedMotion of ['reduce', 'no-preference']) {
 
 test('a taken exact domain lands with its watch link and a failed retry keeps the field in view', async t => {
   const domain = 'mapfern.org';
-  const responses = [{ json: { domains: [domainRow(domain, 'taken')] } }, { status: 503, json: {} }];
+  const responses = [{ json: { domains: [domainRow(domain, 'taken')] } }, { status: 503, json: {} }, { status: 503, json: {} }];
   const { page } = await openPage(t, () => responses.shift(), { reducedMotion: 'reduce' });
   const field = page.locator('#name');
   await field.fill(domain);
   await field.press('Enter');
   const watch = page.getByRole('link', { name: 'Watch ' + domain });
   await watch.waitFor();
-  assert.equal(await watch.innerText(), '.org');
+  assert.equal(await watch.innerText(), 'Watch it');
+  await page.getByText('Couldn’t check other endings.', { exact: true }).waitFor();
   const inView = node => {
     const rect = node.getBoundingClientRect();
     return rect.top >= 0 && rect.bottom <= innerHeight;
