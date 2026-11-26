@@ -94,7 +94,7 @@ function bareReply(ascii, statuses = {}, name = ascii) {
     choice: choiceFor(first), share: null, details: { id: null, status: 'unavailable', pending: [] } };
 }
 
-async function openPage(t, handler, { width = 390, javaScriptEnabled = true, reducedMotion = 'no-preference', registry } = {}) {
+async function openPage(t, handler, { width = 390, javaScriptEnabled = true, reducedMotion = 'no-preference', registry, apple } = {}) {
   const context = await browser.newContext({
     viewport: { width, height: width === 390 ? 844 : 900 },
     javaScriptEnabled, reducedMotion, serviceWorkers: 'block'
@@ -120,6 +120,7 @@ async function openPage(t, handler, { width = 390, javaScriptEnabled = true, red
         headers: { 'access-control-allow-origin': site } });
     }
     if (registry && url.origin === 'https://pubapi.registry.google') return registry(route, url);
+    if (apple && url.origin === 'https://itunes.apple.com') return apple(route, url);
     if (url.origin !== site || request.method() !== 'GET') {
       unexpected.push(request.method() + ' ' + url.href);
       return route.abort();
@@ -181,6 +182,59 @@ async function screenshot(page, filename, target = page) {
   mkdirSync(dir, { recursive: true });
   await page.evaluate(() => document.fonts.ready);
   await target.screenshot({ ...(target === page && { fullPage: true }), path: path.join(dir, filename + '.png'), animations: 'disabled' });
+}
+
+for (const outcome of ['taken', 'empty', 'unavailable']) {
+  test('mobile App Store browser recovery after a Worker 429: ' + outcome, async t => {
+    const reply = checkReply(true);
+    const name = outcome === 'taken' ? 'Map Fern' : 'Mapfern';
+    reply.query.name = name;
+    const details = profileChecks('mapfern');
+    details.appStore = { status: 'unknown', reason: 'rate-limited', matches: [] };
+    reply.appStore = outcome === 'empty' ? { status: 'pending' } : details.appStore;
+    let releaseDetails;
+    const detailsGate = outcome === 'taken' ? new Promise(resolve => { releaseDetails = resolve; }) : null;
+    t.after(() => releaseDetails?.());
+    let releaseApple;
+    const appleGate = new Promise(resolve => { releaseApple = resolve; });
+    t.after(releaseApple);
+    const requests = [];
+    const { page } = await openPage(t, async call => {
+      if (call.path === '/v1/check') return { json: reply };
+      await detailsGate;
+      return { json: details };
+    }, { apple: async (route, url) => {
+      requests.push(url);
+      await appleGate;
+      return route.fulfill({ status: outcome === 'unavailable' ? 429 : 200,
+        headers: { 'access-control-allow-origin': '*' },
+        json: { results: [
+          { trackName: outcome === 'taken' ? 'Mapfern' : 'Map Fern', trackId: 23456 },
+          { trackName: name + ' Plus', trackId: 34567 },
+          { trackName: name, trackId: '45678' },
+          ...(outcome === 'taken' ? [{ trackName: 'ＭＡＰ ＦＥＲＮ — Notes', trackId: 12345 }] : []),
+        ] } });
+    } });
+    await search(page, 'name', 'Mapfern');
+    const row = page.locator('.primary-checks .check-line').filter({ hasText: 'App Store (iOS)' });
+    await row.getByRole('link', { name: 'App Store (iOS) · Still checking' }).waitFor();
+    releaseApple();
+    const linkLabel = { taken: 'Taken', empty: 'No matching app found', unavailable: "Couldn't check" }[outcome];
+    const link = row.getByRole('link', { name: 'App Store (iOS) · ' + linkLabel });
+    await link.waitFor();
+    assert.equal(await row.getAttribute('data-source'), outcome === 'unavailable' ? null : 'browser');
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].searchParams.get('term'), name);
+    assert.equal(requests[0].searchParams.get('country'), 'US');
+    assert.equal(requests[0].searchParams.get('callback'), null);
+    if (outcome === 'taken') {
+      assert.equal(await link.getAttribute('href'), 'https://apps.apple.com/us/app/id12345');
+      releaseDetails();
+      await page.getByText('US trademark: no exact live match found.').waitFor();
+      assert.equal(await row.getAttribute('data-source'), 'browser');
+      assert.equal(requests.length, 1);
+    }
+  });
 }
 
 for (const width of [390, 1440]) {
@@ -680,13 +734,15 @@ test('details use manual links for unknowns and restrict platform destinations',
         { platform: 'Reader', state: 'check', link: 'https://reader.example/profile?name=mapfern' }
       ]
     } };
-  });
+  }, { apple: route => route.fulfill({ status: 503, headers: { 'access-control-allow-origin': '*' } }) });
   await search(page, 'name', 'Mapfern');
   const panelToggle = page.getByRole('button', { name: /^Name checks for / }).first();
   await panelToggle.click();
   await page.getByRole('link', { name: /No profile found/ }).waitFor();
   const details = page.locator('.detail-checks');
   await page.getByText('US trademark: no exact live match found.').waitFor();
+  assert.equal(new URL(await page.getByRole('link', { name: "App Store (iOS) · Couldn't check" }).getAttribute('href')).hostname,
+    'apps.apple.com');
   assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
   assert.equal(await details.locator('a[href="https://reader.example/profile?name=mapfern"]').count(), 0);
   assert.equal(await page.getByRole('link', { name: "Google Play (Android) · Couldn't check · Search Google Play" }).getAttribute('href'),

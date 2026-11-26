@@ -288,8 +288,11 @@ function appChecks(data, name, pending) {
     return row?.status === 'pending' || (!row && pending) ? 'Still checking' : "Couldn't check";
   };
   const play = data.googlePlay;
+  const appleLine = checkLine('App Store (iOS)', outcome(apple),
+    match || link('', 'https://apps.apple.com/us/iphone/search?term=' + key));
+  if (apple?.source === 'browser') appleLine.dataset.source = 'browser';
   return [
-    checkLine('App Store (iOS)', outcome(apple), match || link('', 'https://apps.apple.com/us/iphone/search?term=' + key)),
+    appleLine,
     checkLine('Google Play (Android)', outcome(play), sourceLink('', play?.link, ['play.google.com']) ||
       link('', 'https://play.google.com/store/search?c=apps&q=' + key), 'Search Google Play'),
   ];
@@ -363,7 +366,7 @@ pages.addEventListener('click', event => {
   }
 });
 
-function checksPanel(name, source, signal, firstChecks = {}) {
+function checksPanel(name, source, signal, firstChecks = {}, appleName = name) {
   const box = el('section', 'detail-checks');
   box.hidden = true;
   box.id = 'name-checks-' + ++panelNumber;
@@ -378,13 +381,26 @@ function checksPanel(name, source, signal, firstChecks = {}) {
   let path;
   let data = firstChecks;
   let pending = Boolean(source);
+  let browserApple;
+  let checkingApple = false;
   list.append(handleChecks(data, name));
 
   function showChecks() {
     const slot = host?.querySelector('.primary-checks');
     if (!slot) return;
+    const workerApple = data.appStore;
+    if (workerApple?.status === 'unknown' && browserApple === undefined && !checkingApple && !signal.aborted) {
+      checkingApple = true;
+      void import('./search-api.mjs').then(api => api.checkAppStore(appleName, signal)).catch(() => null).then(result => {
+        browserApple = result;
+        checkingApple = false;
+        if (!signal.aborted) showChecks();
+      });
+    }
+    const appStore = !workerApple || ['unknown', 'pending'].includes(workerApple.status)
+      ? browserApple ?? (checkingApple ? { status: 'pending' } : workerApple) : workerApple;
     const us = data.trademarks?.us;
-    slot.replaceChildren(...appChecks(data, name, pending));
+    slot.replaceChildren(...appChecks({ ...data, appStore }, name, pending));
     if (us?.status === 'exact_match_found') slot.append(trademarkNotice(us, name));
     else if (us?.status === 'pending' || (!us && pending)) slot.append(el('p', 'trademark-pending', 'Trademark check still running.'));
     else if (us?.status === 'no_exact_match_found') slot.append(el('p', 'mark-result', 'US trademark: no exact live match found.'));
@@ -432,8 +448,9 @@ function checksPanel(name, source, signal, firstChecks = {}) {
     }
   }
   retry.addEventListener('click', load);
-  function update(first) {
+  function update(first, term = appleName) {
     data = { ...data, ...first };
+    appleName = term;
     showChecks();
   }
   return { box, load, mount, update };
@@ -454,7 +471,7 @@ function refreshDomains(card, item, response, panel) {
   const focused = card.contains(document.activeElement) ? document.activeElement : null;
   refreshCard(card, fresh);
   panel.mount(card);
-  panel.update(response.firstChecks);
+  panel.update(response.firstChecks, response.query?.name);
   syncChecks();
   updateFootnote();
   restoreControl(card, focused);
@@ -665,7 +682,7 @@ function uniqueIdeas(items, excludedDomains = [], excludedNames = []) {
 function renderName(page, response, name, requested, signal) {
   const card = nameCard(name, response.items, response.best, { priceDate: response.priceDate, requested });
   page.append(card);
-  const panel = checksPanel(name, response.detailsPath && (() => response.detailsPath), signal, response.firstChecks);
+  const panel = checksPanel(name, response.detailsPath && (() => response.detailsPath), signal, response.firstChecks, response.query?.name);
   panel.mount(card);
   panel.load();
   if (!response.items.some(item => item.status === 'available') && response.query?.exactDomain && !response.endingsError) {

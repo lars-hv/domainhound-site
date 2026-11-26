@@ -340,3 +340,31 @@ export function loadDetails(path, signal) {
   if (!detailsPath.test(path)) throw new Error('Invalid details path');
   return request(path, signal);
 }
+
+export async function checkAppStore(name, signal) {
+  const url = new URL('https://itunes.apple.com/search');
+  url.search = new URLSearchParams({ term: name, country: 'US', media: 'software', entity: 'software', limit: '10' });
+  try {
+    const response = await fetch(url, { credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer',
+      signal: AbortSignal.any([signal, AbortSignal.timeout(4500)]) });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (!Array.isArray(data?.results)) return null;
+
+    // Match the Worker's title and subtitle rules in src/apple.js.
+    const normalize = value => value.normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
+    const wanted = normalize(name);
+    const matches = new Map();
+    for (const row of data.results) {
+      if (typeof row?.trackName !== 'string' || !Number.isSafeInteger(row.trackId) || row.trackId <= 0) continue;
+      const base = row.trackName.split(/[:|]|\s[-–—]\s/, 1)[0];
+      if (![row.trackName, base].some(value => normalize(value) === wanted)) continue;
+      matches.set(row.trackId, { name: row.trackName.replace(/[\p{Cc}\p{Cf}\s]+/gu, ' ').trim().slice(0, 100),
+        url: 'https://apps.apple.com/us/app/id' + row.trackId });
+    }
+    return { status: matches.size ? 'taken' : 'no_match_found', reason: null,
+      matches: [...matches.values()].slice(0, 5), checkedAt: new Date().toISOString(), source: 'browser' };
+  } catch {
+    return null;
+  }
+}
