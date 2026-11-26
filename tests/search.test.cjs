@@ -94,7 +94,7 @@ function bareReply(ascii, statuses = {}, name = ascii) {
     choice: choiceFor(first), share: null, details: { id: null, status: 'unavailable', pending: [] } };
 }
 
-async function openPage(t, handler, { width = 390, javaScriptEnabled = true, reducedMotion = 'no-preference' } = {}) {
+async function openPage(t, handler, { width = 390, javaScriptEnabled = true, reducedMotion = 'no-preference', registry } = {}) {
   const context = await browser.newContext({
     viewport: { width, height: width === 390 ? 844 : 900 },
     javaScriptEnabled, reducedMotion, serviceWorkers: 'block'
@@ -119,6 +119,7 @@ async function openPage(t, handler, { width = 390, javaScriptEnabled = true, red
       return route.fulfill({ status: reply.status || 200, json: reply.json,
         headers: { 'access-control-allow-origin': site } });
     }
+    if (registry && url.origin === 'https://pubapi.registry.google') return registry(route, url);
     if (url.origin !== site || request.method() !== 'GET') {
       unexpected.push(request.method() + ' ' + url.href);
       return route.abort();
@@ -281,6 +282,38 @@ for (const width of [390, 1440]) {
     }
   });
 }
+
+test('browser RDAP recovers the Hound’s pick ten times at 390px', async t => {
+  const name = 'brightboard';
+  const domain = name + '.dev';
+  const url = 'https://pubapi.registry.google/rdap/domain/' + domain;
+  let registryRequests = 0;
+  const { page, calls } = await openPage(t, call => {
+    assert.equal(call.path, '/v1/check');
+    assert.equal(call.query.get('name'), name);
+    const seen = call.query.get('seen');
+    assert.ok(seen === null || seen === 'dev:available');
+    const body = bareReply(name, { dev: seen ? 'available' : 'unknown' });
+    const row = body.domains.find(row => row.domain === domain);
+    Object.assign(row, seen ? { evidence: 'client-rdap-404', checkedFrom: 'browser' }
+      : { reason: 'rate-limited', rdapUrl: url });
+    return { json: body };
+  }, { width: 390, registry: (route, request) => {
+    assert.equal(request.href, url);
+    registryRequests += 1;
+    return route.fulfill({ status: 404, body: JSON.stringify({ errorCode: 404 }), contentType: 'application/rdap+json',
+      headers: { 'access-control-allow-origin': '*' } });
+  } });
+  for (let i = 0; i < 10; i++) {
+    await search(page, 'name', name);
+    const best = page.locator('.best-domain');
+    await best.getByRole('link', { name: /Buy .* at Gandi/ }).waitFor();
+    assert.equal(await best.locator('.domain-title').innerText(), domain);
+    assert.equal(calls.length, 2 * (i + 1));
+  }
+  assert.equal(registryRequests, 10);
+  assert.equal(await page.getByText(/checked from your browser/i).count(), 0);
+});
 
 function exactReply(domain, status) {
   const ascii = domain.split('.')[0];

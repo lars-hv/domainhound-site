@@ -181,7 +181,7 @@ function nameCard(name, items, best, { suggestion, priceDate, requested, showNam
   card.setAttribute('aria-label', name);
   if (showName) card.append(el('h3', '', name));
   const available = items.filter(item => item.status === 'available');
-  const dates = available.flatMap(item => item.quotes.map(quote => dateOf(priceDate || quote.checkedAt || quote.snapshotDate)));
+  const dates = available.flatMap(item => item.quotes.map(quote => dateOf(quote.checkedAt || quote.snapshotDate || priceDate)));
   card.dataset.priceDates = [...new Set(dates)].join(' ');
   card.dataset.unknown = items.filter(item => item.status === 'unknown').length;
   if (available.length) {
@@ -210,6 +210,8 @@ function nameCard(name, items, best, { suggestion, priceDate, requested, showNam
     group.append(line);
     card.append(group);
   }
+  const reserved = items.filter(item => item.status === 'reserved');
+  if (reserved.length) card.append(el('p', 'taken-list', 'Reserved by the registry · ' + reserved.map(item => endingOf(item.domain)).join(', ')));
   if (suggestion) {
     if (Number.isFinite(suggestion.score)) {
       const badge = el('span', 'name-score', 'Name score ' + suggestion.score + '/100');
@@ -693,7 +695,8 @@ function renderIdeas(page, sharing, input, response, signal) {
       else sharing.append(link('Share results', result.shareUrl));
     } else share?.remove();
     if (!settled) {
-      status.textContent = moreNames;
+      status.textContent = !items.length && result.suggestions?.length
+        ? 'Checking domains for ' + result.suggestions.join(', ') + '…' : moreNames;
       return;
     }
     status.textContent = error ? (items.length ? 'Couldn’t load more names.' : 'Couldn’t finish the search. Try again.') : '';
@@ -741,6 +744,8 @@ function renderPage(mode, input, response, signal) {
     const actions = el('p', 'requested-actions');
     actions.append(watch, ' or ', link('ask your agent to draft an offer', '#install'), '.');
     head.append(actions);
+  } else if (exact && requested?.status === 'reserved') {
+    page.append(el('p', 'hunt-status', exact + ' is reserved by the registry.'));
   } else if (exact && requested?.status !== 'available') {
     page.append(el('p', 'hunt-status', 'Couldn’t confirm ' + exact + '.'));
   }
@@ -810,12 +815,12 @@ async function search(mode, input, status, submit) {
     if (controller.signal.aborted) return;
     let response = await runSearch(mode, input, controller.signal);
     if (controller.signal.aborted) return;
-    if (response.generationDetails && !response.items.length) {
+    if (response.generationDetails && !response.items.length && !response.suggestions?.length) {
       status.textContent = moreNames;
       response = await finishIdeas(response, controller.signal);
       if (controller.signal.aborted) return;
     }
-    if (!response.query?.exactDomain && !response.items.some(item => item.status !== 'unknown')) {
+    if (!response.suggestions?.length && !response.query?.exactDomain && !response.items.some(item => item.status !== 'unknown')) {
       if (mode === 'idea') status.textContent = 'No available names confirmed at $60 or less for 3 years. Try another description.';
       else if (mode === 'personal' && response.complete !== false && !response.items.length) {
         status.textContent = 'No domains found for this spelling. Try another spelling.';
@@ -831,7 +836,7 @@ async function search(mode, input, status, submit) {
     const watch = firstCard?.querySelector('.taken-list a');
     if (response.query?.exactDomain) {
       const exact = response.items.find(item => item.domain === response.query.exactDomain);
-      const verdict = { available: 'Available', taken: 'Taken' }[exact?.status] || 'Couldn’t confirm';
+      const verdict = { available: 'Available', taken: 'Taken', reserved: 'Reserved by the registry' }[exact?.status] || 'Couldn’t confirm';
       announcement.textContent = response.query.exactDomain + ': ' + verdict + '.';
     } else if (offer) announcement.textContent = offer.dataset.domain + ': Available.';
     else if (watch) announcement.textContent = watch.getAttribute('aria-label').slice(6) + ': Taken.';
