@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Use Domain Hound in Claude | Domain Hound</title>
+  <meta name="description" content="Add Domain Hound to Claude to check domain availability, compare registrar prices and screen a product name.">
+  <link rel="canonical" href="https://domainhound.dev/docs/claude/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Domain Hound">
+  <meta property="og:url" content="https://domainhound.dev/docs/claude/">
+  <meta property="og:title" content="Use Domain Hound in Claude | Domain Hound">
+  <meta property="og:description" content="Check domain availability, compare registrar prices and screen a product name in Claude.">
+  <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
+  <meta property="og:image:alt" content="Domain Hound. Name it already.">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/brand-b.css">
+  <link rel="stylesheet" href="/assets/guides.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/hound-mark.svg">
+</head>
+<body>
+<header class="mast">
+  <div class="wrap mast-inner">
+    <a class="brand" href="/"><span>domainhound.dev</span></a>
+    <nav aria-label="Main"><a href="/#search">Search</a><a href="/watch/">Watch</a></nav>
+  </div>
+</header>
+<main class="guide wrap">
+  <h1>Use Domain Hound in Claude</h1>
+  <p>Check whether a domain is available, compare its first-year and renewal prices at six shops, and see if an app, public profile or exact US trademark already uses the name.</p>
+  <p>The connector is read-only. Any purchase or registration happens at the registrar.</p>
+
+  <section aria-labelledby="connect">
+    <h2 id="connect">Add the connector</h2>
+    <ol>
+      <li>In Claude, open <strong>Customize &gt; Connectors</strong>.</li>
+      <li>Choose <strong>Add &gt; Custom &gt; Web</strong> and name the connector <strong>Domain Hound</strong>.</li>
+      <li>Paste this URL and continue.</li>
+    </ol>
+    <pre aria-label="Connector URL"><code>https://domainhound-mcp.domainhound.workers.dev/mcp</code></pre>
+    <p>Choose <strong>No sign in</strong> for authentication and finish adding the connector. Enable Domain Hound from the <strong>+</strong> menu under <strong>Connectors</strong> in your chat.</p>
+    <p>If you cannot add it, check whether your organization allows custom connectors. See <a href="https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp">Claude’s setup help</a>.</p>
+  </section>
+
+  <section aria-labelledby="examples">
+    <h2 id="examples">Try these prompts</h2>
+    <dl>
+      <dt>“Use Domain Hound to check if example.com is available.”</dt>
+      <dd>The status of that exact domain. The result says whether it is taken, available or could not be confirmed.</dd>
+      <dt>“Compare .com, .dev and .app for Fern Quartz Studio. Show three-year costs and any exact US trademark matches.”</dt>
+      <dd>The three endings, published prices for available domains, a pick if one fits the budget, and name-check results. A trademark match includes a link when a record is available.</dd>
+      <dt>“Check the US App Store for an app named Fern Quartz Studio.”</dt>
+      <dd>Matching US App Store titles and links, or a message that no match was found or the check could not finish.</dd>
+    </dl>
+    <p>Trademark results cover exact live US word marks. Search aid, not legal advice.</p>
+  </section>
+
+  <section aria-labelledby="sources">
+    <h2 id="sources">Where the results come from</h2>
+    <p>Domain Hound checks public registry and DNS records. It compares published list prices from Spaceship, Porkbun, Namecheap, Dynadot, Cloudflare and Gandi where they list the ending. A shop can quote a different price at checkout.</p>
+    <p>Name checks use the US Patent and Trademark Office, Apple’s US App Store catalog, Google Play, and public profile pages, embeds and archives. If a source cannot answer, the result says so.</p>
+    <p>Claude sends the names you ask to check to Domain Hound. See the <a href="/privacy/#hosted">privacy policy</a>.</p>
+  </section>
+
+  <section aria-labelledby="support">
+    <h2 id="support">Support</h2>
+    <p>For help with Domain Hound, <a href="https://github.com/lars-hv/domain-hound/issues">open a GitHub issue</a>. Issues are public. Leave private names and account details out of your report.</p>
+  </section>
+</main>
+<footer><div class="wrap foot"><a href="/">domainhound.dev</a><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a></div></footer>
+</body>
+</html>
