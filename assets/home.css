@@ -42,16 +42,17 @@ h1 { max-width: 13ch; margin: .2em 0 .18em; font-size: clamp(2.7rem, 12.1vw, 4.7
 .setup { container-type: inline-size; max-width: 36rem; margin-top: 1.5rem; scroll-margin-top: 1rem; }
 #setup-label { margin-bottom: .45rem; font-size: 1.15rem; font-weight: 850; }
 .clients { display: inline-grid; grid-auto-flow: column; gap: 1px; background: var(--pine); overflow: hidden; border: 1px solid var(--pine); border-radius: 5px; box-shadow: 3px 4px 0 var(--pine); }
-.clients button { min-height: 44px; padding: .55em 1em; border: 0; background: var(--leaf); color: var(--pine); font-weight: 850; }
+.clients button { min-height: 44px; padding: .55em .65em; border: 0; background: var(--leaf); color: var(--pine); font-weight: 850; }
 .clients button:focus-visible { outline: 2px solid var(--pine); outline-offset: -4px; }
 .clients button:hover, .clients button[aria-pressed="true"] { background: var(--paper); }
 .install-step { padding-top: .6rem; }
+.install-step p + p, .install-step p + ol, .install-step li + li { margin-top: .45rem; }
 .install-step ol { padding-left: 1.5em; }
 .install-step, #search, .watch-extra { font-size: 1rem; }
 .setup code { display: block; width: fit-content; max-width: 100%; margin: .32rem 0 .7rem; color: var(--mist); font: 500 .91rem/1.5 var(--mono); overflow-wrap: anywhere; }
 .other-setup { margin-top: .6rem; }
 .other-setup summary, .coverage summary { width: fit-content; padding-block: .5rem; cursor: pointer; }
-.other-copy { color: inherit; background: transparent; border: 1px solid; border-radius: 4px; padding: .5em; }
+.setup-copy { min-height: 44px; color: inherit; background: transparent; border: 1px solid; border-radius: 4px; padding: .5em; }
 #search { max-width: 36rem; margin-top: 1.25rem; }
 #main-search { display: flex; gap: 0 .7rem; flex-wrap: wrap; align-items: center; }
 #main-search label { font-weight: 650; }
@@ -249,6 +250,7 @@ footer small { flex-basis: 100%; font: 500 .8rem/1.5 Mulish,sans-serif; }
   .fields { grid-template-columns: 1fr; gap: .65rem; }
   .fine { display: block; margin-left: 0; }
 }
-@container (max-width: 26rem) {
+@container (max-width: 32rem) {
   .clients { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); }
+  .clients button:last-child { grid-column: 1 / -1; }
 }

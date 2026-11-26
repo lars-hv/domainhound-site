@@ -32,7 +32,8 @@ const shops = {
 const installText = {
   Claude: publishedApi + '/mcp',
   'Claude Code': 'claude mcp add domain-hound -- npx -y domain-hound',
-  Codex: 'codex mcp add domain-hound -- npx -y domain-hound',
+  'Codex app': null,
+  'Codex (terminal)': 'codex mcp add domain-hound -- npx -y domain-hound',
   ChatGPT: publishedApi + '/mcp',
   'Other MCP': '{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}'
 };
@@ -423,6 +424,7 @@ async function runViewport(browser, engine, width, watchWorker) {
       await home();
       const install = page.locator('#install');
       for (const [client, content] of Object.entries(installText)) {
+        await page.evaluate(() => { window.__qaClipboard = null; });
         if (client === 'Other MCP') {
           await install.locator('summary').click();
           await install.getByRole('button', exact('Copy config')).click();
@@ -432,10 +434,16 @@ async function runViewport(browser, engine, width, watchWorker) {
           await button.focus();
           await button.press('Enter');
           assert.equal(await button.getAttribute('aria-pressed'), 'true');
-          assert.equal(await install.locator('#command').innerText(), content);
+          if (client === 'ChatGPT') {
+            assert.equal(await page.evaluate(() => window.__qaClipboard), null);
+            await install.getByRole('button', exact('Copy URL')).click();
+          }
+          if (client === 'Codex app') await install.getByText(/Settings > MCP servers > Add server > STDIO/).waitFor();
+          else assert.equal(await install.locator('[data-for-client]:visible code').innerText(), content);
           assert.equal(await install.getByRole('link', exact('Full guide')).isVisible(), client === 'Claude');
           assert.equal(await install.locator('#plugins').isVisible(), client === 'ChatGPT');
-          await shot('installer-' + client.toLowerCase().replace(' ', '-'), page.locator('.hero'));
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Installer fits viewport');
+          await shot('installer-' + client.toLowerCase().replace(/[^a-z]+/g, '-').replace(/-$/, ''), install);
         }
         assert.equal(await page.evaluate(() => window.__qaClipboard), content);
       }
@@ -444,6 +452,15 @@ async function runViewport(browser, engine, width, watchWorker) {
       assert.ok(await page.locator('.coverage p').isVisible());
       await page.locator('#close a[href="#install"]').click();
       assert.equal(new URL(page.url()).hash, '#install');
+    });
+
+    await check('Terms from the footer', async () => {
+      await home();
+      await page.locator('footer').getByRole('link', exact('Terms')).click();
+      await page.getByRole('heading', exact('Terms')).waitFor();
+      await page.getByText('Last updated 26 November 2026').waitFor();
+      assert.equal(new URL(page.url()).pathname, '/terms/');
+      await shot('terms');
     });
 
     await check('Brightboard, pick, trademark and shops', async () => {
