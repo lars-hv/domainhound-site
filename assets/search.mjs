@@ -111,6 +111,8 @@ function domainCard(item, best, requested) {
   card.append(head);
   const labels = [requested && 'You asked for this', best && 'Hound’s pick'].filter(Boolean);
   if (labels.length) card.append(el('b', 'pick-label', labels.join(' · ')));
+  if (best?.pickBudget != null) card.append(el('p', 'offer-condition',
+    'Preferred ending at ' + usd.format(best.pickBudget) + ' or less over 3 years.'));
   const offer = item.quotes[0];
   if (offer) {
     const first = el('p', 'first-price');
@@ -187,7 +189,7 @@ function nameCard(name, items, best, { suggestion, priceDate, requested, showNam
     if (requested?.status === 'taken') card.append(el('h3', 'alternatives-title', 'Available instead'), notice);
     else card.append(notice, el('p', 'offer-count', available.length + ' available domain' + (available.length === 1 ? '' : 's')));
     const offers = el('div', 'ending-list');
-    for (const item of available) offers.append(domainCard(item, item.domain === best?.domain, item === requested));
+    for (const item of available) offers.append(domainCard(item, item.domain === best?.domain ? best : null, item === requested));
     card.append(offers);
   }
   const taken = items.filter(item => item.status === 'taken' && item !== requested);

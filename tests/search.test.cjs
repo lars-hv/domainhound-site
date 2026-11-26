@@ -866,6 +866,7 @@ test('the best domain shows only a server pick that matches a confirmed row and 
   const { page } = await openPage(t, call => ({ json: replies.shift() }));
   await search(page, 'name', 'Mapfern');
   await page.locator('.best-domain').getByRole('link', { name: /Buy .* at Gandi/ }).waitFor();
+  assert.match(await page.locator('.best-domain').innerText(), /Preferred ending at \$60\.00 or less over 3 years/);
   for (let i = 0; i < tampered.length; i++) {
     await search(page, 'name', 'Mapfern');
     await page.getByRole('heading', { name: 'Mapfern', exact: true }).waitFor();

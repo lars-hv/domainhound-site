@@ -117,7 +117,8 @@ function bestItem(data) {
   const matched = item.quotes.some(offer => offer.buyUrl && offer.shop === pick.shop &&
     offer.buyUrl === pick.buyUrl && pickTerms.every(key => offer[key] === pick[key]) &&
     Boolean(offer.needsCloudflareDns) === Boolean(pick.needsCloudflareDns));
-  return matched ? item : null;
+  const cap = data.choice.capUsd;
+  return matched ? { ...item, pickBudget: Number.isFinite(cap) && cap >= pick.threeYearUsd ? cap : null } : null;
 }
 
 const asciiLabel = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
