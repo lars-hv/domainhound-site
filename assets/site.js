@@ -1,8 +1,10 @@
 const byId = id => document.getElementById(id);
+const connectorUrl = 'https://domainhound-mcp.domainhound.workers.dev/mcp';
 const commands = {
-  claude: 'claude mcp add domain-hound -- npx -y domain-hound',
+  claude: connectorUrl,
+  'claude-code': 'claude mcp add domain-hound -- npx -y domain-hound',
   codex: 'codex mcp add domain-hound -- npx -y domain-hound',
-  chatgpt: 'https://domainhound-mcp.domainhound.workers.dev/mcp'
+  chatgpt: connectorUrl
 };
 
 async function copyCode(code) {
@@ -26,26 +28,24 @@ async function copyCode(code) {
 }
 
 const clients = document.querySelectorAll('[data-client]');
+const instructions = document.querySelectorAll('[data-for-client]');
 const manual = 'Text selected. Use your device’s Copy action.';
 for (const button of clients) {
   button.setAttribute('aria-pressed', 'false');
   button.addEventListener('click', async () => {
     const client = button.dataset.client;
-    const web = client === 'chatgpt';
     const code = byId('command');
     for (const option of clients) option.setAttribute('aria-pressed', String(option === button));
     byId('setup-step').hidden = false;
-    byId('plugins').hidden = !web;
-    byId('instruction').textContent = web
-      ? 'In Plugins, choose +, then Add custom MCP server. Name it Domain Hound, paste the URL and choose No authentication. Review, create and install.'
-      : 'With Node.js 20+ installed, run this in your terminal.';
+    for (const item of instructions) item.hidden = item.dataset.forClient !== client;
     code.textContent = commands[client];
     byId('copied').textContent = '';
     const ok = await copyCode(code);
     if (button.getAttribute('aria-pressed') === 'true') {
-      byId('copied').textContent = !ok ? manual : web
-        ? 'URL copied. Then ask “@Domain Hound, is lanternbay.com available?”'
-        : 'Copied. Then ask “Is lanternbay.com available?”';
+      let message = 'Copied. Then ask “Is lanternbay.com available?”';
+      if (client === 'claude') message = 'URL copied.';
+      if (client === 'chatgpt') message = 'URL copied. Then ask “@Domain Hound, is lanternbay.com available?”';
+      byId('copied').textContent = ok ? message : manual;
     }
   });
 }

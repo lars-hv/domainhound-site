@@ -252,7 +252,12 @@ for (const width of [390, 1440]) {
     assert.match(await hero.locator('#real-search').innerText(), /tripfixer\.app[\s\S]*\$8\.28[\s\S]*\$14\.49/);
     assert.equal(await page.locator('#setup-step').isVisible(), false);
     const buttons = page.locator('.clients button');
-    assert.deepEqual(await buttons.allTextContents(), ['Claude Code', 'Codex', 'ChatGPT']);
+    assert.deepEqual(await buttons.allTextContents(), ['Claude', 'Claude Code', 'Codex', 'ChatGPT']);
+    const rows = await buttons.evaluateAll(nodes => nodes.map(node => node.offsetTop));
+    assert.equal(rows[0], rows[1]);
+    assert.equal(rows[2], rows[3]);
+    if (width === 390) assert.ok(rows[2] > rows[0]);
+    else assert.equal(rows[2], rows[0]);
     assert.ok((await buttons.first().boundingBox()).y < (await submit.boundingBox()).y);
     assert.ok(await field.evaluate(node => node.getBoundingClientRect().bottom <= innerHeight));
     assert.equal(await page.locator('#faq').count(), 0);
@@ -412,6 +417,7 @@ test('agent setup offers working copy actions for both terminals and the hosted 
   }));
   const setup = page.locator('#install');
   for (const [client, expected] of [
+    ['Claude', 'https://domainhound-mcp.domainhound.workers.dev/mcp'],
     ['Claude Code', 'claude mcp add domain-hound -- npx -y domain-hound'],
     ['Codex', 'codex mcp add domain-hound -- npx -y domain-hound'],
     ['ChatGPT', 'https://domainhound-mcp.domainhound.workers.dev/mcp'],
@@ -419,6 +425,19 @@ test('agent setup offers working copy actions for both terminals and the hosted 
     await setup.getByRole('button', { name: client, exact: true }).click();
     assert.equal(await setup.locator('#command').textContent(), expected);
     assert.equal(await page.evaluate(() => window.copiedSetup), expected);
+    const guide = setup.getByRole('link', { name: 'Full guide' });
+    assert.equal(await guide.isVisible(), client === 'Claude');
+    assert.equal(await setup.getByRole('list').isVisible(), client === 'Claude');
+    if (client === 'Claude') {
+      assert.equal(await guide.getAttribute('href'), '/docs/claude/');
+      assert.deepEqual(await setup.getByRole('listitem').allTextContents(), [
+        'Open Settings > Connectors > Add custom connector.',
+        'Name it Domain Hound and paste the URL.',
+        'Ask “Is brightboard.com available? Find me the best domain.”'
+      ]);
+    }
+    if (client === 'Claude Code') assert.match(await setup.innerText(), /Paste in your terminal, not in the chat\./);
+    if (client === 'ChatGPT') assert.match(await setup.innerText(), /paste the URL in the server URL field/i);
   }
 });
 

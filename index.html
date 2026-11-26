@@ -98,14 +98,23 @@
         <div class="setup" id="install" tabindex="-1">
           <p id="setup-label">Copy setup for your agent</p>
           <div class="clients" role="group" aria-labelledby="setup-label">
-            <button type="button" data-client="claude">Claude Code</button>
+            <button type="button" data-client="claude">Claude</button>
+            <button type="button" data-client="claude-code">Claude Code</button>
             <button type="button" data-client="codex">Codex</button>
             <button type="button" data-client="chatgpt">ChatGPT</button>
           </div>
           <div class="install-step" id="setup-step" hidden>
-            <p id="instruction"></p>
+            <ol data-for-client="claude" hidden>
+              <li>Open Settings &gt; Connectors &gt; Add custom connector.</li>
+              <li>Name it Domain Hound and paste the URL.</li>
+              <li>Ask “Is brightboard.com available? Find me the best domain.”</li>
+            </ol>
+            <p data-for-client="claude-code" hidden>Paste in your terminal, not in the chat. Requires Node.js 20+.</p>
+            <p data-for-client="codex" hidden>With Node.js 20+ installed, run this in your terminal.</p>
+            <p data-for-client="chatgpt" hidden>In Plugins, choose +, then Add custom MCP server. Name it Domain Hound, paste the URL in the server URL field and choose No authentication. Review, create and install.</p>
             <code id="command" tabindex="0"></code>
-            <a id="plugins" href="https://chatgpt.com/plugins" hidden>Open ChatGPT Plugins</a>
+            <a data-for-client="claude" href="/docs/claude/" hidden>Full guide</a>
+            <a id="plugins" data-for-client="chatgpt" href="https://chatgpt.com/plugins" hidden>Open ChatGPT Plugins</a>
             <p id="copied" role="status"></p>
             <details class="other-setup">
               <summary>Other MCP clients</summary>
@@ -115,7 +124,8 @@
             </details>
           </div>
           <noscript>
-            <p>Claude Code</p><code>claude mcp add domain-hound -- npx -y domain-hound</code>
+            <p>Claude: <a href="/docs/claude/">Full guide</a></p><code>https://domainhound-mcp.domainhound.workers.dev/mcp</code>
+            <p>Claude Code: Paste in your terminal, not in the chat.</p><code>claude mcp add domain-hound -- npx -y domain-hound</code>
             <p>Codex</p><code>codex mcp add domain-hound -- npx -y domain-hound</code>
             <p>ChatGPT</p><code>https://domainhound-mcp.domainhound.workers.dev/mcp</code>
           </noscript>
