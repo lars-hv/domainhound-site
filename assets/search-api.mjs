@@ -49,16 +49,17 @@ function shopUrl(value) {
 
 function domainItem(row, cap = Infinity) {
   if (typeof row?.domain !== 'string' || row.domain.length > 253 || !shareDomain.test(row.domain)) return null;
-  const confirmed = row.status === 'available' && ['rdap-404', 'whois-not-found'].includes(row.evidence) &&
+  const confirmed = row.status === 'available' && ['rdap-404', 'whois-not-found', 'client-rdap-404'].includes(row.evidence) &&
     Number.isFinite(Date.parse(row.checkedAt));
-  const status = confirmed ? 'available' : row.status === 'taken' ? 'taken' : 'unknown';
+  const status = confirmed ? 'available' : row.status === 'taken' ? 'taken' : row.reason === 'reserved' ? 'reserved' : 'unknown';
   const premium = row.premium || (row.reason === 'reserved' && 'Reserved');
   const prices = confirmed && !premium && row.priceShown && Array.isArray(row.prices) ? row.prices : [];
   const quotes = prices.filter(validPrice).map(offer => ({
     ...offer, buyUrl: shopUrl(offer.buyUrl)
   })).sort((a, b) => a.threeYearUsd - b.threeYearUsd || a.firstPaymentUsd - b.firstPaymentUsd);
   const offer = quotes.find(quote => quote.buyUrl && quote.threeYearUsd <= cap) || null;
-  return { domain: row.domain, status, premium, eligibility: row.eligibility, quotes, offer, cap };
+  return { domain: row.domain, status, premium, eligibility: row.eligibility, quotes, offer, cap,
+    ...(row.checkedFrom === 'browser' && { checkedFrom: 'browser' }) };
 }
 
 // The generator and personal-name endpoints also supply a compact offer for the
@@ -174,7 +175,10 @@ function ideaResult(data) {
   if (!initial) items.sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
   return {
     items, complete: data.complete, shareUrl: shareUrl(data.share), generationSource: data.path,
-    generationDetails: initial ? generationDetails(data.details) : null
+    generationDetails: initial ? generationDetails(data.details) : null,
+    suggestions: initial && Array.isArray(data.suggestions) ? data.suggestions
+      .filter(entry => ['qwen', 'llama'].includes(entry?.source) && typeof entry.name === 'string' && entry.name.length <= 60)
+      .slice(0, 4).map(entry => entry.name) : []
   };
 }
 
@@ -208,8 +212,46 @@ export async function finishIdeas(result, signal) {
   }
 }
 
-function checkName(name, signal) {
-  return request('/v1/check?' + new URLSearchParams({ name }), signal);
+async function observeRegistry(row, ascii, signal) {
+  if (row?.status !== 'unknown' || !['dev', 'app'].includes(row.ending) || !asciiLabel.test(ascii) ||
+    row.domain !== ascii + '.' + row.ending ||
+    row.rdapUrl !== 'https://pubapi.registry.google/rdap/domain/' + row.domain) return null;
+  try {
+    const deadline = AbortSignal.timeout(1600);
+    const reply = await fetch(row.rdapUrl, { credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer',
+      redirect: 'error', signal: signal ? AbortSignal.any([signal, deadline]) : deadline });
+    if (![200, 404].includes(reply.status) || !(Number(reply.headers.get('age') ?? 0) <= 0) ||
+      !/^application\/(?:rdap\+)?json(?:;|$)/i.test(reply.headers.get('content-type') ?? '')) return null;
+    const body = await reply.json();
+    const text = [body.title, body.description, ...(Array.isArray(body.notices)
+      ? body.notices.flatMap(notice => [notice?.title, notice?.description]) : [])].flat().filter(value => typeof value === 'string');
+    if (reply.status === 200) {
+      if (body.objectClassName !== 'domain' || body.ldhName?.toLowerCase().replace(/\.$/, '') !== row.domain ||
+        (Array.isArray(body.status) && body.status.some(value => /^(reserved|not available)$/i.test(value)))) return null;
+      return row.ending + ':taken';
+    }
+    if (body.errorCode !== 404 ||
+      text.some(value => /\b(?:(?:domain|name) (?:is |has been )?reserved|reserved (?:domain|name)|reserved (?:by|for) (?:the )?registry|not available for registration)\b/i.test(value))) return null;
+    const premium = text.some(value => /\b(?:registry premium|premium (?:domain|name|price|pricing|tier)|(?:domain|name) is premium)\b/i.test(value)
+      && !/\b(?:not|non[- ]|no)\s*(?:an?\s+)?premium\b/i.test(value));
+    return row.ending + (premium ? ':premium' : ':available');
+  } catch {
+    return null;
+  }
+}
+
+async function checkName(name, signal) {
+  const query = new URLSearchParams({ name });
+  const result = await request('/v1/check?' + query, signal);
+  const seen = (await Promise.all(result.domains.map(row => observeRegistry(row, result.query?.ascii, signal)))).filter(Boolean);
+  if (!seen.length) return result;
+  seen.forEach(value => query.append('seen', value));
+  try {
+    return await request('/v1/check?' + query, signal);
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    return result;
+  }
 }
 
 async function checkEndings(input, signal) {
