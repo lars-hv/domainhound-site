@@ -319,6 +319,8 @@ test('confirmed endings remain usable when automatic details have expired', asyn
   await page.goBack();
   if (!(await watch.isVisible())) await search(page, 'name', 'Mapfern');
   await watch.click();
+  await page.waitForURL(url => url.pathname === '/watch/' && url.searchParams.get('domain') === 'mapfern.dev');
+  await page.locator('.watch-page .watch-submit:enabled').waitFor();
   assert.equal(await page.locator('#watch-domain').inputValue(), 'mapfern.dev');
 });
 
