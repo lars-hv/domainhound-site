@@ -115,11 +115,11 @@ function bestItem(data) {
   const row = data.domains.find(candidate => candidate?.domain === pick.domain);
   const item = row && !row.eligibility ? domainItem(row) : null;
   if (item?.status !== 'available' || item.premium || !row.priceShown || !Array.isArray(row.prices)) return null;
-  const matched = item.quotes.some(offer => offer.buyUrl && offer.shop === pick.shop &&
+  const pickPrice = item.quotes.find(offer => offer.buyUrl && offer.shop === pick.shop &&
     offer.buyUrl === pick.buyUrl && pickTerms.every(key => offer[key] === pick[key]) &&
     Boolean(offer.needsCloudflareDns) === Boolean(pick.needsCloudflareDns));
   const cap = data.choice.capUsd;
-  return matched ? { ...item, pickBudget: Number.isFinite(cap) && cap >= pick.threeYearUsd ? cap : null } : null;
+  return pickPrice ? { ...item, pickPrice, pickBudget: Number.isFinite(cap) && cap >= pick.threeYearUsd ? cap : null } : null;
 }
 
 const asciiLabel = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
@@ -254,6 +254,8 @@ async function checkName(name, signal) {
   }
 }
 
+const checkSections = ({ appStore, googlePlay, trademarks }) => ({ appStore, googlePlay, trademarks });
+
 async function checkEndings(input, signal) {
   const exact = await checkName(input, signal);
   // Older replies can omit query metadata. Match the input to a returned
@@ -272,7 +274,7 @@ async function checkEndings(input, signal) {
     const exactStatus = domainItem(requested)?.status;
     const first = exactStatus && exactStatus !== 'unknown' ? requested : duplicate || requested;
     const others = bare.domains.filter(row => row.domain !== query.exactDomain);
-    return { ...bare, query, domains: first ? [first, ...others] : others,
+    return { ...bare, ...mergeChecks(checkSections(exact), checkSections(bare)), query, domains: first ? [first, ...others] : others,
       details: detailsPath.test(bare.details?.path) ? bare.details : exact.details,
       share: duplicate && first?.status === duplicate.status ? bare.share : exact.share };
   } catch (error) {
@@ -293,11 +295,12 @@ export async function runSearch(mode, input, signal, cap = Infinity) {
   const result = {
     items: items.filter(Boolean), complete: data.complete,
     shareUrl: shareUrl(data.share), generationSource: data.path,
-    detailsPath: mode === 'name' && items.some(item => item?.status === 'available') &&
+    detailsPath: mode === 'name' && (items.some(item => item?.status === 'available') || [data.appStore, data.googlePlay, data.trademarks?.us].some(row => row?.status === 'pending')) &&
       detailsPath.test(data.details?.path) ? data.details.path : null
   };
   if (mode === 'name') {
     result.best = bestItem(data);
+    result.firstChecks = checkSections(data);
     result.priceDate = data.priceSnapshot?.checkedAt;
     result.query = checkedQuery(data.query);
     result.endingsError = data.endingsError;
@@ -316,7 +319,7 @@ export function variantLabels({ ascii, name }) {
 export async function closeVariant(label, signal) {
   const response = await runSearch('name', { name: label }, signal);
   return response.best ? { ...response.best, name: label, shareUrl: response.shareUrl,
-    endings: response.items.filter(item => item.domain !== response.best.domain), detailsPath: response.detailsPath } : null;
+    endings: response.items.filter(item => item.domain !== response.best.domain), detailsPath: response.detailsPath, firstChecks: response.firstChecks } : null;
 }
 
 // The Worker caps steering names at 40 characters. The idea can still carry the full name.
@@ -325,6 +328,12 @@ export function closeIdeas(name, signal) {
   const input = { idea: 'names like ' + name };
   if (name.length <= 40) input.wanted = [name];
   return runSearch('idea', input, signal);
+}
+
+export function mergeChecks(first, next) {
+  const best = (before, after) => before && !['pending', 'unknown'].includes(before.status) ? before : after ?? before;
+  return { ...first, ...next, appStore: best(first.appStore, next.appStore),
+    googlePlay: best(first.googlePlay, next.googlePlay), trademarks: { us: best(first.trademarks?.us, next.trademarks?.us) } };
 }
 
 export function loadDetails(path, signal) {

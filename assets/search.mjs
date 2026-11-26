@@ -76,10 +76,9 @@ function shopTable(item, canBuy) {
     const row = body.insertRow();
     const shop = el('th');
     shop.scope = 'row';
-    // The checks panel enables purchase links once the trademark result is shown.
     const linked = canBuy && quote.buyUrl && quote.threeYearUsd <= item.cap;
     const name = el(linked ? 'a' : 'span', 'shop-name', quote.shop);
-    if (linked) name.dataset.buyUrl = quote.buyUrl;
+    if (linked) name.href = quote.buyUrl;
     shop.append(name);
     if (quote.threeYearUsd === item.quotes[0].threeYearUsd) shop.append(el('small', 'lowest', 'Cheapest'));
     if (!quote.buyUrl) shop.append(el('small', '', 'Price only'));
@@ -114,7 +113,7 @@ function domainCard(item, best, requested) {
   if (labels.length) card.append(el('b', 'pick-label', labels.join(' · ')));
   if (best?.pickBudget != null) card.append(el('p', 'offer-condition',
     'Preferred ending at ' + usd.format(best.pickBudget) + ' or less over 3 years.'));
-  const offer = item.quotes[0];
+  const offer = best?.pickPrice ?? item.quotes[0];
   if (offer) {
     const first = el('p', 'first-price');
     first.append(el('strong', '', usd.format(offer.firstYearUsd)), ' first year');
@@ -133,6 +132,8 @@ function domainCard(item, best, requested) {
   const requirement = typeof condition === 'string' && condition.trim();
   if (item.eligibility) card.append(el('p', 'offer-condition', requirement || 'Check who can buy this domain.'));
   const shop = (!item.eligibility || requirement) && item.offer;
+  const checks = el('div', 'primary-checks');
+  card.append(checks);
   if (shop) {
     const total = shop.threeYearUsd !== offer.threeYearUsd ? ' · ' + usd.format(shop.threeYearUsd) + ' for 3 years' : '';
     const buy = link('Buy at ' + shop.shop + total, shop.buyUrl, 'action');
@@ -185,12 +186,18 @@ function nameCard(name, items, best, { suggestion, priceDate, requested, showNam
   const dates = available.flatMap(item => item.quotes.map(quote => dateOf(quote.checkedAt || quote.snapshotDate || priceDate)));
   card.dataset.priceDates = [...new Set(dates)].join(' ');
   card.dataset.unknown = items.filter(item => item.status === 'unknown').length;
+  const first = requested?.status === 'available' ? requested : requested ? null
+    : available.find(item => item.domain === best?.domain) ?? available[0];
+  if (!first) {
+    if (!requested) card.append(el('p', 'ending-summary', items.length && items.every(item => item.status === 'taken')
+      ? 'All checked endings are taken.' : 'No available endings confirmed.'));
+    card.append(el('div', 'primary-checks'));
+  }
   if (available.length) {
-    const notice = el('div', 'trademark-slot');
-    if (requested?.status === 'taken') card.append(el('h3', 'alternatives-title', 'Available instead'), notice);
-    else card.append(notice, el('p', 'offer-count', available.length + ' available domain' + (available.length === 1 ? '' : 's')));
     const offers = el('div', 'ending-list');
-    for (const item of available) offers.append(domainCard(item, item.domain === best?.domain ? best : null, item === requested));
+    const ordered = first ? [first, ...available.filter(item => item !== first)] : available;
+    for (const item of ordered) offers.append(domainCard(item, item.domain === best?.domain ? best : null, item === requested));
+    if (!first) card.append(el('h3', 'alternatives-title', 'Available instead'));
     card.append(offers);
   }
   const taken = items.filter(item => item.status === 'taken' && item !== requested);
@@ -270,21 +277,26 @@ function checkLine(title, outcome, target, linkLabel) {
   return line;
 }
 
-function checkGroups(data, name) {
+function appChecks(data, name, pending) {
   const key = encodeURIComponent(name);
-  const handle = encodeURIComponent(name.toLowerCase().replace(/\s+/g, ''));
-  const apps = el('div');
-  apps.append(el('h5', '', 'App stores · US'));
   const apple = data.appStore;
   const match = (Array.isArray(apple?.matches) ? apple.matches : [])
     .map(item => sourceLink('', item?.url, ['apps.apple.com'])).find(Boolean);
-  const appStates = { taken: 'Taken', exact_match_found: 'Taken', no_match_found: 'No app found', 'not-found': 'No app found' };
+  const outcome = row => {
+    if (['taken', 'exact_match_found'].includes(row?.status)) return 'Taken';
+    if (['no_match_found', 'not-found'].includes(row?.status)) return 'No matching app found';
+    return row?.status === 'pending' || (!row && pending) ? 'Still checking' : "Couldn't check";
+  };
   const play = data.googlePlay;
-  apps.append(checkLine('App Store', appStates[apple?.status] || "Couldn't check",
-    match || link('', 'https://apps.apple.com/us/iphone/search?term=' + key)),
-    checkLine('Google Play', appStates[play?.status] || "Couldn't check",
-      sourceLink('', play?.link, ['play.google.com']) ||
-      link('', 'https://play.google.com/store/search?c=apps&q=' + key), 'Search Google Play'));
+  return [
+    checkLine('App Store (iOS)', outcome(apple), match || link('', 'https://apps.apple.com/us/iphone/search?term=' + key)),
+    checkLine('Google Play (Android)', outcome(play), sourceLink('', play?.link, ['play.google.com']) ||
+      link('', 'https://play.google.com/store/search?c=apps&q=' + key), 'Search Google Play'),
+  ];
+}
+
+function handleChecks(data, name) {
+  const handle = encodeURIComponent(name.toLowerCase().replace(/\s+/g, ''));
   const handles = el('div');
   handles.append(el('h5', '', 'Handles'));
   const list = el('div', 'handle-list');
@@ -306,19 +318,22 @@ function checkGroups(data, name) {
     list.append(checkLine(title, outcome, target, search ? 'Search ' + title : undefined));
   }
   handles.append(list);
-  return [apps, handles];
+  return handles;
 }
 
 function trademarkNotice(us, name) {
   const notice = el('aside', 'trademark-warning');
-  notice.append(el('strong', '', 'Exact US trademark match for “' + name + '”.'));
-  for (const mark of Array.isArray(us.marks) ? us.marks : []) {
+  const marks = Array.isArray(us.marks) && us.marks.length ? us.marks : [{ mark: name }];
+  for (const mark of marks) {
     if (!mark) continue;
-    const filing = sourceLink('Read the filing', mark.url, ['tsdr.uspto.gov']);
-    const line = el('p', '', mark.owner ? mark.owner + ' filed for ' + (mark.mark || name) + '. ' : '');
-    if (filing) line.append(filing);
-    if (line.textContent) notice.append(line);
+    const line = el('p', '', 'Heads-up: ');
+    line.append(el('strong', '', mark.mark || name), ' has an exact live US trademark match',
+      mark.owner ? ' (' + mark.owner + '). ' : '. ');
+    line.append(sourceLink('Read the filing', mark.url, ['tsdr.uspto.gov']) ||
+      link('Search US trademarks', 'https://tmsearch.uspto.gov/'));
+    notice.append(line);
   }
+  notice.append(el('p', '', 'Search aid, not legal advice.'));
   return notice;
 }
 
@@ -327,8 +342,7 @@ let selectedDomain;
 
 function syncChecks() {
   const buttons = [...pages.querySelectorAll('.checks-toggle')];
-  const active = buttons.find(button => button.parentElement.dataset.domain === selectedDomain) ||
-    (selectedDomain !== null && buttons[0]);
+  const active = buttons.find(button => button.parentElement.dataset.domain === selectedDomain);
   if (active) selectedDomain = active.parentElement.dataset.domain;
   for (const panel of pages.querySelectorAll('.detail-checks')) {
     panel.hidden = !active || !panel.parentElement.contains(active);
@@ -349,65 +363,58 @@ pages.addEventListener('click', event => {
   }
 });
 
-function checksPanel(name, source, signal) {
+function checksPanel(name, source, signal, firstChecks = {}) {
   const box = el('section', 'detail-checks');
   box.hidden = true;
   box.id = 'name-checks-' + ++panelNumber;
   box.setAttribute('aria-label', 'Name checks for ' + name);
   const list = el('div', 'check-grid');
-  const mark = el('p', 'mark-result');
   const status = statusLine();
   const retry = el('button', 'hint-switch', 'Retry checks');
   retry.type = 'button';
   retry.hidden = true;
-  box.append(el('h4', '', 'Name checks for “' + name + '”'), list, mark, status, retry);
+  box.append(el('h4', '', 'Name checks for “' + name + '”'), list, status, retry);
   let host;
   let path;
-  let data = {};
+  let data = firstChecks;
   let pending = Boolean(source);
-  list.append(...checkGroups(data, name));
+  list.append(handleChecks(data, name));
 
-  function showTrademark() {
-    const slot = host?.querySelector('.trademark-slot');
+  function showChecks() {
+    const slot = host?.querySelector('.primary-checks');
     if (!slot) return;
     const us = data.trademarks?.us;
-    const exact = us?.status === 'exact_match_found';
-    const clear = us?.status === 'no_exact_match_found';
-    slot.replaceChildren();
-    if (exact) slot.append(trademarkNotice(us, name));
-    else if (pending) slot.append(el('p', 'trademark-pending', 'Checking US trademarks…'));
-    else if (!clear) slot.append(el('p', 'trademark-pending', 'US trademark: couldn’t check.'));
-    host.toggleAttribute('data-check-pending', pending);
-    for (const link of host.querySelectorAll('a[data-buy-url]')) {
-      if (pending) link.removeAttribute('href');
-      else link.href = link.dataset.buyUrl;
-    }
-    mark.textContent = clear ? 'US trademark: none found' : '';
+    slot.replaceChildren(...appChecks(data, name, pending));
+    if (us?.status === 'exact_match_found') slot.append(trademarkNotice(us, name));
+    else if (us?.status === 'pending' || (!us && pending)) slot.append(el('p', 'trademark-pending', 'Trademark check still running.'));
+    else if (us?.status === 'no_exact_match_found') slot.append(el('p', 'mark-result', 'US trademark: no exact live match found.'));
+    else slot.append(el('p', 'trademark-pending', 'US trademark: couldn’t check.'));
   }
+
   function mount(card) {
     host = card;
-    const offers = card.querySelector('.ending-list');
-    if (!offers) {
-      box.remove();
-      return;
+    if (card.querySelector('.ending-list') && !card.contains(box)) {
+      const foot = card.querySelector('.suggestion-foot');
+      if (foot) foot.before(box);
+      else card.append(box);
     }
-    if (offers.nextElementSibling !== box) offers.after(box);
-    showTrademark();
+    showChecks();
   }
   async function load() {
     if (!source || signal.aborted) return;
     retry.hidden = true;
     pending = true;
-    showTrademark();
-    status.textContent = 'Checking apps and handles…';
+    showChecks();
+    status.textContent = 'Checking handles…';
     try {
       const api = await import('./search-api.mjs');
       path ??= await source(api);
       if (signal.aborted) return;
       if (path) {
-        data = await api.loadDetails(path, signal);
+        const details = await api.loadDetails(path, signal);
         if (signal.aborted) return;
-        list.replaceChildren(...checkGroups(data, name));
+        data = api.mergeChecks(data, details);
+        list.replaceChildren(handleChecks(data, name));
         retry.hidden = data.complete !== false;
       }
       status.textContent = retry.hidden ? '' : 'Some checks are still pending.';
@@ -418,11 +425,18 @@ function checksPanel(name, source, signal) {
       retry.hidden = [400, 410].includes(error.status);
     } finally {
       pending = false;
-      if (!signal.aborted) showTrademark();
+      for (const row of [data.appStore, data.googlePlay, data.trademarks?.us]) {
+        if (row?.status === 'pending') row.status = 'unknown';
+      }
+      if (!signal.aborted) showChecks();
     }
   }
   retry.addEventListener('click', load);
-  return { box, load, mount };
+  function update(first) {
+    data = { ...data, ...first };
+    showChecks();
+  }
+  return { box, load, mount, update };
 }
 
 // The generator may know only the winning ending. Reuse the domain lookup
@@ -440,6 +454,7 @@ function refreshDomains(card, item, response, panel) {
   const focused = card.contains(document.activeElement) ? document.activeElement : null;
   refreshCard(card, fresh);
   panel.mount(card);
+  panel.update(response.firstChecks);
   syncChecks();
   updateFootnote();
   restoreControl(card, focused);
@@ -455,7 +470,7 @@ function attachChecks(card, item, checks, load = true) {
       refreshDomains(card, item, response, panel);
       return card.contains(panel.box) ? response.detailsPath : null;
     };
-    panel = checksPanel(item.name, source, checks.signal);
+    panel = checksPanel(item.name, source, checks.signal, item.firstChecks ?? {});
     checks.panels.set(key, panel);
   }
   panel.mount(card);
@@ -650,11 +665,10 @@ function uniqueIdeas(items, excludedDomains = [], excludedNames = []) {
 function renderName(page, response, name, requested, signal) {
   const card = nameCard(name, response.items, response.best, { priceDate: response.priceDate, requested });
   page.append(card);
-  if (response.items.some(item => item.status === 'available')) {
-    const panel = checksPanel(name, response.detailsPath && (() => response.detailsPath), signal);
-    panel.mount(card);
-    panel.load();
-  } else if (response.query?.exactDomain && !response.endingsError) {
+  const panel = checksPanel(name, response.detailsPath && (() => response.detailsPath), signal, response.firstChecks);
+  panel.mount(card);
+  panel.load();
+  if (!response.items.some(item => item.status === 'available') && response.query?.exactDomain && !response.endingsError) {
     const taken = response.complete && requested?.status === 'taken' && response.items.every(item => item.status === 'taken');
     const line = el('p', 'ending-summary', taken ? 'All checked endings are taken.' : 'No available endings confirmed.');
     const ideas = el('button', 'hint-switch', 'Find new names');
@@ -662,7 +676,7 @@ function renderName(page, response, name, requested, signal) {
     ideas.setAttribute('form', 'main-search');
     ideas.dataset.seed = response.query.name;
     line.append(' ', ideas);
-    card.prepend(line);
+    card.querySelector('.primary-checks')?.after(line);
   }
   if (response.endingsError) {
     page.append(el('p', 'hunt-status', response.endingsError === 'rate-limited' ? rateLimit : 'Couldn’t check other endings.'));
@@ -778,7 +792,7 @@ function renderPage(mode, input, response, signal) {
   sharing.prepend(el('small', 'quote-caption'));
   page.append(sharing);
   pages.replaceChildren(page);
-  selectedDomain = undefined;
+  selectedDomain = null;
   syncChecks();
   updateFootnote();
   region.hidden = false;
