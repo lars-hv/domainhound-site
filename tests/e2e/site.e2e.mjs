@@ -30,6 +30,7 @@ const shops = {
   Cloudflare: ['www.cloudflare.com', 'q'], Gandi: ['shop.gandi.net', 'search']
 };
 const installText = {
+  Claude: publishedApi + '/mcp',
   'Claude Code': 'claude mcp add domain-hound -- npx -y domain-hound',
   Codex: 'codex mcp add domain-hound -- npx -y domain-hound',
   ChatGPT: publishedApi + '/mcp',
@@ -432,7 +433,9 @@ async function runViewport(browser, engine, width, watchWorker) {
           await button.press('Enter');
           assert.equal(await button.getAttribute('aria-pressed'), 'true');
           assert.equal(await install.locator('#command').innerText(), content);
+          assert.equal(await install.getByRole('link', exact('Full guide')).isVisible(), client === 'Claude');
           assert.equal(await install.locator('#plugins').isVisible(), client === 'ChatGPT');
+          await shot('installer-' + client.toLowerCase().replace(' ', '-'), page.locator('.hero'));
         }
         assert.equal(await page.evaluate(() => window.__qaClipboard), content);
       }
