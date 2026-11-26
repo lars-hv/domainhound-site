@@ -1,7 +1,7 @@
 body {
   min-height: 100vh;
   color: var(--cream);
-  background: var(--blue);
+  background: var(--forest);
 }
 
 .receipt-width {

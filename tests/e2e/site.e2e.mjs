@@ -138,6 +138,8 @@ async function runViewport(browser, engine, width, watchWorker) {
   const pending = new Set();
   const errors = [];
   const expectedFailures = new WeakSet();
+  const registryMiss = url => /^https:\/\/pubapi\.registry\.google\/rdap\/domain\/[a-z0-9-]+\.(?:dev|app)$/.test(url);
+  let bulkRegistry = false;
   let offline = false;
   let expectedMissing = false;
   let takingScreenshot = false;
@@ -150,6 +152,7 @@ async function runViewport(browser, engine, width, watchWorker) {
     if (msg.type() !== 'error') return;
     // Browsers also log failed resource loads as console errors.
     if (offline && /load resource|network|ERR_|offline/i.test(msg.text())) return;
+    if (registryMiss(msg.location().url) && /404/.test(msg.text())) return;
     if (expectedMissing && /404|not found/i.test(msg.text())) return;
     // WebKit's screenshot helper inserts its own temporary style tag. The
     // share page correctly rejects it under its strict CSP.
@@ -163,6 +166,14 @@ async function runViewport(browser, engine, width, watchWorker) {
     }
   });
   page.on('response', response => {
+    // A registry 404 is the protocol's successful answer for an unregistered name.
+    if (response.status() === 404 && registryMiss(response.url())) {
+      const read = response.json().then(data => assert.equal(data.errorCode, 404))
+        .catch(error => errors.push('Invalid registry response: ' + error.message));
+      pending.add(read);
+      void read.finally(() => pending.delete(read));
+      return;
+    }
     if (response.status() >= 400 && !(expectedMissing && response.status() === 404 &&
       new URL(response.url()).pathname === missingPath)) {
       errors.push(summary + ': HTTP ' + response.status() + ' ' + safeAddress(response.url()));
@@ -233,6 +244,13 @@ async function runViewport(browser, engine, width, watchWorker) {
       body: Buffer.from(await reply.arrayBuffer()) });
   });
   if (preview) {
+    // Bulk idea and personal searches can fan out to dozens of optional browser
+    // RDAP probes. Exercise the no-evidence path locally without exhausting the
+    // public registry across four viewports. Worker lookups still use real data.
+    await context.route('https://pubapi.registry.google/rdap/domain/*', route => {
+      if (!bulkRegistry) return route.fallback();
+      return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*' } });
+    });
     // Keep the signed worker page's production asset URLs while serving the
     // matching checkout locally.
     await context.route(publishedOrigin + '/assets/**', async route => {
@@ -252,6 +270,7 @@ async function runViewport(browser, engine, width, watchWorker) {
 
   async function check(label, run) {
     summary = label;
+    bulkRegistry = false;
     scenario++;
     try {
       await run();
@@ -283,7 +302,7 @@ async function runViewport(browser, engine, width, watchWorker) {
   async function submit(value, enter = false) {
     await field.fill(value);
     if (enter) await field.press('Enter');
-    else await main.getByRole('button', exact('Find it here')).click();
+    else await main.getByRole('button', exact('Check')).click();
   }
 
   async function sawHeading(text) {
@@ -388,7 +407,8 @@ async function runViewport(browser, engine, width, watchWorker) {
       assert.equal(await page.getByRole('heading', { level: 1 }).count(), 1);
       await shot('home');
       const before = traffic.length;
-      await main.getByRole('button', exact('Find it here')).click();
+      await field.fill('');
+      await main.getByRole('button', exact('Check')).click();
       assert.ok(await field.evaluate(input => input.validity.valueMissing && input.validationMessage));
       assert.equal(await region.isVisible(), false);
       await submit('bad..com', true);
@@ -398,42 +418,29 @@ async function runViewport(browser, engine, width, watchWorker) {
       await shot('invalid');
     });
 
-    await check('Installer, keyboard, copy and FAQ', async () => {
+    await check('Agent setup, keyboard, copy and coverage', async () => {
       await home();
       const install = page.locator('#install');
-      const connect = main.getByRole('button', exact('Find it in your agent'));
-      await connect.click();
-      const claude = install.getByRole('tab', exact('Claude Code'));
-      await claude.waitFor();
-      assert.equal(await claude.evaluate(tab => document.activeElement === tab), true);
-      await claude.press('End');
-      assert.equal(await install.getByRole('tab', exact('Other MCP')).getAttribute('aria-selected'), 'true');
-      await install.getByRole('tab', exact('Other MCP')).press('Home');
-      assert.equal(await claude.getAttribute('aria-selected'), 'true');
       for (const [client, content] of Object.entries(installText)) {
-        const tab = install.getByRole('tab', exact(client));
-        await tab.click();
-        assert.equal(await tab.getAttribute('aria-selected'), 'true');
-        const panel = install.getByRole('tabpanel');
-        assert.equal(await panel.locator('code').innerText(), content);
-        await panel.getByRole('button', { name: /^Copy/ }).click();
-        await panel.getByRole('button', exact('Copied')).waitFor();
+        if (client === 'Other MCP') {
+          await install.locator('summary').click();
+          await install.getByRole('button', exact('Copy config')).click();
+          await install.getByText('Config copied.', { exact: true }).waitFor();
+        } else {
+          const button = install.getByRole('button', exact(client));
+          await button.focus();
+          await button.press('Enter');
+          assert.equal(await button.getAttribute('aria-pressed'), 'true');
+          assert.equal(await install.locator('#command').innerText(), content);
+          assert.equal(await install.locator('#plugins').isVisible(), client === 'ChatGPT');
+        }
         assert.equal(await page.evaluate(() => window.__qaClipboard), content);
       }
       await shot('installer', install);
-      await connect.click();
-      assert.equal(await claude.isVisible(), false);
-      await page.locator('#close a[href="#name"]').click();
-      assert.equal(new URL(page.url()).hash, '#name');
+      await page.locator('.coverage summary').click();
+      assert.ok(await page.locator('.coverage p').isVisible());
       await page.locator('#close a[href="#install"]').click();
-      await claude.waitFor();
       assert.equal(new URL(page.url()).hash, '#install');
-      for (const question of await page.locator('#faq details').all()) {
-        await question.locator('summary').click();
-        assert.ok(await question.locator('p').isVisible());
-        await question.locator('summary').click();
-        assert.equal(await question.locator('p').isVisible(), false);
-      }
     });
 
     await check('Brightboard, pick, trademark and shops', async () => {
@@ -507,16 +514,17 @@ async function runViewport(browser, engine, width, watchWorker) {
       await submit('brightboard.ai');
       await sawHeading('brightboard.ai is taken.');
       const watch = region.locator('.requested-actions').getByRole('link', exact('Watch brightboard.ai'));
-      assert.equal(new URL(await watch.getAttribute('href'), site).searchParams.get('domain'), 'brightboard.ai');
+      assert.equal(await page.locator('#watch-domain').inputValue(), 'brightboard.ai');
       assert.equal(await region.locator('.taken-list').getByRole('link', exact('Watch brightboard.ai')).count(), 0);
       await region.getByRole('heading', exact('Available instead')).waitFor();
       await region.locator('.offer-row').first().waitFor();
       await page.waitForFunction(() => !document.querySelector('.hunt-card[data-check-pending]'));
       await shot('taken-domain', region);
       await region.locator('.requested-actions a[href="#install"]').click();
-      await page.locator('#install[open]').waitFor();
+      assert.equal(new URL(page.url()).hash, '#install');
       await watch.click();
-      await page.waitForURL(url => url.pathname === '/watch/' && url.searchParams.get('domain') === 'brightboard.ai');
+      await page.waitForURL(url => url.pathname === '/' && url.hash === '#watch-domain');
+      await shot('taken-watch', page.locator('.watch-band'));
       assert.equal(await page.locator('#watch-domain').inputValue(), 'brightboard.ai');
     });
 
@@ -578,6 +586,7 @@ async function runViewport(browser, engine, width, watchWorker) {
     });
 
     await check('Sentence, scored ideas and refinement', async () => {
+      bulkRegistry = true;
       await home();
       const from = traffic.length;
       await field.fill(idea);
@@ -585,7 +594,7 @@ async function runViewport(browser, engine, width, watchWorker) {
       await page.getByRole('button', exact('Search as a name')).click();
       assert.equal(await page.locator('#search-hint-text').innerText(), 'Name search');
       await page.getByRole('button', exact('Search as an idea')).click();
-      await main.getByRole('button', exact('Find it here')).click();
+      await main.getByRole('button', exact('Check')).click();
       await sawHeading('Name ideas');
       await region.locator('.refine summary').waitFor({ timeout: 90_000 });
       const first = region.locator('.idea-list .hunt-card').first();
@@ -611,6 +620,7 @@ async function runViewport(browser, engine, width, watchWorker) {
     });
 
     await check('Own-name disclosure, Escape and search', async () => {
+      bulkRegistry = true;
       await home();
       await field.focus();
       const trigger = page.getByRole('link', exact('Use my own name'));
@@ -665,6 +675,22 @@ async function runViewport(browser, engine, width, watchWorker) {
     });
 
     await check('Watch validation, consent, payload and manage page', async () => {
+      await home();
+      const inline = page.locator('form#watch');
+      assert.equal(await inline.locator('#watch-domain').inputValue(), '');
+      await inline.getByRole('button').click();
+      await inline.getByText('Enter a domain like brightname.com.', { exact: true }).waitFor();
+      await inline.locator('#watch-domain').fill('example.com');
+      await inline.getByRole('button').click();
+      await inline.getByText('Enter an email like you@example.com.', { exact: true }).waitFor();
+      assert.equal(watchCalls.length, 0);
+      const inlineAddress = 'site-qa-home-' + unique + '-' + id + '@example.com';
+      await inline.locator('#watch-name').fill('Alex');
+      await inline.locator('#watch-email').fill(inlineAddress);
+      await inline.getByRole('button').click();
+      await inline.getByText('Check your email to start your watch.', { exact: true }).waitFor();
+      assert.deepEqual(watchCalls[0], { email: inlineAddress, domain: 'example.com', name: 'Alex', source: 'site', website: '' });
+      const manageLink = await watchWorker.manageLink(inlineAddress);
       await page.goto(new URL('/watch/?domain=Example.COM&email=ignored@example.com', site).href);
       const domain = page.locator('#watch-domain');
       const email = page.locator('#watch-email');
@@ -686,8 +712,7 @@ async function runViewport(browser, engine, width, watchWorker) {
       await button.click();
       await page.getByText('Enter an email like you@example.com.', { exact: true }).waitFor();
       assert.equal(await email.getAttribute('aria-invalid'), 'true');
-      assert.equal(watchCalls.length, 0);
-      let manageLink;
+      assert.equal(watchCalls.length, 1);
       for (const optIn of [false, true]) {
         const address = 'site-qa-' + unique + '-' + id + '-' + Number(optIn) + '@example.com';
         await domain.fill('https://Example.com/hello');
@@ -699,8 +724,6 @@ async function runViewport(browser, engine, width, watchWorker) {
           ...(optIn && { news: 'yes' }) });
         assert.equal(await news.isChecked(), false);
         assert.equal(await email.inputValue(), '');
-        // The queue can defer the second mail to respect its sending pace.
-        if (!optIn) manageLink = await watchWorker.manageLink(address);
       }
       await shot('watch-accepted');
       const manage = await page.goto(manageLink);
@@ -709,7 +732,7 @@ async function runViewport(browser, engine, width, watchWorker) {
       await page.getByRole('heading', exact('Watches')).waitFor();
       await page.getByRole('button', exact('Erase everything')).waitFor();
       await shot('manage');
-      assert.equal(watchCalls.length, 2);
+      assert.equal(watchCalls.length, 3);
       assert.deepEqual(watchWorker.unexpected, []);
     });
 
@@ -741,6 +764,7 @@ async function runViewport(browser, engine, width, watchWorker) {
           await disclosure.locator('summary').click();
           assert.equal(await disclosure.getAttribute('open'), '');
         }
+        if (path === '/guides/how-to-check-domain-availability/') await shot('guide');
         if (['/privacy/', '/guides/', '/data/'].includes(path)) await shot(path.split('/')[1]);
       }
       const llms = await get('/llms.txt');
@@ -799,7 +823,7 @@ async function runViewport(browser, engine, width, watchWorker) {
       } finally {
         offline = false;
       }
-      await main.getByRole('button', exact('Find it here')).click();
+      await main.getByRole('button', exact('Check')).click();
       await sawHeading('tripfixer');
       assert.equal(await main.locator('.hunt-status').textContent(), '');
       await page.waitForFunction(() => !document.querySelector('.hunt-card[data-check-pending]'));

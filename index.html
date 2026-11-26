@@ -4,31 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>Domain Hound | Name it already.</title>
+  <title>Domain Hound | Find a name you can buy</title>
   <meta name="description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="For language models">
   <link rel="canonical" href="https://domainhound.dev/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Domain Hound">
   <meta property="og:url" content="https://domainhound.dev/">
-  <meta property="og:title" content="Domain Hound | Name it already.">
+  <meta property="og:title" content="Domain Hound | Find a name you can buy">
   <meta property="og:description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
   <meta property="og:image:alt" content="Domain Hound: Name it already.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Domain Hound | Name it already.">
+  <meta name="twitter:title" content="Domain Hound | Find a name you can buy">
   <meta name="twitter:description" content="Find an available domain for your idea, business or own name. Compare checkout and renewal prices, or keep hunting in your agent.">
   <meta name="twitter:image" content="https://domainhound.dev/assets/social-preview.png">
   <link rel="icon" href="assets/hound-mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/site.css">
-  <link rel="stylesheet" href="assets/brand-b.css">
   <link rel="stylesheet" href="assets/search.css">
+  <link rel="stylesheet" href="assets/home.css">
   <meta name="domain-hound-api" content="https://domainhound-mcp.domainhound.workers.dev">
-  <noscript>
-    <style>
-      .search-paths, .hunt-form, #close a[href="#name"], .installer .tabs, .installer .copy, .install-close { display: none; }
-      .installer [role="tabpanel"][hidden] { display: block !important; }
-    </style>
-  </noscript>
+  <noscript><style>#main-search, .clients, .hunt-form { display: none; }</style></noscript>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -83,31 +78,6 @@
         "license": "https://opensource.org/licenses/MIT",
         "targetProduct": { "@id": "https://domainhound.dev/#software" },
         "publisher": { "@id": "https://domainhound.dev/#publisher" }
-      },
-      {
-        "@type": "FAQPage",
-        "@id": "https://domainhound.dev/#faq",
-        "url": "https://domainhound.dev/",
-        "isPartOf": { "@id": "https://domainhound.dev/#website" },
-        "about": { "@id": "https://domainhound.dev/#software" },
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "Why check trademarks?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "81% of 1,000 common English words already had a US trademark (Harvard Law Review, 2018)."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What’s the renewal trap?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "A .co costs $3.11 the first year, then $31.05 every year. We show both prices."
-            }
-          }
-        ]
       }
     ]
   }
@@ -116,149 +86,139 @@
 <body>
 <main id="top">
   <section class="hero">
-    <div class="wrap hero-grid search-hero">
-      <a class="paper-art" href="/" aria-label="Domain Hound home">
-        <span class="paper-word first">Domain</span>
-        <span class="paper-word second">Hound</span>
-        <span class="paper-dog"><img src="assets/hound-mark.svg" width="180" height="180" alt=""></span>
-      </a>
+    <div class="wrap hero-grid">
       <div class="lead">
-        <p class="kicker">For founders with an idea and no name.</p>
-        <h1>Find a startup name you can actually buy.</h1>
-        <p class="subline">Say what you’re building. The Hound sniffs out names that are available everywhere, at the best price.</p>
-      </div>
-      <div class="hunt-box" id="search">
-        <form class="hunt-form" id="main-search" data-mode="auto">
-          <label for="name" class="sr-only">Name or idea</label>
-          <input id="name" type="text" required maxlength="400" autocapitalize="none" spellcheck="false" aria-describedby="search-hint-text" placeholder="A name, or what you’re building">
-          <div class="search-buttons">
-            <button class="hunt-submit action" type="submit" disabled>Find it here</button>
-            <button class="action" type="button" id="connect" aria-controls="install" aria-expanded="false">Find it in your agent</button>
-            <small class="agent-names">In Claude, Codex or ChatGPT</small>
+        <a class="paper-art" href="/" aria-label="Domain Hound home">
+          <span class="paper-word first">Domain</span>
+          <span class="paper-word second">Hound</span>
+          <span class="paper-dog"><img src="assets/hound-mark.svg" width="180" height="180" alt=""></span>
+        </a>
+        <h1>Your agent finds a name you can buy.</h1>
+        <p class="subline">Free. Checks price, renewal, trademarks, app stores and handles before you buy.</p>
+        <div class="setup" id="install" tabindex="-1">
+          <p id="setup-label">Copy setup for your agent</p>
+          <div class="clients" role="group" aria-labelledby="setup-label">
+            <button type="button" data-client="claude">Claude Code</button>
+            <button type="button" data-client="codex">Codex</button>
+            <button type="button" data-client="chatgpt">ChatGPT</button>
           </div>
-          <p class="search-hint" hidden><span class="sr-only" id="search-hint-text" aria-live="polite"></span> <button type="button" class="hint-switch"></button></p>
-        </form>
-        <div class="search-paths" hidden>
-          <a href="#panel-personal" aria-controls="panel-personal" aria-expanded="false">Use my own name</a>
-        </div>
-        <form class="hunt-form inline-search" id="panel-personal" data-mode="personal" hidden>
-          <label for="personal">What’s your full name?</label>
-          <input id="personal" type="text" autocomplete="name" required maxlength="80" placeholder="First and last name">
-          <button class="hunt-submit action" type="submit" disabled>Find my domain</button>
-        </form>
-        <noscript><p class="hunt-notice">Turn on JavaScript to search here, or <a href="#install">open the agent setup</a>.</p></noscript>
-      </div>
-      <aside class="receipt-stage" id="real-search" aria-label="Tripfixer search receipt">
-        <div class="name-receipt">
-          <header><time datetime="2026-11-24">24 Nov 2026</time><span class="stamp">Name it already.</span></header>
-          <p class="miss">Wanted: <s>concierge.com</s> · Taken</p>
-          <p class="winner"><strong>tripfixer.app</strong> <b>Available</b></p>
-          <div class="receipt-price">
-            <p><strong>$8.28</strong> first year</p>
-            <p><strong>$14.49/yr</strong> after</p>
+          <div class="install-step" id="setup-step" hidden>
+            <p id="instruction"></p>
+            <code id="command" tabindex="0"></code>
+            <a id="plugins" href="https://chatgpt.com/plugins" hidden>Open ChatGPT Plugins</a>
+            <p id="copied" role="status"></p>
+            <details class="other-setup">
+              <summary>Other MCP clients</summary>
+              <code id="other-config">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
+              <button type="button" class="other-copy">Copy config</button>
+              <span role="status" id="other-status"></span>
+            </details>
           </div>
-          <p class="receipt-shop">Spaceship</p>
-          <ul class="receipt-checks">
-            <li><b>App Store:</b> no app called Tripfixer</li>
-            <li><b>US trademark:</b> none found</li>
-            <li><b>GitHub:</b> no profile found</li>
-          </ul>
-          <p class="receipt-total"><strong>360</strong> names sniffed. One winner.</p>
+          <noscript>
+            <p>Claude Code</p><code>claude mcp add domain-hound -- npx -y domain-hound</code>
+            <p>Codex</p><code>codex mcp add domain-hound -- npx -y domain-hound</code>
+            <p>ChatGPT</p><code>https://domainhound-mcp.domainhound.workers.dev/mcp</code>
+          </noscript>
         </div>
-      </aside>
+        <div id="search">
+          <form class="hunt-form" id="main-search" data-mode="auto">
+            <label for="name">Or try it here</label>
+            <div class="small-field">
+              <input id="name" value="concierge.com" placeholder="Name or domain" required maxlength="400" autocapitalize="none" spellcheck="false" aria-describedby="search-hint-text">
+              <button type="submit" class="hunt-submit" disabled>Check</button>
+            </div>
+            <p class="search-hint" hidden><span class="sr-only" id="search-hint-text" aria-live="polite"></span><button type="button" class="hint-switch"></button></p>
+          </form>
+          <div class="search-paths" hidden><a href="#panel-personal" aria-controls="panel-personal" aria-expanded="false">Use my own name</a></div>
+          <form class="hunt-form inline-search" id="panel-personal" data-mode="personal" hidden>
+            <label for="personal">What’s your full name?</label>
+            <input id="personal" type="text" autocomplete="name" required maxlength="80" placeholder="First and last name">
+            <button class="hunt-submit action" type="submit" disabled>Find my domain</button>
+          </form>
+          <noscript><p>Turn on JavaScript to search here, or <a href="#install">open the agent setup</a>.</p></noscript>
+        </div>
+      </div>
+      <div id="real-search" class="stage">
+        <div class="phone" role="group" aria-label="Reconstruction of the Tripfixer name hunt">
+          <div class="screen">
+            <div class="status-bar" aria-hidden="true">
+              <span>9:41</span><i class="island"></i>
+              <svg viewBox="0 0 53 13" fill="currentColor">
+                <path d="M0 9h2.5v3H0zm4-2.5h2.5V12H4zM8 4h2.5v8H8zm4-3h2.5v11H12z"/>
+                <path d="M18 4.6a9.4 9.4 0 0 1 13 0m-10.6 2.5a5.9 5.9 0 0 1 8.2 0m-5.8 2.4a2.4 2.4 0 0 1 3.4 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="24.5" cy="11.1" r="1"/>
+                <rect x="35" y="2.5" width="15" height="8.5" rx="2" fill="none" stroke="currentColor"/>
+                <rect x="36.6" y="4.1" width="11.8" height="5.3" rx="1"/><path d="M51 5h1.4v3.5H51z"/>
+              </svg>
+            </div>
+            <div class="contact"><span class="avatar"><img src="assets/hound-mark.svg" alt=""></span>Domain Hound</div>
+            <div class="thread">
+              <p class="dateline">24 Nov 2026</p>
+              <div class="message outgoing"><p class="bubble">concierge.com is taken. Find a name for my travel app.</p></div>
+              <div class="message incoming">
+                <div class="bubble result-bubble">
+                  <p>360 names sniffed.</p>
+                  <strong>tripfixer.app</strong>
+                  <div class="price"><b>$8.28</b> first year<br><b>$14.49</b> at renewal</div>
+                  <p>You bought it at Spaceship for $8.28.</p>
+                </div>
+              </div>
+              <div class="checks">
+                <time datetime="2026-11-25">25 Nov 2026</time>
+                <p>No match on the US App Store. No exact live US trademark or GitHub profile found.</p>
+                <details class="coverage">
+                  <summary>Google Play and social handles</summary>
+                  <p>Also checks Google Play, LinkedIn, X, Instagram, TikTok, YouTube and GitHub.</p>
+                </details>
+              </div>
+            </div>
+            <div class="home-bar" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
   <p class="sr-only" id="result-announcement" role="status"></p>
   <section class="hunt-results" id="search-results" aria-label="Search results" hidden>
     <div class="wrap" id="result-pages"></div>
   </section>
-  <div class="setup-strip"><div class="wrap">
-    <details id="install">
-      <summary>Connect your agent</summary>
-      <div class="installer">
-        <p class="install-heading">Free · <a href="https://github.com/lars-hv/domain-hound">open source (MIT)</a>. <a href="/guides/domain-hound-claude-code-codex/#purchase">Never buys without you.</a></p>
-        <div class="tabs" role="tablist" aria-label="Install for">
-          <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude" tabindex="0">Claude Code</button>
-          <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex" tabindex="-1">Codex</button>
-          <button type="button" role="tab" id="tab-chatgpt" aria-selected="false" aria-controls="panel-chatgpt" tabindex="-1">ChatGPT</button>
-          <button type="button" role="tab" id="tab-other" aria-selected="false" aria-controls="panel-other" tabindex="-1">Other MCP</button>
-        </div>
-        <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude">
-          <noscript><strong>Claude Code</strong></noscript>
-          <p class="hint">In your terminal</p>
-          <code tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
-          <button type="button" class="copy action"><span>Copy command</span></button>
-        </div>
-        <div role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
-          <noscript><strong>Codex</strong></noscript>
-          <p class="hint">In your terminal</p>
-          <code tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
-          <button type="button" class="copy action"><span>Copy command</span></button>
-        </div>
-        <div role="tabpanel" id="panel-chatgpt" aria-labelledby="tab-chatgpt" hidden>
-          <noscript><strong>ChatGPT</strong></noscript>
-          <p class="hint">Paste this URL when adding a connector</p>
-          <code tabindex="0">https://domainhound-mcp.domainhound.workers.dev/mcp</code>
-          <button type="button" class="copy action"><span>Copy URL</span></button>
-        </div>
-        <div role="tabpanel" id="panel-other" aria-labelledby="tab-other" hidden>
-          <noscript><strong>Other MCP clients</strong></noscript>
-          <p class="hint">MCP configuration</p>
-          <code tabindex="0">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
-          <button type="button" class="copy action"><span>Copy config</span></button>
-        </div>
-        <p class="feedback" role="status"></p>
+  <section class="band watch-band" aria-labelledby="watch-title">
+    <div class="wrap split">
+      <div>
+        <p id="watch-stamp" hidden></p>
+        <h2 id="watch-title">Want a taken domain?</h2>
+        <p class="watch-line">Get an email when it frees up.</p>
+        <p class="watch-extra">Your agent can also find owner details and draft an offer.</p>
       </div>
-    </details>
-  </div></div>
-  <section class="story-pain story-band">
-    <div class="wrap story-split">
-      <h2>Every good name is taken. So what the hell do you call it?</h2>
-      <div class="traps">
-        <p>The owner wants <strong>$1,311.</strong> <a href="https://www.namepros.com/threads/domain-name-sales-semi-annual-report-2025.1356912/" title="Average across 93,100 reported domain sales, January to June 2025">NamePros 2025</a></p>
-        <p>A cheap .co: <strong>$3.11</strong> today, <strong>$31.05</strong> next year. <a href="https://www.spaceship.com/domains/cctld/co/">Spaceship Nov 2026</a></p>
-      </div>
+      <form id="watch" novalidate aria-labelledby="watch-title" autocomplete="off">
+        <div class="fields">
+          <label for="watch-domain">Domain<input id="watch-domain" required inputmode="url" autocapitalize="none" spellcheck="false"></label>
+          <label for="watch-name">Name <small>(optional)</small><input id="watch-name" autocomplete="given-name" maxlength="80"></label>
+          <label for="watch-email">Email<input id="watch-email" type="email" required autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="254"></label>
+        </div>
+        <div hidden><label for="watch-website">Website</label><input id="watch-website" tabindex="-1" autocomplete="off"></div>
+        <button type="submit" class="watch-submit" disabled>Watch this domain</button>
+        <p class="fine">Confirm by email. Stop anytime.</p>
+        <p id="watch-status" role="status"></p>
+        <noscript><p>Turn on JavaScript to request a watch.</p></noscript>
+      </form>
     </div>
   </section>
-  <section class="story-band" id="how" aria-label="How it works">
+  <section class="band close" id="close">
     <div class="wrap">
-      <ol class="hunt-steps">
-        <li><strong>You describe it.</strong><p>Here · Claude · Codex · ChatGPT</p></li>
-        <li><strong>The Hound checks the domain, the real price, both app stores, trademarks and handles.</strong>
-          <p>Compare shops and renewal prices. App Store, Google Play, LinkedIn, X, Instagram, TikTok, YouTube, GitHub.</p>
-        </li>
-        <li><strong>You pick.</strong><p>Your agent buys it and connects your site, or finds the owner and drafts an offer.</p></li>
-      </ol>
-    </div>
-  </section>
-  <section class="story-band story-agent" aria-labelledby="versus">
-    <div class="wrap story-split">
-      <h2 id="versus">Others tell you it’s taken and wish you luck. <em>The Hound brings back one you can own.</em></h2>
-      <div class="leash">
-        <p>Available? Your agent buys it. Taken? It finds the owner and drafts the offer.</p>
-        <strong>Never buys without you. You hold the leash.</strong>
-      </div>
-    </div>
-  </section>
-  <section class="story-questions" id="faq" aria-label="Frequently asked questions">
-    <div class="wrap story-split">
-      <details><summary>Why check trademarks?</summary><p>81% of 1,000 common English words already had a US trademark (<a href="https://harvardlawreview.org/print/vol-131/are-we-running-out-of-trademarks/">Harvard Law Review, 2018</a>).</p></details>
-      <details><summary>What’s the renewal trap?</summary><p>A .co costs $3.11 the first year, then $31.05 every year. We show both prices.</p></details>
-    </div>
-  </section>
-  <section class="story-band story-close" id="close">
-    <div class="wrap">
-      <h2>Still calling it ‘Untitled project’? <em>Name it already.</em></h2>
-      <div class="search-buttons">
-        <a class="action" href="#name">Find it here</a>
-        <a class="action" href="#install">Find it in your agent</a>
-        <small class="agent-names">In Claude, Codex or ChatGPT</small>
-      </div>
+      <div><h2>You hold the leash.</h2><p>With Spaceship connected, your local agent buys with your approval and sets up your site.</p></div>
+      <a class="access" href="#install">Connect your agent <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 15V3M4 8l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg></a>
     </div>
   </section>
 </main>
-<footer><nav class="wrap foot" aria-label="Footer"><a href="/watch/">Watch a domain</a><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a></nav></footer>
+<footer>
+  <div class="wrap">
+    <span>Domain Hound · BrightBoard AS</span>
+    <nav aria-label="More"><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a><a href="https://github.com/lars-hv/domain-hound">Open source</a></nav>
+    <small>Independent of the shops and platforms named.</small>
+  </div>
+</footer>
 <script src="assets/site.js"></script>
+<script src="assets/watch.js"></script>
 <script type="module" src="assets/search.mjs"></script>
 </body>
 </html>

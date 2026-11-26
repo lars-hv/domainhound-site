@@ -11,18 +11,21 @@ async function checkWatch({ dedicated, width }) {
   const button = form.querySelector('button[type="submit"]');
   const status = form.querySelector('[role="status"]');
 
-  assert(news.labels[0].textContent.trim() === 'Yes, email me news about Domain Hound and other developer tools from BrightBoard AS. At most twice a month. Unsubscribe any time.', 'News consent text changed');
-  assert(form.querySelectorAll('input[type="checkbox"]').length === 1 && !news.checked && !news.required, 'News must be optional and unticked');
+  if (dedicated) {
+    assert(news.labels[0].textContent.trim() === 'Yes, email me news about Domain Hound and other developer tools from BrightBoard AS. At most twice a month. Unsubscribe any time.', 'News consent text changed');
+    assert(form.querySelectorAll('input[type="checkbox"]').length === 1 && !news.checked && !news.required, 'News must be optional and unticked');
+  } else {
+    assert(!news && name && !name.required && name.maxLength === 80 && name.value === '', 'Offer only an optional name');
+  }
   assert(email.value === '', 'Never prefill email from the URL');
-  assert(!name, 'The watch form should only ask for a domain and email');
   assert([...new FormData(form)].length === 0, 'Native form submission must not expose signup details');
   assert(domain.value === (dedicated ? 'xn--bcher-kva.com' : ''), 'Expected only a valid domain to be prefilled');
-  assert(!button.disabled && button.textContent === 'Watch for free', 'Watch button must be ready');
+  assert(!button.disabled && button.textContent === (dedicated ? 'Watch for free' : 'Watch this domain'), 'Watch button must be ready');
   await document.fonts.ready;
   assert(document.documentElement.scrollWidth <= width, 'Page overflows horizontally');
   const bounds = button.getBoundingClientRect();
   assert(bounds.height >= 44, 'Watch button is too small');
-  assert(bounds.top >= 0 && bounds.bottom <= innerHeight, 'Signup below first viewport: ' + bounds.bottom);
+  if (dedicated) assert(bounds.top >= 0 && bounds.bottom <= innerHeight, 'Signup below first viewport: ' + bounds.bottom);
 
   const calls = [];
   let reply;
@@ -58,18 +61,19 @@ async function checkWatch({ dedicated, width }) {
   button.click();
   await expectStatus('sending', /Sending/);
   button.click();
-  assert(calls.length === 1 && news.disabled && domain.readOnly, 'Duplicate submission or editable in-flight fields');
+  assert(calls.length === 1 && (dedicated ? news.disabled : name.readOnly) && domain.readOnly, 'Duplicate submission or editable in-flight fields');
   const payload = calls[0];
   assert(Object.keys(payload).sort().join(',') === 'domain,email,source,website', 'Omit unchecked news and blank name');
   assert(payload.email === email.value && payload.domain === 'example.com' && payload.source === 'site' && payload.website === '', 'Wrong watch payload');
   release(new Response(JSON.stringify({ ok: true }), { status: 202 }));
   await expectStatus('success', /email to start your watch/i);
-  assert(!news.checked && !news.disabled && !email.value, 'Reset sensitive fields after acceptance');
+  assert(!news?.checked && !news?.disabled && !email.value, 'Reset sensitive fields after acceptance');
 
   fill(domain, 'example.com');
   fill(email, 'reader@example.com');
-  news.labels[0].click();
-  assert(news.checked, 'Consent label must toggle the checkbox');
+  if (dedicated) news.labels[0].click();
+  else fill(name, 'Alex');
+  if (dedicated) assert(news.checked, 'Consent label must toggle the checkbox');
   const failures = [
     [429, {}, /too many/i],
     [422, { message: 'Alerts cover .com for now.' }, /cover .com/],
@@ -84,15 +88,16 @@ async function checkWatch({ dedicated, width }) {
     };
     button.click();
     await expectStatus('error', words);
-    assert(news.checked && email.value && !news.disabled && !domain.readOnly, 'Keep entries for retry');
+    assert((dedicated ? news.checked : name.value === 'Alex') && email.value && !news?.disabled && !domain.readOnly, 'Keep entries for retry');
   }
   reply = () => new Response(JSON.stringify({ ok: true }), { status: 202 });
   button.click();
   await expectStatus('success', /email to start your watch/i);
   assert(calls.length === failures.length + 2 && calls.slice(1).every(call =>
-    call.news === 'yes' && !('name' in call) && call.source === 'site' && !('newsConsent' in call)), 'Wrong opt-in payload');
-  assert(!news.checked && !email.value, 'Future signups must start empty and unticked');
+    (dedicated ? call.news === 'yes' && !('name' in call) : call.name === 'Alex' && !('news' in call)) && call.source === 'site' && !('newsConsent' in call)), 'Wrong opt-in payload');
+  assert(!news?.checked && !name?.value && !email.value, 'Future signups must start empty and unticked');
 
+  if (!dedicated) return;
   form.querySelector('summary').click();
   assert(form.querySelector('details').open && /up to four emails per domain/i.test(form.innerText), 'Show the email cap');
   assert(/stop news, stop a watch, or erase your address and watches/i.test(form.innerText), 'Explain signed-link controls');
