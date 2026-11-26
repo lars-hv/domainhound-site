@@ -88,7 +88,6 @@
 .results-head { margin-bottom: 12px; }
 .results-head:has(.requested-actions) { justify-content: flex-start; align-items: baseline; }
 .hunt-card > .alternatives-title { display: block; margin: 16px 0 8px; }
-.alternatives-title + .trademark-slot:not(:empty) { margin-bottom: 8px; }
 .hunt-list { margin: 16px 0 0; list-style: none; padding: 0; display: grid; gap: 22px; }
 .hunt-card + .hunt-card { margin-top: 24px; }
 .hunt-list .hunt-card { border-top: 2px solid; padding-top: 12px; }
@@ -100,7 +99,7 @@
 .trademark-warning strong { font-size: 1.15rem; }
 .trademark-warning p, .trademark-pending { font-size: .93rem; }
 .trademark-pending { border-left: 2px solid; padding-left: 10px; }
-.hunt-card[data-check-pending] .offer-row > :is(.action, .buy-note) { display: none; }
+.primary-checks:not(:empty) { margin: 12px 0; }
 .ending-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 2px; background: var(--blue); }
 .offer-row, .detail-checks { min-width: 0; background: var(--cream); padding: 15px 16px 0; }
 .offer-row { display: flex; flex-direction: column; align-items: flex-start; }

@@ -351,6 +351,7 @@ test('confirmed endings remain usable when automatic details have expired', asyn
   assert.equal(await page.getByRole('link', { name: /^Buy /i }).count(), 1);
   await page.getByRole('link', { name: 'Watch mapfern.dev' }).waitFor();
   assert.equal(await page.getByText('mapfern.app', { exact: true }).count(), 0);
+  await page.getByRole('button', { name: /^Name checks for / }).first().click();
   await page.getByText(/checks expired/).waitFor();
   assert.equal(calls[1].query.get('id'), 'mapfern');
   assert.equal(await book.isVisible(), true);
@@ -725,15 +726,17 @@ test('details use manual links for unknowns and restrict platform destinations',
     } };
   });
   await search(page, 'name', 'Mapfern');
+  const panelToggle = page.getByRole('button', { name: /^Name checks for / }).first();
+  await panelToggle.click();
   await page.getByRole('link', { name: /No profile found/ }).waitFor();
   const details = page.locator('.detail-checks');
-  assert.match(await details.innerText(), /US trademark: none found/);
+  await page.getByText('US trademark: no exact live match found.').waitFor();
   assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
   assert.equal(await details.locator('a[href="https://reader.example/profile?name=mapfern"]').count(), 0);
-  assert.equal(await page.getByRole('link', { name: "Google Play · Couldn't check · Search Google Play" }).getAttribute('href'),
+  assert.equal(await page.getByRole('link', { name: "Google Play (Android) · Couldn't check · Search Google Play" }).getAttribute('href'),
     'https://play.google.com/store/search?q=mapfern');
   assert.equal(new URL(await details.getByRole('link', { name: "LinkedIn · Couldn't check · Search LinkedIn" }).getAttribute('href')).searchParams.get('keywords'), 'mapfern');
-  assert.match(await details.innerText(), /Google Play\s+Couldn't check/);
+  assert.doesNotMatch(await details.innerText(), /Google Play/);
   assert.match(await details.innerText(), /LinkedIn\s+Couldn't check/);
   assert.equal(await details.getByRole('link', { name: "Instagram · Couldn't check" }).getAttribute('href'),
     'https://www.instagram.com/mapfern');
@@ -753,8 +756,10 @@ test('details show checked store and archive outcomes and every requested platfo
     return { json: details };
   });
   await search(page, 'name', 'Mapfern');
+  await page.getByRole('link', { name: 'Google Play (Android) · Taken · Search Google Play', exact: true }).waitFor();
+  await page.getByRole('button', { name: /^Name checks for / }).first().click();
   const details = page.locator('.detail-checks');
-  for (const label of ['Google Play · Taken · Search Google Play', 'LinkedIn · Found in 2021',
+  for (const label of ['LinkedIn · Found in 2021',
     'Reddit · No page found in public archives · Search Reddit', 'Twitch · No profile found', 'Threads · Taken',
     "Facebook · Couldn't check"]) {
     await details.getByRole('link', { name: label, exact: true }).waitFor();
@@ -1064,7 +1069,7 @@ test('a taken exact domain leads with watch and offer actions, then normal alter
   assert.equal(await results.locator('.best-domain .domain-title').innerText(), 'mapfern.dev');
   assert.equal(await results.locator('.offer-row .shop-table').count(), 2);
   await results.getByRole('button', { name: 'Name checks for mapfern.so' }).click();
-  await results.getByText('US trademark: none found').waitFor();
+  await results.getByText('US trademark: no exact live match found.').waitFor();
   assert.equal(calls.length, 3);
 });
 
@@ -1155,6 +1160,8 @@ for (const width of [390, 1440]) {
       return top.top < innerHeight && top.bottom > 0;
     });
     const details = results.locator('.detail-checks');
+    assert.equal(await details.isVisible(), false);
+    await best.getByRole('button', { name: /^Name checks for / }).click();
     await details.getByRole('status').filter({ hasText: /check|load/i }).waitFor();
     assert.equal(await results.getByText('mapfern.xyz', { exact: true }).count(), 0);
     const taken = results.locator('.taken-group');
@@ -1162,15 +1169,15 @@ for (const width of [390, 1440]) {
       nodes.map(node => new URL(node.href).searchParams.get('domain')).sort()), ['mapfern.app', 'mapfern.net']);
     assert.equal(await page.locator('#real-search').isVisible(), false);
     const order = await results.locator('.domain-title').allTextContents();
-    assert.deepEqual(order.slice(0, 3), ['mapfern.com', 'mapfern.io', 'mapfern.dev']);
+    assert.deepEqual(order.slice(0, 3), ['mapfern.dev', 'mapfern.com', 'mapfern.io']);
     assert.match(await taken.innerText(), /draft an offer/);
     assert.ok(await taken.locator('a[href="#install"]').isVisible());
     release();
     await details.getByRole('link', { name: /No profile found/ }).waitFor();
     assert.equal(await details.locator('a[href*="social.example"]').count(), 0);
     assert.deepEqual(await details.locator('.check-line b').allTextContents(),
-      ['App Store', 'Google Play', 'LinkedIn', 'X', 'Instagram', 'Threads', 'TikTok', 'YouTube', 'GitHub', 'Facebook', 'Twitch', 'Reddit']);
-    assert.ok(await details.evaluate(box => box.previousElementSibling.matches('.ending-list')));
+      ['LinkedIn', 'X', 'Instagram', 'Threads', 'TikTok', 'YouTube', 'GitHub', 'Facebook', 'Twitch', 'Reddit']);
+    assert.ok(await details.evaluate(box => box.previousElementSibling.matches('.taken-group')));
     assert.equal(await details.locator('a[href="https://www.instagram.com/mapfern"]').count(), 1);
     assert.match(await details.innerText(), /No profile found/i);
     assert.doesNotMatch(await details.innerText(), /\bfree\b|\bavailable\b/i);
@@ -1257,6 +1264,7 @@ test('rate-limited name checks can be retried without rechecking domains', async
   });
   await search(page, 'name', 'Mapfern');
   const details = page.locator('.detail-checks');
+  await page.getByRole('button', { name: /^Name checks for / }).first().click();
   await details.getByText(breather, { exact: true }).waitFor();
   assert.ok(await page.locator('.best-domain a.action').isVisible());
   await details.getByRole('button', { name: /retry/i }).click();
@@ -1281,6 +1289,7 @@ test('a late handle response cannot attach itself to the next name', async t => 
   await search(page, 'name', 'Mapfern');
   await started;
   await search(page, 'name', 'Trailfin');
+  await page.getByRole('button', { name: 'Name checks for trailfin.com' }).click();
   const details = page.locator('.detail-checks');
   await details.locator('a[href="https://www.instagram.com/trailfin"]').waitFor();
   release();
@@ -1407,7 +1416,7 @@ test('the comparison guide exposes the full evidence without scripts', async t =
 });
 
 for (const width of [390, 1440]) {
-  test('domain cards compare every shop and put an exact filing ahead of Buy at ' + width, async t => {
+  test('domain cards put the pick, apps and exact US filing before shop comparisons at ' + width, async t => {
     const reply = checkReply(true);
     const row = reply.domains[0];
     row.prices[1].threeYearUsd = 12;
@@ -1425,35 +1434,49 @@ for (const width of [390, 1440]) {
       buyUrl: 'https://www.namecheap.com/domains/registration/results/?domain=' + other.domain }));
     reply.domains.unshift(other);
     const details = profileChecks('mapfern');
+    details.appStore = { status: 'no_match_found', matches: [] };
+    details.googlePlay = { status: 'taken', link: 'https://play.google.com/store/search?q=mapfern' };
     details.trademarks.us = { status: 'exact_match_found', marks: [
       { mark: 'MAPFERN', owner: 'Example Company', url: 'https://tsdr.uspto.gov/#caseNumber=12345678' }
     ] };
+    const late = width === 390;
+    for (const key of ['appStore', 'googlePlay', 'trademarks']) {
+      reply[key] = late ? key === 'trademarks' ? { us: { status: 'pending' } } : { status: 'pending' } : details[key];
+    }
     let release;
     const held = new Promise(resolve => { release = resolve; });
     t.after(release);
     const { page } = await openPage(t, async call => {
       if (call.path === '/v1/check') return { json: reply };
       await held;
-      return { json: details };
+      return { json: late ? details : { ...details, appStore: { status: 'unknown' }, googlePlay: { status: 'unknown' },
+        trademarks: { us: { status: 'unknown' } } } };
     }, { width });
     await search(page, 'name', 'Mapfern');
     const results = page.locator('#result-pages');
     const toggles = results.getByRole('button', { name: /^Name checks for / });
     await toggles.first().waitFor();
-    assert.equal(await results.getByRole('link', { name: /^Buy / }).count(), 0);
-    assert.equal(await results.locator('a.shop-name[href]').count(), 0);
-    release();
+    assert.equal(await results.getByRole('link', { name: /^Buy / }).count(), 2);
     const filing = results.getByRole('link', { name: /filing/i });
+    if (late) {
+      await results.getByText('Trademark check still running.').waitFor();
+      assert.equal(await results.getByText('Still checking', { exact: true }).count(), 2);
+    } else {
+      await filing.waitFor();
+      await results.getByText('Search aid, not legal advice.').waitFor();
+    }
+    release();
     await filing.waitFor();
     assert.match(await results.innerText(), /Example Company/);
     assert.match(await filing.getAttribute('href'), /^https:\/\/tsdr\.uspto\.gov\//);
     const buy = results.getByRole('link', { name: 'Buy mapfern.com at Gandi' });
     assert.ok(await buy.evaluate(node => Boolean(document.querySelector('.trademark-warning').compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)));
-    assert.deepEqual(await results.locator('.domain-title').allTextContents(), ['mapfern.io', 'mapfern.com']);
+    assert.deepEqual(await results.locator('.domain-title').allTextContents(), ['mapfern.com', 'mapfern.io']);
     const card = results.locator('.best-domain');
-    assert.match(await card.innerText(), /Hound’s pick/);
-    assert.match(await buy.innerText(), /Gandi.*\$32\.00/);
-    assert.match(await card.locator('.three-year').innerText(), /\$12\.00 over 3 years at Porkbun/);
+    assert.match(await card.innerText(), /Hound’s pick.*App Store \(iOS\).*No matching app found.*Google Play \(Android\).*Taken.*Example Company.*Buy at Gandi/s);
+    assert.equal(await buy.innerText(), 'Buy at Gandi');
+    await screenshot(page, 'trademark-order-' + width, card);
+    assert.match(await card.locator('.three-year').innerText(), /\$32\.00 over 3 years at Gandi/);
     assert.deepEqual(await card.locator('tbody th .shop-name').allTextContents(), ['Porkbun', 'Gandi', 'Spaceship', 'Cloudflare', 'Dynadot']);
     assert.match(await card.locator('tbody tr').first().innerText(), /Cheapest.*Price only/s);
     assert.equal(await card.locator('tbody tr:visible').count(), 3);
@@ -1472,6 +1495,9 @@ for (const width of [390, 1440]) {
     assert.equal(await otherCard.getByText('Price only').count(), 0);
     assert.equal(await otherCard.locator('.renewal-warning').count(), 0, 'exactly 3x needs no warning');
     const panel = results.locator('.detail-checks');
+    assert.equal(await panel.isVisible(), false);
+    assert.equal(await toggles.first().getAttribute('aria-expanded'), 'false');
+    await toggles.first().click();
     assert.ok((await panel.boundingBox()).y >= (await card.boundingBox()).y + (await card.boundingBox()).height - 1);
     assert.equal(await toggles.first().getAttribute('aria-expanded'), 'true');
     await toggles.nth(1).click();
@@ -1507,6 +1533,7 @@ test('one to six domains keep the shared checks below every card', async t => {
     await search(page, 'name', 'Mapfern');
     const cards = page.locator('.ending-list .offer-row');
     await cards.nth(count - 1).waitFor();
+    await cards.first().getByRole('button', { name: /^Name checks for / }).click();
     const { bounds, panelTop } = await cards.evaluateAll(nodes => ({
       bounds: nodes.map(node => node.getBoundingClientRect().toJSON()),
       panelTop: document.querySelector('.detail-checks').getBoundingClientRect().top
