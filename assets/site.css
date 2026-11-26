@@ -1,17 +1,9 @@
-@font-face {
-  font-family: Mulish;
-  src: url("mulish-latin-wght-normal.woff2") format("woff2");
-  font-weight: 200 1000;
-  font-style: normal;
-  font-display: swap;
-}
+@import url("palette.css");
 :root {
-  color-scheme: light;
-  --ink: #100e08;
-  --cream: #fff7de;
-  --gold: #f4c64f;
+  --ink: var(--pine);
+  --cream: var(--paper);
+  --gold: var(--leaf);
   --gutter: clamp(18px, 4.5vw, 64px);
-  --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 }
 *, *::after, *::before { box-sizing: border-box; }
 [hidden] { display: none !important; }

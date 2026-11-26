@@ -5,6 +5,8 @@
   const endpoint = 'https://domainhound-alerts.domainhound.workers.dev/watch';
   const domainInput = document.getElementById('watch-domain');
   const emailInput = document.getElementById('watch-email');
+  const nameInput = document.getElementById('watch-name');
+  const stamp = document.getElementById('watch-stamp');
   const news = document.getElementById('watch-news');
   const trap = document.getElementById('watch-website');
   const button = form.querySelector('.watch-submit');
@@ -26,7 +28,7 @@
   }
 
   const requestedDomain = new URLSearchParams(window.location.search).get('domain');
-  if (requestedDomain) domainInput.value = watchHostname(requestedDomain.trim()) || '';
+  if (!stamp && requestedDomain) domainInput.value = watchHostname(requestedDomain.trim()) || '';
 
   function showStatus(message, state, invalidInput) {
     status.textContent = message;
@@ -39,13 +41,33 @@
   }
 
   function clearStatus() {
-    for (const input of [domainInput, emailInput]) {
+    for (const input of [domainInput, emailInput, nameInput].filter(Boolean)) {
       input.removeAttribute('aria-invalid');
       input.removeAttribute('aria-describedby');
     }
     showStatus('', '');
   }
 
+  if (stamp) {
+    const clearStamp = () => {
+      stamp.hidden = true;
+      stamp.textContent = '';
+    };
+    domainInput.addEventListener('input', clearStamp);
+    form.addEventListener('reset', clearStamp);
+    document.addEventListener('watch-suggestion', event => {
+      if (domainInput.readOnly) return;
+      const domain = event.detail;
+      if (!domain && stamp.hidden) return;
+      domainInput.value = domain || '';
+      clearStatus();
+      clearStamp();
+      if (domain) {
+        stamp.textContent = 'Taken · ' + domain;
+        stamp.hidden = false;
+      }
+    });
+  }
   form.addEventListener('input', clearStatus);
   form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -57,11 +79,13 @@
     if (!validEmail(email)) return showStatus('Enter an email like you@example.com.', 'error', emailInput);
 
     const payload = { email, domain, source: 'site', website: trap.value };
-    if (news.checked) payload.news = 'yes';
+    if (nameInput?.value.trim()) payload.name = nameInput.value.trim();
+    if (news?.checked) payload.news = 'yes';
 
     button.setAttribute('aria-disabled', 'true');
     domainInput.readOnly = emailInput.readOnly = true;
-    news.disabled = true;
+    if (nameInput) nameInput.readOnly = true;
+    if (news) news.disabled = true;
     showStatus('Sending…', 'sending');
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
@@ -84,7 +108,7 @@
         showStatus('Check your email to start your watch.', 'success');
       } else if ([400, 422].includes(response.status) && typeof result?.message === 'string' && result.message) {
         const field = response.status === 422 || /domain/i.test(result.message) ? domainInput : emailInput;
-        showStatus(result.message, 'error', field);
+        showStatus(result.message, 'error', nameInput && /name/i.test(result.message) ? nameInput : field);
       } else {
         showStatus('We couldn’t start your watch. Try again later.', 'error');
       }
@@ -93,7 +117,8 @@
     } finally {
       clearTimeout(timer);
       domainInput.readOnly = emailInput.readOnly = false;
-      news.disabled = false;
+      if (nameInput) nameInput.readOnly = false;
+      if (news) news.disabled = false;
       button.removeAttribute('aria-disabled');
     }
   });

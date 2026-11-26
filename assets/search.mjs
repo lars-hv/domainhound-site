@@ -38,6 +38,7 @@ function cancelSearch() {
 }
 
 function clearResults() {
+  document.dispatchEvent(new CustomEvent('watch-suggestion'));
   document.getElementById('real-search').hidden = false;
   region.hidden = true;
   pages.replaceChildren();
@@ -739,7 +740,10 @@ function renderPage(mode, input, response, signal) {
   const page = document.createDocumentFragment();
   page.append(head);
   if (taken) {
-    const watch = link('Watch it', '/watch/?domain=' + encodeURIComponent(exact));
+    const suggestWatch = () => document.dispatchEvent(new CustomEvent('watch-suggestion', { detail: exact }));
+    suggestWatch();
+    const watch = link('Watch it', '#watch-domain');
+    watch.addEventListener('click', suggestWatch);
     watch.setAttribute('aria-label', 'Watch ' + exact);
     const actions = el('p', 'requested-actions');
     actions.append(watch, ' or ', link('ask your agent to draft an offer', '#install'), '.');

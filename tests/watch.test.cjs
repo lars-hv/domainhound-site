@@ -33,19 +33,13 @@ for (const width of [390, 1440]) {
         });
         const page = await context.newPage();
         page.on('pageerror', error => unexpected.push(error.message));
-        if (!dedicated) {
-          await page.goto(site);
-          assert.equal(await page.locator('#watch').count(), 0);
-          await page.getByRole('link', { name: 'Watch a domain' }).click();
-          assert.equal(new URL(page.url()).pathname, '/watch/');
-        }
-        const target = dedicated ? '/watch/?domain=B%C3%9CCHER.com' : '/watch/?domain=%3Cinvalid%3E';
+        const target = dedicated ? '/watch/?domain=B%C3%9CCHER.com' : '/?domain=ignored.com';
         await page.goto(site + target + '&email=ignored%40example.com&name=Ignored&news=yes');
         await page.addScriptTag({ content: checks });
         await page.evaluate(options => checkWatch(options), { dedicated, width });
         await page.getByRole('link', { name: 'Privacy', exact: true }).first().click();
-        assert.equal(new URL(page.url()).hash, '#watch');
-        assert.equal(await page.locator(':target').innerText(), 'Domain watch alerts');
+        assert.equal(new URL(page.url()).pathname, '/privacy/');
+        assert.equal(await page.locator('#watch').innerText(), 'Domain watch alerts');
         assert.match(await page.locator('section[aria-labelledby="watch"]').innerText(), /delete unconfirmed sign-ups after 7 days/i);
         assert.match(await page.locator('section[aria-labelledby="news"]').innerText(), /address hash on our do-not-send list/i);
         assert.deepEqual(unexpected, []);

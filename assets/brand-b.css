@@ -1,12 +1,12 @@
 :root {
-  --blue: #102385;
+  --blue: var(--pine);
   --ink: var(--blue);
-  --lime: #cdf473;
-  --coral: #ffab91;
+  --lime: var(--leaf);
+  --coral: var(--amber);
   --body-size: 1.0625rem;
 }
 body { font-size: var(--body-size); line-height: 1.5; }
-.mast, .hero, .trust, footer { background: var(--blue); color: var(--cream); }
+.mast, .hero, .trust, footer { background: var(--forest); color: var(--cream); }
 .mast .brand { font: 700 .9rem var(--mono); }
 .mast-inner { min-height: 52px; }
 .mast nav a, .foot a { font-size: .9375rem; }
@@ -125,7 +125,7 @@ h2 { font-size: 2.25rem; line-height: 1.05; }
 .watch h2 + .watch-intro { margin-top: 6px; }
 .watch-controls { grid-template-columns: minmax(0, 1fr); margin-top: 14px; }
 .watch-field input { font-family: var(--mono); }
-.watch-field input::placeholder { color: #565d76; }
+.watch-field input::placeholder { color: var(--forest); }
 .watch-field input[aria-invalid="true"] { border: 2px solid currentColor; }
 .watch-news {
   display: flex;
@@ -148,7 +148,7 @@ h2 { font-size: 2.25rem; line-height: 1.05; }
 }
 .watch-help summary, .watch-help > a { padding-block: 12px; cursor: pointer; }
 .watch-help p { max-width: 57ch; margin-bottom: 10px; }
-.watch-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--blue); }
+.watch-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--forest); }
 .watch-page main { flex: 1; }
 .watch-page .hero-grid { grid-template-areas: "lead" "watch"; }
 .watch-page .lead img { padding: 4px; background: var(--lime); }
