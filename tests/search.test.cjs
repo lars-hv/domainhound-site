@@ -729,6 +729,17 @@ test('details show checked store and archive outcomes and every requested platfo
   assert.doesNotMatch(await details.innerText(), /Check yourself/i);
 });
 
+test('an invalid exact domain shows an input error before reaching the API', async t => {
+  const { page, calls } = await openPage(t, () => ({ status: 400, json: { error: 'invalid-name' } }));
+  await page.locator('#name').fill('bad..com');
+  await page.locator('#name').press('Enter');
+  await page.locator('#main-search [role="status"]').filter({ hasText: 'Enter a name or a domain' }).waitFor();
+  assert.equal(await page.locator('#name').getAttribute('aria-invalid'), 'true');
+  assert.equal(calls.length, 0);
+  await page.locator('#name').fill('bücher.co.uk.');
+  assert.equal(await page.locator('#name').getAttribute('aria-invalid'), null);
+});
+
 test('an unconfirmed or over-budget idea never becomes a bookable suggestion', async t => {
   const reply = ideas([['Mapfern', 'mapfern.com'], ['Trailfin', 'trailfin.com']]);
   reply.names[0].domains[0].evidence = null;

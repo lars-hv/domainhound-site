@@ -1,4 +1,4 @@
-import { guessMode, normalize } from './search-mode.mjs';
+import { guessMode, normalize, validDomainForm } from './search-mode.mjs';
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 const priceDay = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
@@ -893,6 +893,12 @@ for (const form of document.querySelectorAll('.hunt-form')) {
 
   async function run(mode) {
     const value = field.value.trim();
+    if (mode === 'name' && value.includes('.') && !validDomainForm(normalize(value))) {
+      status.textContent = 'Enter a name or a domain, such as example.com.';
+      field.setAttribute('aria-invalid', 'true');
+      field.focus();
+      return;
+    }
     let problem = '';
     if (!value) problem = mode === 'personal' ? 'Enter your full name using up to 80 characters.' : 'Enter a name or describe your idea.';
     else if (mode === 'personal' && value.length > 80) problem = 'Enter your full name using up to 80 characters.';
@@ -925,6 +931,8 @@ for (const form of document.querySelectorAll('.hunt-form')) {
     override = modeNow() === 'name' ? 'idea' : 'name';
     updateHint();
     field.setCustomValidity('');
+    field.removeAttribute('aria-invalid');
+    status.textContent = '';
     // Already searched this text: run it the other way now and drop the old answer.
     if (submitted !== null && submitted === field.value) {
       cancelSearch();
@@ -936,6 +944,7 @@ for (const form of document.querySelectorAll('.hunt-form')) {
   });
   field.addEventListener('input', () => {
     field.setCustomValidity('');
+    field.removeAttribute('aria-invalid');
     override = null;
     submitted = null;
     updateHint();
