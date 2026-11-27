@@ -1,0 +1,237 @@
+{
+  "eligible_companies": 1591,
+  "excluded_websites": 10,
+  "websites": 1581,
+  "endings": {
+    ".ad": 1,
+    ".ai": 479,
+    ".al": 1,
+    ".app": 19,
+    ".art": 1,
+    ".bio": 13,
+    ".bot": 6,
+    ".build": 6,
+    ".ca": 1,
+    ".cafe": 1,
+    ".care": 2,
+    ".cc": 3,
+    ".chat": 2,
+    ".co": 38,
+    ".codes": 2,
+    ".com": 733,
+    ".company": 5,
+    ".computer": 2,
+    ".cool": 1,
+    ".cx": 3,
+    ".design": 1,
+    ".dev": 56,
+    ".earth": 2,
+    ".farm": 1,
+    ".fast": 1,
+    ".film": 1,
+    ".finance": 1,
+    ".fit": 1,
+    ".fun": 1,
+    ".fyi": 2,
+    ".gg": 2,
+    ".glass": 1,
+    ".health": 7,
+    ".inc": 11,
+    ".insure": 1,
+    ".io": 60,
+    ".jobs": 1,
+    ".lat": 1,
+    ".live": 1,
+    ".ltd": 1,
+    ".markets": 3,
+    ".md": 1,
+    ".me": 2,
+    ".money": 1,
+    ".net": 4,
+    ".new": 1,
+    ".no": 1,
+    ".one": 3,
+    ".org": 6,
+    ".re": 1,
+    ".run": 4,
+    ".school": 1,
+    ".security": 2,
+    ".sh": 17,
+    ".si": 1,
+    ".so": 20,
+    ".space": 4,
+    ".store": 1,
+    ".systems": 3,
+    ".tax": 1,
+    ".team": 1,
+    ".tech": 9,
+    ".to": 2,
+    ".trade": 2,
+    ".travel": 1,
+    ".us": 6,
+    ".video": 1,
+    ".vision": 1,
+    ".work": 3,
+    ".works": 1,
+    ".world": 1,
+    ".xyz": 4
+  },
+  "batches": [
+    {
+      "batch": "Winter 2023",
+      "websites": 113,
+      "ai": 24,
+      "choices": {
+        "exactOther": 43,
+        "exactCom": 29,
+        "differentOther": 17,
+        "differentCom": 24
+      }
+    },
+    {
+      "batch": "Summer 2023",
+      "websites": 98,
+      "ai": 28,
+      "choices": {
+        "exactOther": 37,
+        "exactCom": 32,
+        "differentOther": 13,
+        "differentCom": 16
+      }
+    },
+    {
+      "batch": "Winter 2024",
+      "websites": 146,
+      "ai": 35,
+      "choices": {
+        "exactOther": 48,
+        "exactCom": 43,
+        "differentOther": 17,
+        "differentCom": 38
+      }
+    },
+    {
+      "batch": "Summer 2024",
+      "websites": 153,
+      "ai": 44,
+      "choices": {
+        "exactOther": 61,
+        "exactCom": 43,
+        "differentOther": 23,
+        "differentCom": 26
+      }
+    },
+    {
+      "batch": "Fall 2024",
+      "websites": 53,
+      "ai": 20,
+      "choices": {
+        "exactOther": 19,
+        "exactCom": 13,
+        "differentOther": 10,
+        "differentCom": 11
+      }
+    },
+    {
+      "batch": "Winter 2025",
+      "websites": 101,
+      "ai": 35,
+      "choices": {
+        "exactOther": 40,
+        "exactCom": 28,
+        "differentOther": 13,
+        "differentCom": 20
+      }
+    },
+    {
+      "batch": "Spring 2025",
+      "websites": 83,
+      "ai": 25,
+      "choices": {
+        "exactOther": 37,
+        "exactCom": 20,
+        "differentOther": 13,
+        "differentCom": 13
+      }
+    },
+    {
+      "batch": "Summer 2025",
+      "websites": 111,
+      "ai": 45,
+      "choices": {
+        "exactOther": 48,
+        "exactCom": 31,
+        "differentOther": 18,
+        "differentCom": 14
+      }
+    },
+    {
+      "batch": "Fall 2025",
+      "websites": 92,
+      "ai": 31,
+      "choices": {
+        "exactOther": 36,
+        "exactCom": 21,
+        "differentOther": 15,
+        "differentCom": 20
+      }
+    },
+    {
+      "batch": "Winter 2026",
+      "websites": 137,
+      "ai": 46,
+      "choices": {
+        "exactOther": 63,
+        "exactCom": 36,
+        "differentOther": 19,
+        "differentCom": 19
+      }
+    },
+    {
+      "batch": "Spring 2026",
+      "websites": 127,
+      "ai": 38,
+      "choices": {
+        "exactOther": 40,
+        "exactCom": 37,
+        "differentOther": 22,
+        "differentCom": 28
+      }
+    },
+    {
+      "batch": "Summer 2026",
+      "websites": 180,
+      "ai": 47,
+      "choices": {
+        "exactOther": 62,
+        "exactCom": 50,
+        "differentOther": 28,
+        "differentCom": 40
+      }
+    },
+    {
+      "batch": "Fall 2026",
+      "websites": 187,
+      "ai": 61,
+      "choices": {
+        "exactOther": 70,
+        "exactCom": 50,
+        "differentOther": 36,
+        "differentCom": 31
+      }
+    }
+  ],
+  "audit": {
+    "date": "2026-11-27",
+    "sample": 50,
+    "errors": 0
+  },
+  "source": {
+    "directory": "https://yc-oss.github.io/api/companies/all.json",
+    "snapshot": "https://raw.githubusercontent.com/yc-oss/api/3164430271c7fd083eee684c2abe5de3c79b6bfc/companies/all.json",
+    "updated": "2026-11-27T05:54:51.720Z",
+    "sha256": "33779dea2d3b5474babe57ab5b067fff99cc2078476b800c65b61e44d6c8588f",
+    "psl": "https://publicsuffix.org/list/public_suffix_list.dat",
+    "psl_version": "2026-11-26_18-39-01_UTC"
+  }
+}

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SF Startup Domains</title>
+  <meta name="description" content="{{description}}">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Domain Hound">
+  <meta property="og:title" content="Keep the name or keep the .com?">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:image" content="https://domainhound.dev/sf/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://domainhound.dev/sf/">
+  <link rel="icon" href="../assets/hound-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/home.css">
+  <link rel="stylesheet" href="page.css">
+  <script defer src="page.mjs"></script>
+</head>
+<body>
+<header><div class="frame mast">
+  <a class="paper-art" href="https://domainhound.dev/" aria-label="Domain Hound home">
+    <span class="paper-word first">Domain</span><span class="paper-word second">Hound</span>
+    <span class="paper-dog"><img src="../assets/hound-mark.svg" width="180" height="180" alt=""></span>
+  </a>
+  <a href="#check">Check my name</a>
+</div></header>
+<main>
+  <section class="intro"><div class="frame spread">
+    <div class="lead-copy">
+      <p class="eyebrow">San Francisco Bay Area</p>
+      <h1>Keep the name or keep the <span>.com?</span></h1>
+      <p class="lede">We compared the names and web addresses of {{total}} Bay Area startups in Y Combinator’s directory.</p>
+      <a class="method-link" href="#method">How we counted</a>
+    </div>
+    <div class="ballot">
+      <div class="ballot-head"><label for="batch-select">YC batch</label><select id="batch-select" disabled>{{options}}</select></div>
+      <div id="batch-chart" aria-live="polite">{{charts}}</div>
+      <button id="share" class="share-link" type="button" hidden>Share this batch</button><span id="share-status" role="status"></span>
+    </div>
+  </div></section>
+
+  <section class="research"><div class="frame spread">
+    <div class="trend-copy">
+      <h2>Has .ai peaked?</h2>
+      <p class="deck">Its highest share so far was <strong>{{peakAi}}% in {{peakBatch}}</strong>. In {{latest}}, {{latestAi}}% of listed sites used .ai.</p>
+      <aside class="fact"><h3>Rising endings to watch</h3>
+        <p><b>.si</b> appeared on {{si}} of {{total}} sites. {{siNote}}</p>
+      </aside>
+    </div>
+    <figure class="trend"><figcaption>Share of sites using .ai</figcaption>
+      <div class="plot-head" aria-hidden="true"><span>YC batch</span><span>.ai share</span><span>Batch size</span></div>
+      <div class="plot">{{trend}}</div>
+    </figure>
+  </div></section>
+
+  <section class="method" id="method"><div class="frame">
+    <h2>How we counted</h2>
+    <p><time datetime="{{isoDate}}">{{date}}</time> · One listed website per company across {{batches}} Bay Area YC batches. {{excluded}} of {{eligible}} companies had no usable website. Addresses may have changed since launch.</p>
+    <p>We hand-checked {{sample}} randomly selected brand/domain pairs and found {{errors}} classification errors ({{errorRate}}% in the sample).</p>
+    <details><summary>Matching rule, data and sources</summary>
+      <p>We compare the full listed name with the label immediately before the registry ending. We ignore case, spaces and punctuation, and keep words such as “AI” and “Inc.” in the brand. For example, a brand listed as “Example.ai” differs from the label “example” under this rule.</p>
+      <p>Each company with a listed Bay Area city or town, or Stanford, counts once. Remote-only entries are excluded. The charts describe current addresses and cannot tell us why a founder chose a domain or how the company performed.</p>
+      <p><a href="https://github.com/yc-oss/api">YC OSS directory feed</a> · <a href="https://publicsuffix.org/list/">Public Suffix List</a> · <a href="https://www.ycombinator.com/legal#tou">YC terms</a> · <a href="../data/sf/endings.json" download>Download aggregate counts</a></p>
+    </details>
+    <p class="affiliation">Not affiliated with Y Combinator.</p>
+  </div></section>
+
+  <section id="check" class="check-band"><div class="frame">
+    <div class="check-box">
+      <h2>Check my name</h2>
+      <p>Google ranks .ai and .com the same; the name does the work. <a class="source" href="https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites#generic-domains">Google’s guidance</a></p>
+      <form id="check-form" hidden autocomplete="off"><label for="candidate">Startup name</label>
+        <div class="field"><input id="candidate" type="text" required maxlength="253" placeholder="Your startup name" autocapitalize="none" spellcheck="false">
+        <button type="submit">Check my name</button></div>
+      </form>
+      <noscript><p><a href="https://domainhound.dev/#search">Use the Domain Hound checker</a></p></noscript>
+      <p id="check-status" role="status"></p><ul id="matches"></ul>
+      <a id="watch-link" hidden rel="noreferrer">Watch the exact .com</a>
+    </div>
+  </div></section>
+</main>
+</body>
+</html>
