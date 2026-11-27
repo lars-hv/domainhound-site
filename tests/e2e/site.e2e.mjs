@@ -202,6 +202,7 @@ async function runViewport(browser, engine, width, watchWorker) {
     const request = route.request();
     const url = new URL(request.url());
     assert.ok([site.origin, api.origin, publishedApi].includes(url.origin), 'Unexpected search origin: ' + url.origin);
+    if (url.pathname === '/v1/event') return route.fulfill({ status: 204 });
     if (offline && url.pathname === '/v1/check') {
       expectedFailures.add(request);
       return route.abort('internetdisconnected');

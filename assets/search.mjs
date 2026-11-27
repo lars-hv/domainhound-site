@@ -1,4 +1,5 @@
 import { guessMode, normalize, validDomainForm } from './search-mode.mjs';
+import { recordUsage } from './usage.mjs';
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 const priceDay = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
@@ -57,6 +58,18 @@ const topEndings = ['.com', '.ai', '.io'];
 const endingOf = domain => domain.slice(domain.indexOf('.'));
 
 const visibleShops = 3;
+const trackedShops = new Set(['Spaceship', 'Porkbun', 'Namecheap', 'Dynadot', 'Gandi', 'Cloudflare']);
+
+function trackBuy(anchor, shop, domain) {
+  if (!trackedShops.has(shop)) return;
+  const ending = endingOf(domain).slice(1);
+  if (!/^(?:[a-z0-9-]{1,63}|co\.uk)$/.test(ending)) return;
+  const count = () => recordUsage('buy', shop.toLowerCase(), ending);
+  anchor.addEventListener('click', count);
+  anchor.addEventListener('auxclick', event => {
+    if (event.button === 1) count();
+  });
+}
 
 function shopTable(item, canBuy) {
   const table = el('table', 'shop-table');
@@ -78,7 +91,10 @@ function shopTable(item, canBuy) {
     shop.scope = 'row';
     const linked = canBuy && quote.buyUrl && quote.threeYearUsd <= item.cap;
     const name = el(linked ? 'a' : 'span', 'shop-name', quote.shop);
-    if (linked) name.href = quote.buyUrl;
+    if (linked) {
+      name.href = quote.buyUrl;
+      trackBuy(name, quote.shop, item.domain);
+    }
     shop.append(name);
     if (quote.threeYearUsd === item.quotes[0].threeYearUsd) shop.append(el('small', 'lowest', 'Cheapest'));
     if (!quote.buyUrl) shop.append(el('small', '', 'Price only'));
@@ -94,6 +110,7 @@ function shopTable(item, canBuy) {
   more.type = 'button';
   more.setAttribute('aria-expanded', 'false');
   more.addEventListener('click', () => {
+    if (body.hidden) recordUsage('more_shops');
     body.hidden = !body.hidden;
     more.setAttribute('aria-expanded', String(!body.hidden));
     more.textContent = body.hidden ? label : 'Show fewer shops';
@@ -138,6 +155,7 @@ function domainCard(item, best, requested) {
     const total = shop.threeYearUsd !== offer.threeYearUsd ? ' · ' + usd.format(shop.threeYearUsd) + ' for 3 years' : '';
     const buy = link('Buy at ' + shop.shop + total, shop.buyUrl, 'action');
     buy.setAttribute('aria-label', 'Buy ' + item.domain + ' at ' + shop.shop);
+    trackBuy(buy, shop.shop, item.domain);
     card.append(buy);
     if (shop.shop === 'Cloudflare') card.append(el('p', 'offer-condition buy-note', 'Cloudflare requires its own DNS.'));
     if (shop.renewalUsd > 3 * shop.firstYearUsd) {
@@ -237,7 +255,10 @@ function nameCard(name, items, best, { suggestion, priceDate, requested, showNam
     }
     if (reasons.childElementCount) why.append(reasons);
     if (why.childElementCount > 1) foot.append(why);
-    if (suggestion.shareUrl) foot.append(link('Share', suggestion.shareUrl));
+    if (suggestion.shareUrl) {
+      foot.append(link('Share', suggestion.shareUrl));
+      currentSearch?.track.share(suggestion.shareUrl);
+    }
     if (foot.childElementCount) card.append(foot);
   }
   return card;
@@ -401,7 +422,13 @@ function checksPanel(name, source, signal, firstChecks = {}, appleName = name) {
       ? browserApple ?? (checkingApple ? { status: 'pending' } : workerApple) : workerApple;
     const us = data.trademarks?.us;
     slot.replaceChildren(...appChecks({ ...data, appStore }, name, pending));
-    if (us?.status === 'exact_match_found') slot.append(trademarkNotice(us, name));
+    const track = currentSearch?.controller.signal === signal && currentSearch.track;
+    if (['taken', 'exact_match_found'].some(status =>
+      status === appStore?.status || status === data.googlePlay?.status)) track?.outcome('app_taken');
+    if (us?.status === 'exact_match_found') {
+      slot.append(trademarkNotice(us, name));
+      track?.outcome('trademark');
+    }
     else if (us?.status === 'pending' || (!us && pending)) slot.append(el('p', 'trademark-pending', 'Trademark check still running.'));
     else if (us?.status === 'no_exact_match_found') slot.append(el('p', 'mark-result', 'US trademark: no exact live match found.'));
     else slot.append(el('p', 'trademark-pending', 'US trademark: couldn’t check.'));
@@ -723,6 +750,7 @@ function renderIdeas(page, sharing, input, response, signal) {
     updateIdeaCards(list, items, settled && pending && !error, checks, settled);
     const share = sharing.querySelector('a');
     if (result.shareUrl) {
+      currentSearch?.track.share(result.shareUrl);
       if (share) share.href = result.shareUrl;
       else sharing.append(link('Share results', result.shareUrl));
     } else share?.remove();
@@ -767,7 +795,10 @@ function renderPage(mode, input, response, signal) {
   heading.tabIndex = -1;
   head.append(heading);
   const sharing = el('div', 'result-sharing');
-  if (response.shareUrl) sharing.append(link('Share results', response.shareUrl));
+  if (response.shareUrl) {
+    sharing.append(link('Share results', response.shareUrl));
+    currentSearch?.track.share(response.shareUrl);
+  }
   const page = document.createDocumentFragment();
   page.append(head);
   if (taken) {
@@ -829,6 +860,24 @@ const loading = {
   personal: 'Checking domains for your name…'
 };
 
+function trackSearch(kind) {
+  recordUsage('search', 'site', kind);
+  const outcomes = new Set();
+  const links = new Set();
+  return {
+    outcome(value) {
+      if (outcomes.has(value)) return;
+      outcomes.add(value);
+      recordUsage('outcome', 'site', kind, value);
+    },
+    share(url) {
+      if (links.has(url)) return;
+      links.add(url);
+      recordUsage('share_created');
+    },
+  };
+}
+
 async function search(mode, input, status, submit) {
   if (submit.hasAttribute('aria-disabled')) return;
   cancelSearch();
@@ -840,7 +889,9 @@ async function search(mode, input, status, submit) {
     scrollToAnswer(form, 'center');
   }
   const controller = new AbortController();
-  currentSearch = { controller, status, submit };
+  const kind = mode === 'personal' ? 'own_name' : mode === 'name' && input.name.includes('.') ? 'exact_domain' : mode;
+  const track = trackSearch(kind);
+  currentSearch = { controller, status, submit, track };
   if (input.round !== 2) clearResults();
   document.getElementById('real-search').hidden = true;
   status.textContent = loading[mode];
@@ -860,6 +911,7 @@ async function search(mode, input, status, submit) {
       else if (mode === 'personal' && response.complete !== false && !response.items.length) {
         status.textContent = 'No domains found for this spelling. Try another spelling.';
       } else status.textContent = 'Couldn’t confirm any domains. Try again.';
+      track.outcome('pick_no');
       returnToField();
       return status;
     }
@@ -879,7 +931,17 @@ async function search(mode, input, status, submit) {
       heading.focus({ preventScroll: true });
       scrollToAnswer(heading);
     }
+    // An initial ideas card is already visible, even if its check settles later.
+    const picked = () => Boolean(pages.querySelector('.best-domain'));
+    const hasPick = picked();
+    if (hasPick) track.outcome('pick_yes');
     await finish?.(finishIdeas);
+    if (!controller.signal.aborted) {
+      if (!hasPick) track.outcome(picked() ? 'pick_yes' : 'pick_no');
+      if (response.complete && !response.endingsError && response.items.length &&
+          (!response.query?.exactDomain || response.items.some(item => item.domain === response.query.exactDomain)) &&
+          response.items.every(item => item.status === 'taken')) track.outcome('all_taken');
+    }
     return heading;
   } catch (error) {
     if (controller.signal.aborted) return;

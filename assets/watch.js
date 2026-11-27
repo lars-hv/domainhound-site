@@ -1,3 +1,5 @@
+import { recordUsage } from './usage.mjs';
+
 /* Domain watch form. Fields carry no name, so a native submit could never send the email anywhere. */
 (() => {
   const form = document.getElementById('watch');
@@ -78,6 +80,7 @@
     if (!domain) return showStatus('Enter a domain like brightname.com.', 'error', domainInput);
     if (!validEmail(email)) return showStatus('Enter an email like you@example.com.', 'error', emailInput);
 
+    if (!trap.value) recordUsage('watch_submitted');
     const payload = { email, domain, source: 'site', website: trap.value };
     if (nameInput?.value.trim()) payload.name = nameInput.value.trim();
     if (news?.checked) payload.news = 'yes';

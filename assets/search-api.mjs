@@ -1,18 +1,14 @@
 // All search requests and wire formats stay here.
 import { shareDomain, sharePage, shareUrlLimit } from '../r/share-format.mjs';
 
-const hosted = 'https://domainhound-mcp.domainhound.workers.dev';
-const configured = document.querySelector('meta[name="domain-hound-api"]')?.content.trim();
-const apiBase = new URL(configured || hosted);
-const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(apiBase.hostname);
-if (apiBase.username || apiBase.password || (apiBase.protocol !== 'https:' && !(loopback && apiBase.protocol === 'http:'))) {
-  throw new Error('Invalid search API origin');
-}
+import { readApiOrigin } from './api-origin.mjs';
+
+const apiOrigin = readApiOrigin();
 
 async function request(path, signal, body) {
   const post = body !== undefined;
   const timeout = AbortSignal.timeout(path === '/v1/generate' ? 90_000 : 25_000);
-  const response = await fetch(new URL(path, apiBase.origin), {
+  const response = await fetch(new URL(path, apiOrigin), {
     method: post ? 'POST' : 'GET',
     headers: post ? { 'Content-Type': 'application/json' } : undefined,
     body: post ? JSON.stringify(body) : undefined,

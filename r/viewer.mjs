@@ -1,3 +1,4 @@
+import { recordUsage } from '../assets/usage.mjs';
 import { readShareFragment } from './share-format.mjs';
 
 const receipt = document.getElementById('receipt');
@@ -116,6 +117,7 @@ copyButton.addEventListener('click', async () => {
   feedback.textContent = '';
   try {
     await navigator.clipboard.writeText(url);
+    recordUsage('copy_confirmed');
     if (url === location.href) feedback.textContent = 'Link copied.';
   } catch {
     if (url === location.href) feedback.textContent = 'Copy the full link from your address bar.';
