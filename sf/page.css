@@ -78,3 +78,35 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
   .cards article + article { border-top: 0; border-left: 1px solid var(--forest); }
 }
 #batch-select { padding: .5rem; font: 800 1rem Mulish, sans-serif; border: 1px solid var(--pine); border-radius: 0; color: var(--pine); background: var(--mint); }
+
+.funding-jump { display: inline-block; margin-top: .8rem; font-size: 1rem; font-weight: 800; }
+.funding-band { background: var(--paper); padding-block: clamp(2.5rem, 5vw, 4.8rem); }
+.funding-band .eyebrow { color: var(--forest); margin-bottom: .6rem; }
+.funding-band h2 { text-wrap: balance; }
+.funding-band .deck { max-width: 62ch; margin-bottom: .25rem; }
+.funding-note { font-size: 1rem; }
+.funding-tools { display: flex; align-items: center; gap: .7rem 1.2rem; flex-wrap: wrap; margin-top: 1.3rem; }
+#funding-count { font-size: .88rem; font-weight: 750; }
+#funding-more, .funding-picker select { min-height: 42px; background: var(--mint); color: var(--pine); border: 1px solid var(--forest); border-radius: .25rem; padding: .45rem .85rem; font: 800 .95rem Mulish, sans-serif; }
+#company-table { width: 100%; margin: .8rem 0 0; }
+#company-table :is(th, td) { text-align: left; padding: .7rem .55rem; }
+#company-table thead { background: var(--forest); color: var(--paper); }
+#company-table thead button { color: inherit; background: none; border: none; padding: .3rem 0; font: inherit; font-weight: 850; }
+#company-table [aria-sort] button::after { content: ''; display: inline-block; margin-left: .4em; vertical-align: middle; border-inline: .32em solid transparent; border-top: .42em solid; }
+#company-table [aria-sort="ascending"] button::after { transform: rotate(180deg); }
+#company-table .site-domain { font: 500 .88rem var(--mono); overflow-wrap: anywhere; }
+#company-table .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
+#company-table .amount a { font-weight: 850; text-underline-offset: .18em; }
+.funding-picker { display: none; }
+@media (max-width: 800px) {
+  .funding-picker:not([hidden]) { display: flex; align-items: center; gap: .65rem; flex-basis: 100%; font-size: .95rem; font-weight: 800; }
+  .funding-picker select { min-width: 0; max-width: 100%; }
+  #company-table, #company-table tbody { display: block; }
+  #company-table thead { display: none; }
+  #company-table tr { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem .65rem; padding: 1.05rem; background: var(--mist); border-top: 2px solid var(--forest); margin-top: .75rem; }
+  #company-table :is(th, td) { display: block; min-width: 0; padding: 0; border: none; overflow-wrap: anywhere; }
+  #company-table th, #company-table .site-domain { grid-column: 1 / -1; }
+  #company-table th { font-size: 1.25rem; line-height: 1.2; }
+  #company-table .site-domain { margin-top: -.5rem; }
+  #company-table td:not(.site-domain)::before { content: attr(data-label); display: block; margin-bottom: .1rem; font: 650 .78rem Mulish, sans-serif; color: var(--forest); }
+}

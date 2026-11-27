@@ -1,5 +1,6 @@
 """Refresh the Bay Area YC website aggregates. See README for inputs and usage."""
 import argparse
+import csv
 import hashlib
 import io
 import json
@@ -15,6 +16,8 @@ from urllib.parse import urlsplit
 from urllib.request import urlopen
 
 import tldextract
+
+from edgar import funding
 
 ROOT = Path(__file__).resolve().parents[2]
 FEED = "https://yc-oss.github.io/api"
@@ -61,7 +64,7 @@ def domain_parts(raw, extractor):
         return None
     result = extractor(host)
     if result.domain and result.suffix:
-        return result.domain, "." + result.suffix
+        return host.removeprefix("www."), result.domain, "." + result.suffix
     return None
 
 
@@ -100,6 +103,7 @@ def shares(counts):
 
 
 def aggregate(rows, as_of, extractor, words):
+    companies = []
     batches = defaultdict(Counter)
     shapes, prefixes = Counter(), Counter()
     lengths, matched_com, mismatched_com, hyphens, digits = [], 0, 0, 0, 0
@@ -119,11 +123,14 @@ def aggregate(rows, as_of, extractor, words):
         if website is None:
             missing += 1
             continue
-        label, ending = website
+        host, label, ending = website
         counts[ending] += 1
         shapes[name_shape(row["name"], words)] += 1
         brand = re.sub(r"[^a-z0-9]", "", row["name"].lower())
         stem = label.replace("-", "")
+        companies.append({"id": row["id"], "company": row["name"], "domain": host,
+                          "ending": ending, "batch": row["batch"],
+                          "has_com": True if ending == ".com" and label == brand else None})
         if ending == ".com":
             if brand == stem:
                 matched_com += 1
@@ -138,7 +145,7 @@ def aggregate(rows, as_of, extractor, words):
     total = sum(batches.values(), Counter())
     if not lengths or len(seen) != len(lengths) + missing:
         raise ValueError("Unexpected cohort coverage")
-    return {
+    return companies, {
         "eligible_companies": len(seen), "excluded_websites": missing, "websites": len(lengths),
         "endings": shares(total),
         "batches": [{"batch": f"{SEASONS[s]} {y}", "websites": sum(c.values()), "endings": shares(c)}
@@ -150,6 +157,21 @@ def aggregate(rows, as_of, extractor, words):
                   "matching_com": matched_com, "different_com": mismatched_com,
                   "exact_prefixes": {p: prefixes[p] for p in ("get", "try", "hq")}},
     }
+
+
+def apply_com_redirects(companies, as_of):
+    with Path(__file__).with_name("com-redirects.csv").open() as source:
+        evidence = {int(item["yc_id"]): item for item in csv.DictReader(source)}
+    for row in companies:
+        observed = evidence.get(row["id"])
+        if not observed or observed["checked"] > as_of:
+            continue
+        brand_com = re.sub(r"[^a-z0-9]", "", row["company"].lower()) + ".com"
+        pair = {row["domain"], brand_com}
+        if (row["domain"] == observed["listed_domain"] and brand_com == observed["brand_com"]
+                and {observed["from_host"], observed["to_host"]} == pair):
+            row["has_com"] = True
+            row["com_redirect"] = {key: observed[key] for key in ("from_host", "to_host", "checked")}
 
 
 def fetch(url):
@@ -177,17 +199,21 @@ def main():
         path.write_bytes(psl)
         extractor = tldextract.TLDExtract(suffix_list_urls=(path.as_uri(),), cache_dir=None,
                                             fallback_to_snapshot=False, include_psl_private_domains=False)
-        data = aggregate(rows, as_of, extractor, word_list(fetch(WORDNET)))
+        companies, data = aggregate(rows, as_of, extractor, word_list(fetch(WORDNET)))
     data["source"] = {"directory": FEED + "/companies/all.json", "snapshot": base + "/companies/all.json",
                       "updated": meta["last_updated"], "sha256": hashlib.sha256(raw).hexdigest(),
                       "psl": PSL, "psl_version": re.search(rb"// VERSION: (.+)", psl)[1].decode(),
                       "wordnet": WORDNET}
-    # The renderer and share card both read this file. Raw company rows never reach the site.
+    apply_com_redirects(companies, as_of.isoformat())
+    public = funding(companies, {row["id"]: row for row in rows}, as_of.isoformat())
     with TemporaryDirectory(dir=ROOT) as staging:
         stage = Path(staging)
+        (stage / "companies.json").write_text(json.dumps(public, ensure_ascii=False, indent=2) + "\n")
         (stage / "endings.json").write_text(json.dumps(data, indent=2) + "\n")
         subprocess.run(["node", str(ROOT / "scripts/sf/render.cjs"), staging], check=True)
-        for file, directory in (("endings.json", "data/sf"), ("index.html", "sf"), ("share.png", "sf")):
+        outputs = (("companies.json", "data/sf"), ("endings.json", "data/sf"),
+                   ("index.html", "sf"), ("share.png", "sf"))
+        for file, directory in outputs:
             (stage / file).replace(ROOT / directory / file)
 
 

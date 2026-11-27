@@ -4,6 +4,7 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 const { webkit } = require('playwright-core');
 const data = require('../data/sf/endings.json');
+const { companies } = require('../data/sf/companies.json');
 
 test('SF counts reconcile across cohorts, endings, and brand shapes', () => {
   assert.equal(data.websites + data.excluded_websites, data.eligible_companies);
@@ -46,6 +47,21 @@ test('SF chart and name check work without publishing a search to the page URL o
       return route.fulfill({ json: { domains: [{ domain: 'example.com', status: 'taken' }] } });
     });
     await page.goto(site + '/sf/');
+    const body = page.locator('#company-table tbody tr');
+    const more = page.getByRole('button', { name: 'Show all', exact: true });
+    await more.waitFor();
+    assert.equal(await body.count(), 50);
+    const funded = companies.filter(row => row.funding);
+    const highest = Math.max(...funded.map(row => row.funding.sold));
+    assert.equal(await body.first().locator('.amount').innerText(), '$' + highest.toLocaleString('en-US'));
+    await more.click();
+    assert.equal(await body.count(), data.websites);
+    await page.locator('#funding-sort').selectOption('funding:asc');
+    const lowest = Math.min(...funded.map(row => row.funding.sold));
+    assert.equal(await body.first().locator('.amount').innerText(), '$' + lowest.toLocaleString('en-US'));
+    if (funded.length < companies.length) assert.equal(await body.last().locator('.amount').innerText(), 'No match');
+    await page.getByRole('button', { name: 'Show 50' }).click();
+    assert.equal(await body.count(), 50);
     const first = data.batches[0];
     await page.getByRole('button', { name: new RegExp('^' + first.batch) }).click();
     assert.equal(await page.locator('#batch-select').inputValue(), first.batch);
@@ -66,5 +82,40 @@ test('SF chart and name check work without publishing a search to the page URL o
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();
+  }
+});
+
+test('company table reconciles to the chart and to distinct SEC offerings', () => {
+  assert.equal(new Set(companies.map(row => row.id)).size, data.websites);
+  const counts = {};
+  const issuers = new Set();
+  for (const row of companies) {
+    counts[row.batch] ??= {};
+    counts[row.batch][row.ending] = (counts[row.batch][row.ending] || 0) + 1;
+    const brandCom = row.company.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com';
+    if (row.has_com) {
+      if (row.com_redirect) {
+        assert.deepEqual(new Set([row.com_redirect.from_host, row.com_redirect.to_host]), new Set([row.domain, brandCom]));
+      } else {
+        assert.ok(row.domain === brandCom || row.domain.endsWith('.' + brandCom));
+      }
+    } else {
+      assert.equal(row.has_com, null);
+    }
+    if (!row.funding) continue;
+    const { cik, filings, sold, latest_filing } = row.funding;
+    assert.match(cik, /^\d{10}$/);
+    assert.ok(!issuers.has(cik));
+    issuers.add(cik);
+    assert.equal(latest_filing, filings.map(f => f.date).sort().at(-1));
+    const latest = new Map();
+    for (const f of filings) {
+      assert.match(f.url, /^https:\/\/www\.sec\.gov\/Archives\/edgar\/data\//);
+      latest.set(f.file_number, f.sold);
+    }
+    assert.equal(sold, [...latest.values()].reduce((a, b) => a + b, 0));
+  }
+  for (const batch of data.batches) {
+    assert.deepEqual(counts[batch.batch], Object.fromEntries(Object.entries(batch.endings).map(([k, v]) => [k, v.count])));
   }
 });

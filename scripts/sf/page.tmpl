@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="/assets/home.css">
   <link rel="stylesheet" href="/sf/page.css">
   <script type="module" src="/sf/page.mjs"></script>
+  <script type="module" src="/sf/funding-table.mjs"></script>
 </head>
 <body>
 <header><div class="frame mast">
@@ -33,7 +34,8 @@
   <section class="intro"><div class="frame spread">
     <div><p class="eyebrow">San Francisco Bay Area &nbsp;/&nbsp; {{years}}</p>
     <h1>What SF startups<br>launch on.</h1>
-    <p class="lede">We counted the domain endings on {{total}} Bay Area startup websites in Y Combinator’s public directory.</p></div>
+    <p class="lede">We counted the domain endings on {{total}} Bay Area startup websites in Y Combinator’s public directory.</p>
+    <a class="funding-jump" href="#funding">See funding by company</a></div>
     <div class="ticket"><div class="ticket-top"><span>Website ending</span><b>.ai</b></div>
       <strong>{{ai}}<small>%</small></strong><p>of the websites end in <b>.ai</b></p>
       <div class="ticket-foot">{{aiCount}} of {{total}} sites <span>{{month}}</span></div>
@@ -76,6 +78,24 @@
     <noscript><p>Turn on JavaScript for a live domain check.</p></noscript>
     <p id="check-status" role="status"></p><ul id="matches"></ul>
   </div></section>
+  <section id="funding" class="funding-band"><div class="frame">
+    <p class="eyebrow">Funding by company</p>
+    <h2>{{fundingHeadline}}</h2>
+    <p class="deck">We ranked the {{matched}} companies we could match to SEC filings by the amount they reported selling.</p>
+    <details class="funding-note"><summary>What the numbers mean</summary>
+      <p>Raised (Form D) adds up amounts sold in offerings reported to the SEC through {{day}}. An amendment replaces the earlier amount for that offering. Some rounds are never filed. These figures do not measure company value.</p>
+      <p>“No match” means we couldn’t confirm a filing under the company’s exact legal name. For the .com check, we remove spaces and punctuation from the brand name. “Yes” means YC lists that .com or we saw it redirect to or from the listed website. Other .com ownership is unverified. Websites can change after launch.</p>
+      <a href="/data/sf/companies.json" download>Download companies and filing sources (JSON)</a>
+    </details>
+    <div class="funding-tools">
+      <label class="funding-picker" hidden>Sort by <select id="funding-sort"></select></label>
+      <p id="funding-count" role="status">{{visible}} of {{total}} companies</p>
+      <button id="funding-more" aria-controls="company-table" aria-expanded="false" hidden>Show all</button>
+    </div>
+    <table id="company-table" aria-label="Bay Area YC companies and Form D funding">
+      <thead><tr>{{fundingHeaders}}</tr></thead><tbody>{{companyRows}}</tbody>
+    </table>
+  </div></section>
   <!-- Future input is weekly ending/count aggregates only, with at least 20 per published bucket. -->
   <section hidden id="weekly"><h2>Endings founders searched this week</h2></section>
   <section class="method"><div class="frame">
@@ -85,7 +105,7 @@
       <p>We matched any listed California location to a Bay Area city or town, plus Stanford. Companies with multiple locations count once. Remote-only and future batches are excluded. This sample covers publicly launched YC companies across all statuses.</p>
       <p>We used registry endings from the <a href="https://publicsuffix.org/list/">Public Suffix List</a> so endings like .co.uk stay together. Lengths count the label immediately before that ending. For brand matches and prefixes, we compare lowercase letters and digits and ignore punctuation and spaces. Legal endings such as Inc. stay in the listed brand.</p>
       <p>For name shapes, <a href="https://www.nltk.org/howto/wordnet.html">WordNet</a> supplies English words. Compounds have dictionary parts separated by spaces, hyphens, capitalization or a split into two words of at least three letters each. Unmatched single alphabetic tokens are possibly made-up. Other spellings stay unclassified.</p>
-      <p>Our source is <a href="https://github.com/yc-oss/api">YC OSS</a>, an unofficial feed of the <a href="https://www.ycombinator.com/companies">YC directory</a>. YC’s <a href="https://www.ycombinator.com/legal#tou">terms of use</a> restrict scraping and commercial reuse of site content. The feed does not grant a separate data license. Domain Hound publishes aggregate counts and is independent of YC.</p>
+      <p>Our source is <a href="https://github.com/yc-oss/api">YC OSS</a>, an unofficial feed of the <a href="https://www.ycombinator.com/companies">YC directory</a>. YC’s <a href="https://www.ycombinator.com/legal#tou">terms of use</a> restrict scraping and commercial reuse of site content. The feed does not grant a separate data license. Domain Hound is independent of YC.</p>
     </details>
     <div class="foot-links"><a href="/data/sf/endings.json" download>Download the counts (JSON)</a><button id="share" hidden>Share this page</button><span id="share-status" role="status"></span></div>
   </div></section>

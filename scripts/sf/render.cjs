@@ -7,6 +7,15 @@ const stage = process.argv[2];
 const output = stage || path.join(root, 'sf');
 const input = path.join(stage || path.join(root, 'data/sf'), 'endings.json');
 const data = JSON.parse(fs.readFileSync(input));
+const fundingTable = require('../../sf/funding.mjs');
+const { companies, as_of: fundingDate } = JSON.parse(fs.readFileSync(path.join(path.dirname(input), 'companies.json')));
+if (companies.length !== data.websites || fundingDate !== data.source.updated.slice(0, 10)) {
+  throw new Error('Funding and chart snapshots differ');
+}
+const ranked = fundingTable.sorted(companies, 'funding', 'desc');
+const matched = ranked.filter(row => row.funding);
+const top = matched.slice(0, 20);
+const com = top.filter(row => row.ending === '.com').length;
 const { batches, facts, endings } = data;
 const first = batches[0];
 const latest = batches.at(-1);
@@ -34,6 +43,11 @@ function tableRows(entries) {
 }
 
 const values = {
+  fundingHeadline: top.length ? `${com} of the top ${top.length} list a .com domain` : 'Funding by company',
+  matched: count(matched.length), visible: count(Math.min(fundingTable.pageSize, ranked.length)),
+  companyRows: fundingTable.tableRows(ranked.slice(0, fundingTable.pageSize)),
+  fundingHeaders: Object.entries(fundingTable.columns).map(([key, label]) =>
+    `<th scope="col" data-key="${key}"${key === 'funding' ? ' aria-sort="descending"' : ''}><button type="button" disabled>${label}</button></th>`).join(''),
   total: count(data.websites), ai: share(data, '.ai'), aiCount: count(endings['.ai']?.count || 0),
   years: `2023 to ${latest.batch.split(' ')[1]}`, month: formatDate({ month: 'short', year: 'numeric' }),
   day: formatDate({ month: 'long', day: 'numeric', year: 'numeric' }),
