@@ -1,0 +1,195 @@
+{
+  "checked": "2026-11-27",
+  "source": "https://domainhound-mcp.domainhound.workers.dev/v1/check",
+  "currency": "USD",
+  "basis": "Standard list prices before tax. Lowest total payments due over three years at one shop.",
+  "availableNames": [
+    "cedarthimblezavo",
+    "pebbleorbitnivo",
+    "saffronquillmavo"
+  ],
+  "offers": {
+    ".com": [
+      {
+        "shop": "Spaceship",
+        "firstYearUsd": 9.68,
+        "renewalUsd": 10.88,
+        "minimumYears": 1,
+        "firstPaymentUsd": 9.68,
+        "renewalPaymentUsd": 10.88,
+        "threeYearUsd": 31.44,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.spaceship.com/domains/gtld/com/"
+      },
+      {
+        "shop": "Cloudflare",
+        "firstYearUsd": 11.17,
+        "renewalUsd": 11.17,
+        "minimumYears": 1,
+        "firstPaymentUsd": 11.17,
+        "renewalPaymentUsd": 11.17,
+        "threeYearUsd": 33.51,
+        "checkedAt": "2026-11-26",
+        "source": "https://pricing.registrar.cloudflare.com/"
+      },
+      {
+        "shop": "Dynadot",
+        "firstYearUsd": 11.62,
+        "renewalUsd": 11.62,
+        "minimumYears": 1,
+        "firstPaymentUsd": 11.62,
+        "renewalPaymentUsd": 11.62,
+        "threeYearUsd": 34.86,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.dynadot.com/domain/prices?currency=usd"
+      },
+      {
+        "shop": "Porkbun",
+        "firstYearUsd": 11.81,
+        "renewalUsd": 11.81,
+        "minimumYears": 1,
+        "firstPaymentUsd": 11.81,
+        "renewalPaymentUsd": 11.81,
+        "threeYearUsd": 35.43,
+        "checkedAt": "2026-11-26",
+        "source": "https://porkbun.com/products/domains"
+      },
+      {
+        "shop": "Namecheap",
+        "firstYearUsd": 12.28,
+        "renewalUsd": 20.18,
+        "minimumYears": 1,
+        "firstPaymentUsd": 12.28,
+        "renewalPaymentUsd": 20.18,
+        "threeYearUsd": 52.64,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.namecheap.com/domains/full-tld-list/"
+      },
+      {
+        "shop": "Gandi",
+        "firstYearUsd": 11.71,
+        "renewalUsd": 38.38,
+        "minimumYears": 1,
+        "firstPaymentUsd": 11.71,
+        "renewalPaymentUsd": 38.38,
+        "threeYearUsd": 88.47,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.gandi.net/en/domain/tld/com?currency=USD"
+      }
+    ],
+    ".ai": [
+      {
+        "shop": "Spaceship",
+        "firstYearUsd": 79.98,
+        "renewalUsd": 79.98,
+        "minimumYears": 2,
+        "firstPaymentUsd": 159.96,
+        "renewalPaymentUsd": 159.96,
+        "threeYearUsd": 319.92,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.spaceship.com/domains/cctld/ai/"
+      },
+      {
+        "shop": "Cloudflare",
+        "firstYearUsd": 80,
+        "renewalUsd": 80,
+        "minimumYears": 2,
+        "firstPaymentUsd": 160,
+        "renewalPaymentUsd": 160,
+        "threeYearUsd": 320,
+        "checkedAt": "2026-11-26",
+        "source": "https://pricing.registrar.cloudflare.com/"
+      },
+      {
+        "shop": "Porkbun",
+        "firstYearUsd": 82.7,
+        "renewalUsd": 82.7,
+        "minimumYears": 2,
+        "firstPaymentUsd": 165.4,
+        "renewalPaymentUsd": 165.4,
+        "threeYearUsd": 330.8,
+        "checkedAt": "2026-11-26",
+        "source": "https://porkbun.com/products/domains"
+      },
+      {
+        "shop": "Dynadot",
+        "firstYearUsd": 85.6,
+        "renewalUsd": 85.6,
+        "minimumYears": 2,
+        "firstPaymentUsd": 171.2,
+        "renewalPaymentUsd": 171.2,
+        "threeYearUsd": 342.4,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.dynadot.com/domain/prices?currency=usd"
+      },
+      {
+        "shop": "Namecheap",
+        "firstYearUsd": 89.98,
+        "renewalUsd": 114.98,
+        "minimumYears": 2,
+        "firstPaymentUsd": 179.96,
+        "renewalPaymentUsd": 229.96,
+        "threeYearUsd": 409.92,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.namecheap.com/domains/full-tld-list/"
+      },
+      {
+        "shop": "Gandi",
+        "firstYearUsd": 112.06,
+        "renewalUsd": 179.76,
+        "minimumYears": 2,
+        "firstPaymentUsd": 224.12,
+        "renewalPaymentUsd": 359.52,
+        "threeYearUsd": 583.64,
+        "checkedAt": "2026-11-26",
+        "source": "https://www.gandi.net/en/domain/tld/ai?currency=USD"
+      }
+    ],
+    ".si": [
+      {
+        "shop": "Dynadot",
+        "firstYearUsd": 11.29,
+        "renewalUsd": 11.29,
+        "minimumYears": 1,
+        "firstPaymentUsd": 11.29,
+        "renewalPaymentUsd": 11.29,
+        "threeYearUsd": 33.87,
+        "checkedAt": "2026-11-25",
+        "source": "https://www.dynadot.com/domain/prices?currency=usd"
+      },
+      {
+        "shop": "Spaceship",
+        "firstYearUsd": 10.98,
+        "renewalUsd": 11.98,
+        "minimumYears": 1,
+        "firstPaymentUsd": 10.98,
+        "renewalPaymentUsd": 11.98,
+        "threeYearUsd": 34.94,
+        "checkedAt": "2026-11-24",
+        "source": "https://www.spaceship.com/domain-search/pricing/"
+      },
+      {
+        "shop": "Porkbun",
+        "firstYearUsd": 19.95,
+        "renewalUsd": 17.13,
+        "minimumYears": 1,
+        "firstPaymentUsd": 19.95,
+        "renewalPaymentUsd": 17.13,
+        "threeYearUsd": 54.21,
+        "checkedAt": "2026-11-25",
+        "source": "https://porkbun.com/products/domains"
+      },
+      {
+        "shop": "Gandi",
+        "firstYearUsd": 126,
+        "renewalUsd": 215.98,
+        "minimumYears": 1,
+        "firstPaymentUsd": 126,
+        "renewalPaymentUsd": 215.98,
+        "threeYearUsd": 557.96,
+        "checkedAt": "2026-11-25",
+        "source": "https://www.gandi.net/en-US/domain/tld"
+      }
+    ]
+  }
+}

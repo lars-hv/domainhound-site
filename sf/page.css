@@ -43,7 +43,8 @@ h2 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.025em; font-weight: 
 .batch-readout span { font-size: .96rem; }
 summary { cursor: pointer; padding-block: .7rem; font-weight: 850; width: fit-content; }
 .chart-note { max-width: 67ch; margin-top: 1rem; }
-.ai-trend { max-width: 42rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--forest); }
+.ai-trend { max-width: 42rem; }
+.trend-band { padding-bottom: 0; }
 .ai-trend h2 { font-size: clamp(1.65rem, 3vw, 2.45rem); }
 .ai-trend figure { margin: 1.15rem 0 0; --batch: 6.1rem; --percent: 3rem; --size: 4.2rem; }
 .trend-head { display: grid; grid-template-columns: var(--batch) 1fr auto; border-bottom: 2px solid var(--forest); padding-bottom: .35rem; font: 600 .76rem/1.35 var(--mono); }
@@ -66,15 +67,16 @@ table { border-collapse: collapse; width: min(100%, 32rem); margin: .8rem 0; fon
 th, td, caption { text-align: left; padding: .36rem .3rem; border-bottom: 1px solid var(--forest); }
 th:not(:first-child), td:not(:first-child) { text-align: right; }
 caption { font-weight: 850; }
-#check-form { margin-top: 1.35rem; }
-#check-form label { display: block; font-size: .95rem; margin-bottom: .4rem; }
+.name-check { margin-top: 1.35rem; }
+.name-check label { display: block; font-size: .95rem; margin-bottom: .4rem; }
 .field { display: flex; max-width: 34rem; }
 .field input { min-width: 0; width: 100%; border: 0; border-radius: 0; padding: .65em; color: var(--pine); background: var(--paper); }
+.field input::placeholder { color: var(--forest); opacity: 1; }
 .field button { flex-shrink: 0; padding: .7em 1em; border: 0; border-left: 2px solid var(--pine); border-radius: 0; background: var(--leaf); color: var(--pine); font-weight: 900; }
-#check-status:not(:empty), #matches:not(:empty) { margin-top: 1rem; }
-#matches { list-style: none; padding: 0; max-width: 34rem; }
-#matches li { display: flex; justify-content: space-between; gap: .75rem; border-top: 1px solid var(--leaf); padding: .5em 0; }
-#matches b { overflow-wrap: anywhere; }
+.check-status:not(:empty), .matches:not(:empty) { margin-top: 1rem; }
+.matches { list-style: none; padding: 0; max-width: 34rem; }
+.matches li { display: flex; justify-content: space-between; gap: .75rem; border-top: 1px solid var(--leaf); padding: .5em 0; }
+.matches b { overflow-wrap: anywhere; }
 .method h2 { font-size: clamp(1.65rem, 3vw, 2.45rem); }
 .method p, details p { max-width: 66ch; margin-block: .7rem; }
 .foot-links { justify-content: flex-start; flex-wrap: wrap; border-top: 1px solid var(--pine); padding-top: 1rem; margin-top: .7rem; }
@@ -122,3 +124,12 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
   #company-table .site-domain { margin-top: -.5rem; }
   #company-table td:not(.site-domain)::before { content: attr(data-label); display: block; margin-bottom: .1rem; font: 650 .78rem Mulish, sans-serif; color: var(--forest); }
 }
+
+.pick-cards h3 { font: 900 2.65rem/1.2 Mulish, sans-serif; letter-spacing: -.03em; }
+.pick-cards dl { margin: 1rem 0 .4rem; font-variant-numeric: tabular-nums; }
+.pick-cards dl div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--forest); padding-block: .35rem; }
+.pick-cards dd { margin: 0; font-weight: 900; }
+.pick-cards .shop, .price-date { font: 600 .84rem/1.55 var(--mono); }
+.pick-cards .shop { margin-bottom: .8rem; }
+.pick-rule { margin-top: 1.25rem; max-width: 64ch; }
+.name-check label span { color: var(--mint); }

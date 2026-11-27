@@ -36,49 +36,54 @@ async function enableChart() {
 }
 enableChart().catch(() => {}); // The static chart, latest batch and download remain readable offline.
 
-const form = document.getElementById('check-form');
-const field = document.getElementById('candidate');
-const status = document.getElementById('check-status');
-const matches = document.getElementById('matches');
-let current;
-function resetSearch() {
-  current?.abort();
-  matches.replaceChildren();
-  status.textContent = '';
-  field.setCustomValidity('');
+async function lookup(name, signal) {
+  const { runSearch } = await import('/assets/search-api.mjs');
+  signal.throwIfAborted();
+  return runSearch('name', { name, extraEnding: 'si' }, signal);
 }
-field.addEventListener('input', resetSearch);
-form.addEventListener('submit', async event => {
-  event.preventDefault();
-  resetSearch();
-  const name = field.value.trim();
-  if (!name) {
-    field.setCustomValidity('Enter a name or domain.');
-    field.reportValidity();
-    return;
+
+for (const form of document.querySelectorAll('.name-check')) {
+  const field = form.querySelector('input');
+  const status = form.querySelector('.check-status');
+  const matches = form.querySelector('.matches');
+  let current;
+  function resetSearch() {
+    current?.abort();
+    matches.replaceChildren();
+    status.textContent = '';
+    field.setCustomValidity('');
   }
-  const request = current = new AbortController();
-  status.textContent = 'Checking endings…';
-  try {
-    const { runSearch } = await import('/assets/search-api.mjs');
-    if (request.signal.aborted) return;
-    const result = await runSearch('name', { name }, request.signal);
-    if (request.signal.aborted) return;
-    const labels = { taken: 'Taken', available: 'Available', reserved: 'Reserved', unknown: 'Unconfirmed' };
-    for (const item of result.items) {
-      const li = document.createElement('li');
-      const domain = document.createElement('b');
-      domain.textContent = item.domain;
-      li.append(domain, labels[item.status]);
-      matches.append(li);
+  field.addEventListener('input', resetSearch);
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    resetSearch();
+    const name = field.value.trim();
+    if (!name) {
+      field.setCustomValidity('Enter a name or domain.');
+      field.reportValidity();
+      return;
     }
-    status.textContent = result.items.length ? 'Domain check results' : 'No endings confirmed. Try another name.';
-  } catch (error) {
-    if (!request.signal.aborted) status.textContent = error.status === 429
-      ? 'Too many checks. Try again in a few minutes.' : 'Couldn’t check that name. Please try again.';
-  }
-});
-form.hidden = false;
+    const request = current = new AbortController();
+    status.textContent = 'Checking endings…';
+    try {
+      const result = await lookup(name, request.signal);
+      if (request.signal.aborted) return;
+      const labels = { taken: 'Taken', available: 'Available', reserved: 'Reserved', unknown: 'Unconfirmed' };
+      for (const item of result.items) {
+        const li = document.createElement('li');
+        const domain = document.createElement('b');
+        domain.textContent = item.domain;
+        li.append(domain, labels[item.status]);
+        matches.append(li);
+      }
+      status.textContent = result.items.length ? 'Domain check results' : 'No endings confirmed. Try another name.';
+    } catch (error) {
+      if (!request.signal.aborted) status.textContent = error.status === 429
+        ? 'Too many checks. Try again in a few minutes.' : 'Couldn’t check that name. Please try again.';
+    }
+  });
+  form.hidden = false;
+}
 
 const share = document.getElementById('share');
 if (navigator.share || navigator.clipboard?.writeText) {
@@ -87,7 +92,7 @@ if (navigator.share || navigator.clipboard?.writeText) {
     const url = new URL('/sf/', location.origin).href;
     const message = document.getElementById('share-status');
     try {
-      if (navigator.share) await navigator.share({ title: 'What SF startups launch on', url });
+      if (navigator.share) await navigator.share({ title: document.title, url });
       else {
         await navigator.clipboard.writeText(url);
         message.textContent = 'Link copied.';
