@@ -100,6 +100,7 @@ async function openPage(t, handler, { width = 390, javaScriptEnabled = true, red
     javaScriptEnabled, reducedMotion, serviceWorkers: 'block'
   });
   const calls = [];
+  const beacons = [];
   const unexpected = [];
   const page = await context.newPage();
   page.setDefaultTimeout(3500);
@@ -111,6 +112,12 @@ async function openPage(t, handler, { width = 390, javaScriptEnabled = true, red
   await context.route('**/*', async route => {
     const request = route.request();
     const url = new URL(request.url());
+    if ([api, 'https://domainhound-mcp.domainhound.workers.dev'].includes(url.origin) && url.pathname === '/v1/event') {
+      assert.equal(request.method(), 'POST');
+      assert.equal(url.search, '');
+      beacons.push(request.postDataJSON());
+      return route.fulfill({ status: 204 });
+    }
     if (url.origin === api) {
       const body = request.postDataJSON();
       const call = { method: request.method(), path: url.pathname, query: url.searchParams, body };
@@ -136,7 +143,7 @@ async function openPage(t, handler, { width = 390, javaScriptEnabled = true, red
   });
   await page.goto(site);
   assert.equal(calls.length, 0);
-  return { page, calls };
+  return { page, calls, beacons };
 }
 
 // Supply the per-name checks for tests focused on shortlist ranking and steering.
@@ -401,6 +408,38 @@ test('rate limited and unavailable searches can be retried', async t => {
   assert.equal(responses.length, 0);
 });
 
+function captureBeacon(page, event, values) {
+  return page.waitForRequest(request => {
+    if (new URL(request.url()).pathname !== '/v1/event') return false;
+    const data = request.postDataJSON();
+    return data.event === event && JSON.stringify(data.values) === JSON.stringify(values);
+  });
+}
+
+test('search results send only categories for impressions, shops, and guides', async t => {
+  const response = checkReply();
+  response.domains[0].prices.push(price('mapfern.com', { shop: 'Namecheap', buyUrl: 'https://www.namecheap.com/domains/' }));
+  response.appStore = { status: 'taken', matches: [] };
+  response.trademarks = { us: { status: 'exact_match_found', marks: [] } };
+  const { page, beacons } = await openPage(t, () => ({ json: response }));
+  const results = [
+    ['search', ['site', 'name']], ['share_created', []], ['outcome', ['site', 'name', 'pick_yes']],
+    ['outcome', ['site', 'name', 'app_taken']], ['outcome', ['site', 'name', 'trademark']],
+  ];
+  await Promise.all([...results.map(([event, values]) => captureBeacon(page, event, values)), search(page, 'name', 'Mapfern')]);
+
+  const more = page.getByRole('button', { name: '+1 more shop' });
+  await Promise.all([captureBeacon(page, 'more_shops', []), more.click()]);
+  await page.getByRole('button', { name: 'Show fewer shops' }).click();
+  // Leave the synthetic registrar link in place without navigating outside the test.
+  await page.evaluate(() => document.addEventListener('click', event => event.preventDefault(), { once: true }));
+  await Promise.all([captureBeacon(page, 'buy', ['gandi', 'com']), page.getByRole('link', { name: /Buy mapfern.com at Gandi/ }).click()]);
+  await Promise.all([captureBeacon(page, 'guide_opened', []), page.goto(site + '/guides/domain-renewal-prices/')]);
+  assert.deepEqual(beacons.filter(row => row.event !== 'outcome').map(row => row.event).sort(),
+    ['buy', 'guide_opened', 'more_shops', 'search', 'share_created']);
+  assert.doesNotMatch(JSON.stringify(beacons), /mapfern|https:/i);
+});
+
 test('search has a readable fallback when scripts are off', async t => {
   const { page } = await openPage(t, () => assert.fail('Unexpected request'), { javaScriptEnabled: false });
   assert.match(await page.locator('#search').innerText(), /Turn on JavaScript to search/i);
@@ -415,7 +454,7 @@ test('search has a readable fallback when scripts are off', async t => {
 
 for (const width of [390, 1440]) {
   test('agent setup buttons, clipboard and terms at ' + width + 'px', async t => {
-    const { page } = await openPage(t, () => assert.fail('Unexpected search'), { width });
+    const { page, beacons } = await openPage(t, () => assert.fail('Unexpected search'), { width });
     await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
       value: { writeText(text) { window.copiedSetup = text; } }
     }));
@@ -431,7 +470,10 @@ for (const width of [390, 1440]) {
       await page.evaluate(() => { window.copiedSetup = 'untouched'; });
       const button = setup.getByRole('button', { name: client, exact: true });
       await button.focus();
+      const key = (await button.getAttribute('data-client')).replaceAll('-', '_');
+      const install = captureBeacon(page, 'install', [key]);
       await button.press('Enter');
+      await install;
       assert.equal(await button.getAttribute('aria-pressed'), 'true');
       const panel = setup.locator('[data-for-client]:visible');
       const text = await panel.innerText();
@@ -449,12 +491,15 @@ for (const width of [390, 1440]) {
         const copy = panel.getByRole('button', { name: 'Copy URL' });
         const eligibility = panel.getByText(/Business/);
         assert.ok((await eligibility.boundingBox()).y < (await copy.boundingBox()).y);
-        await copy.click();
+        await Promise.all([captureBeacon(page, 'copy_confirmed', []), copy.click()]);
       }
       assert.equal(await page.evaluate(() => window.copiedSetup), expected ?? 'untouched');
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       if (['Codex app', 'ChatGPT'].includes(client)) await screenshot(page, client.toLowerCase().replace(' ', '-') + '-' + width, setup);
     }
+    assert.deepEqual(beacons.filter(row => row.event === 'install').map(row => row.values[0]),
+      ['claude', 'claude_code', 'codex', 'codex_app', 'chatgpt']);
+    assert.equal(beacons.filter(row => row.event === 'copy_confirmed').length, 4);
     await page.locator('footer').getByRole('link', { name: 'Terms', exact: true }).click();
     await page.getByRole('heading', { name: 'Terms', exact: true }).waitFor();
     await page.getByText('Last updated 26 November 2026').waitFor();

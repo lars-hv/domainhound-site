@@ -1,7 +1,10 @@
+import { recordUsage } from './usage.mjs';
+
 const byId = id => document.getElementById(id);
 async function copyCode(code) {
   try {
     await navigator.clipboard.writeText(code.textContent);
+    recordUsage('copy_confirmed');
     return true;
   } catch {
     const range = document.createRange();
@@ -12,6 +15,7 @@ async function copyCode(code) {
     try {
       if (document.execCommand('copy')) {
         selection.removeAllRanges();
+        recordUsage('copy_confirmed');
         return true;
       }
     } catch { /* Leave the text selected for manual copy. */ }
@@ -32,6 +36,7 @@ byId('other-copy').hidden = false;
 for (const button of clients) {
   button.setAttribute('aria-pressed', 'false');
   button.addEventListener('click', async () => {
+    recordUsage('install', button.dataset.client.replaceAll('-', '_'));
     for (const option of clients) option.setAttribute('aria-pressed', String(option === button));
     for (const item of instructions) item.hidden = item.dataset.forClient !== button.dataset.client;
     step.hidden = false;

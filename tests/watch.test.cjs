@@ -21,9 +21,14 @@ for (const width of [390, 1440]) {
       });
       try {
         const unexpected = [];
+        const beacons = [];
         await context.route('**/*', route => {
           const request = route.request();
           const url = new URL(request.url());
+          if (url.href === 'https://domainhound-mcp.domainhound.workers.dev/v1/event' && request.method() === 'POST') {
+            beacons.push(request.postDataJSON());
+            return route.fulfill({ status: 204 });
+          }
           if (url.origin !== site || request.method() !== 'GET') {
             unexpected.push(request.method() + ' ' + url.href);
             return route.abort();
@@ -43,6 +48,7 @@ for (const width of [390, 1440]) {
         assert.match(await page.locator('section[aria-labelledby="watch"]').innerText(), /delete unconfirmed sign-ups after 7 days/i);
         assert.match(await page.locator('section[aria-labelledby="news"]').innerText(), /address hash on our do-not-send list/i);
         assert.deepEqual(unexpected, []);
+        assert.deepEqual(beacons, Array.from({ length: 7 }, () => ({ event: 'watch_submitted', values: [] })));
       } finally {
         await context.close();
       }
