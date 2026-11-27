@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What SF startups launch on | Domain Hound</title>
+  <meta name="description" content="{{description}}">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Domain Hound">
+  <meta property="og:title" content="What SF startups launch on">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:image" content="https://domainhound.dev/sf/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{description}}">
+  <meta property="og:url" content="https://domainhound.dev/sf/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://domainhound.dev/sf/">
+  <link rel="icon" href="/assets/hound-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/home.css">
+  <link rel="stylesheet" href="/sf/page.css">
+  <script type="module" src="/sf/page.mjs"></script>
+  <script type="module" src="/sf/funding-table.mjs"></script>
+</head>
+<body>
+<header><div class="frame mast">
+  <a class="paper-art" href="/" aria-label="Domain Hound home">
+    <span class="paper-word first">Domain</span><span class="paper-word second">Hound</span>
+    <span class="paper-dog"><img src="/assets/hound-mark.svg" width="180" height="180" alt=""></span>
+  </a>
+  <a class="jump" href="#check">Check a name</a>
+</div></header>
+<main>
+  <section class="intro"><div class="frame spread">
+    <div><p class="eyebrow">San Francisco Bay Area &nbsp;/&nbsp; {{years}}</p>
+    <h1>What SF startups<br>launch on.</h1>
+    <p class="lede">We counted the domain endings on {{total}} Bay Area startup websites in Y Combinator’s public directory.</p>
+    <a class="funding-jump" href="#funding">See funding by company</a></div>
+    <div class="ticket"><div class="ticket-top"><span>Website ending</span><b>.ai</b></div>
+      <strong>{{ai}}<small>%</small></strong><p>of the websites end in <b>.ai</b></p>
+      <div class="ticket-foot">{{aiCount}} of {{total}} sites <span>{{month}}</span></div>
+    </div>
+  </div></section>
+  <section class="chart-band"><div class="frame">
+    <h2>The endings, batch by batch</h2>
+    <p class="deck">Each bar is one YC batch. Pick a bar to see its numbers.</p>
+    <div class="legend"><span><i class="com"></i>.com</span><span><i class="ai"></i>.ai</span><span><i class="rest"></i>Other endings</span></div>
+    <div class="plot">
+      <div class="axis" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
+      <div class="years">{{bars}}</div>
+    </div>
+    <div class="batch-readout"><select aria-label="YC batch" id="batch-select" disabled>{{options}}</select><span id="batch-summary" role="status">{{summary}}</span></div>
+    <details class="batch-details"><summary>All endings in this batch</summary>
+      <table><caption>{{latest}}</caption><thead><tr><th>Ending</th><th>Sites</th><th>Share</th></tr></thead><tbody>{{tableRows}}</tbody></table>
+    </details>
+    <p class="chart-note">In Winter 2023, {{firstAi}}% used .ai. Its share peaked at {{peakAi}}% in {{peakBatch}} and reached {{lastAi}}% in {{latest}}.</p>
+    <section class="ai-trend" aria-labelledby="ai-trend-title">
+      <h2 id="ai-trend-title">Has .ai peaked?</h2>
+      <p class="chart-note">Its highest share was <strong>{{trendPeak}}</strong>. In {{latest}}, it was {{trendLatest}}.</p>
+      <figure aria-label="Share of sites using .ai by YC batch">
+        <div class="trend-head" aria-hidden="true"><span>YC batch</span><span>.ai share</span><span>Batch size</span></div>
+        <div class="trend-plot">{{trend}}</div>
+      </figure>
+    </section>
+  </div></section>
+  <section class="facts-band"><div class="frame">
+    <h2>Behind the dot</h2>
+    <div class="cards">
+      <article><h3>The middle name</h3><strong>{{median}}</strong><p>characters before the dot, at the median. The shortest had {{shortest}} and the longest had {{longest}}.</p></article>
+      <article><h3>A little head start</h3><strong>{{prefixCount}}</strong><p>sites added a prefix to their exact brand name. “get” appeared {{get}} times, “try” {{try}} and “hq” {{hq}}.</p></article>
+      <article><h3>The .com detour</h3><strong>{{different}}</strong><p>of {{comCount}} .com sites used a domain label that differed from the listed brand.</p></article>
+    </div>
+    <details><summary>More naming facts and name shapes</summary>
+      <p>{{distinct}} endings appear across the sample. {{single}} appear just once. {{hyphen}} domain labels contain a hyphen and {{digits}} contain a digit.</p>
+      <h3>How the brand names read</h3>
+      <p>These are spelling estimates. An English dictionary can miss surnames and words from other languages.</p>
+      <table><thead><tr><th>Name shape</th><th>Brands</th><th>Share</th></tr></thead><tbody>{{shapes}}</tbody></table>
+    </details>
+  </div></section>
+  <section id="check" class="check-band"><div class="frame">
+    <h2>Check your own name. Free.</h2>
+    <form id="check-form" hidden autocomplete="off"><label for="candidate">Name or domain</label><div class="field">
+      <input id="candidate" type="text" maxlength="253" required placeholder="Your startup name" autocapitalize="none" spellcheck="false">
+      <button type="submit">Check endings</button>
+    </div></form>
+    <noscript><p>Turn on JavaScript for a live domain check.</p></noscript>
+    <p id="check-status" role="status"></p><ul id="matches"></ul>
+  </div></section>
+  <section id="funding" class="funding-band"><div class="frame">
+    <p class="eyebrow">Funding by company</p>
+    <h2>{{fundingHeadline}}</h2>
+    <p class="deck">We ranked the {{matched}} companies we could match to SEC filings by the amount they reported selling.</p>
+    <details class="funding-note"><summary>What the numbers mean</summary>
+      <p>Raised (Form D) adds up amounts sold in offerings reported to the SEC through {{day}}. An amendment replaces the earlier amount for that offering. Some rounds are never filed. These figures do not measure company value.</p>
+      <p>“No match” means we couldn’t confirm a filing under the company’s exact legal name. For the .com check, we remove spaces and punctuation from the brand name. “Yes” means YC lists that .com or we saw it redirect to or from the listed website. Other .com ownership is unverified. Websites can change after launch.</p>
+      <a href="/data/sf/companies.json" download>Download companies and filing sources (JSON)</a>
+    </details>
+    <div class="funding-tools">
+      <label class="funding-picker" hidden>Sort by <select id="funding-sort"></select></label>
+      <p id="funding-count" role="status">{{visible}} of {{total}} companies</p>
+      <button id="funding-more" aria-controls="company-table" aria-expanded="false" hidden>Show all</button>
+    </div>
+    <table id="company-table" aria-label="Bay Area YC companies and Form D funding">
+      <thead><tr>{{fundingHeaders}}</tr></thead><tbody>{{companyRows}}</tbody>
+    </table>
+  </div></section>
+  <!-- Future input is weekly ending/count aggregates only, with at least 20 per published bucket. -->
+  <section hidden id="weekly"><h2>Endings founders searched this week</h2></section>
+  <section class="method"><div class="frame">
+    <h2>How we counted</h2>
+    <p>Snapshot dated {{day}}. We counted one listed website per company across {{batches}} YC batches, from Winter 2023 through {{latest}}. {{excluded}} of {{eligible}} eligible companies had no usable website. A website can change after launch.</p>
+    <details><summary>Coverage, sources and terms</summary>
+      <p>We matched any listed California location to a Bay Area city or town, plus Stanford. Companies with multiple locations count once. Remote-only and future batches are excluded. This sample covers publicly launched YC companies across all statuses.</p>
+      <p>We used registry endings from the <a href="https://publicsuffix.org/list/">Public Suffix List</a> so endings like .co.uk stay together. Lengths count the label immediately before that ending. For brand matches and prefixes, we compare lowercase letters and digits and ignore punctuation and spaces. Legal endings such as Inc. stay in the listed brand.</p>
+      <p>For name shapes, <a href="https://www.nltk.org/howto/wordnet.html">WordNet</a> supplies English words. Compounds have dictionary parts separated by spaces, hyphens, capitalization or a split into two words of at least three letters each. Unmatched single alphabetic tokens are possibly made-up. Other spellings stay unclassified.</p>
+      <p>Our source is <a href="https://github.com/yc-oss/api">YC OSS</a>, an unofficial feed of the <a href="https://www.ycombinator.com/companies">YC directory</a>. YC’s <a href="https://www.ycombinator.com/legal#tou">terms of use</a> restrict scraping and commercial reuse of site content. The feed does not grant a separate data license. Domain Hound is independent of YC.</p>
+    </details>
+    <div class="foot-links"><a href="/data/sf/endings.json" download>Download the counts (JSON)</a><button id="share" hidden>Share this page</button><span id="share-status" role="status"></span></div>
+  </div></section>
+</main>
+<footer><div class="frame"><a href="/">Domain Hound</a><a href="/privacy/">Privacy</a></div></footer>
+</body>
+</html>
