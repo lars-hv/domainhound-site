@@ -2,6 +2,7 @@
 import { shareDomain, sharePage, shareUrlLimit } from '../r/share-format.mjs';
 
 import { readApiOrigin } from './api-origin.mjs';
+import { isInternalTraffic } from './usage.mjs';
 
 const apiOrigin = readApiOrigin();
 
@@ -10,7 +11,10 @@ async function request(path, signal, body) {
   const timeout = AbortSignal.timeout(path === '/v1/generate' ? 90_000 : 25_000);
   const response = await fetch(new URL(path, apiOrigin), {
     method: post ? 'POST' : 'GET',
-    headers: post ? { 'Content-Type': 'application/json' } : undefined,
+    headers: {
+      ...(post && { 'Content-Type': 'application/json' }),
+      ...(isInternalTraffic() && { 'X-Domain-Hound-Internal': '1' }),
+    },
     body: post ? JSON.stringify(body) : undefined,
     credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer', redirect: 'error',
     signal: signal ? AbortSignal.any([signal, timeout]) : timeout

@@ -440,6 +440,28 @@ test('search results send only categories for impressions, shops, and guides', a
   assert.doesNotMatch(JSON.stringify(beacons), /mapfern|https:/i);
 });
 
+test('internal mode labels beacons and API calls until cleared', async t => {
+  const { page } = await openPage(t, () => ({ json: checkReply() }));
+  await page.goto(site + '/?internal=1');
+  await page.goto(site);
+  async function checkTraffic(marker) {
+    const [beacon, request] = await Promise.all([
+      captureBeacon(page, 'search', ['site', 'name']),
+      page.waitForRequest(request => new URL(request.url()).pathname === '/v1/check' && request.method() === 'GET'),
+      search(page, 'name', 'Mapfern'),
+    ]);
+    assert.deepEqual(beacon.postDataJSON(), {
+      event: 'search', values: ['site', 'name'], ...(marker && { internal: 1 }),
+    });
+    assert.equal(await request.headerValue('x-domain-hound-internal'), marker);
+    assert.equal(await page.evaluate(() => document.cookie), '');
+  }
+  await checkTraffic('1');
+  await page.goto(site + '/?internal=0');
+  await page.goto(site);
+  await checkTraffic(null);
+});
+
 test('search has a readable fallback when scripts are off', async t => {
   const { page } = await openPage(t, () => assert.fail('Unexpected request'), { javaScriptEnabled: false });
   assert.match(await page.locator('#search').innerText(), /Turn on JavaScript to search/i);

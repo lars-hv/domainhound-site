@@ -13,6 +13,7 @@ const site = new URL(process.env.SITE_BASE || 'http://127.0.0.1:8798');
 const api = new URL(process.env.API_BASE || 'http://127.0.0.1:8797');
 const publishedOrigin = 'https://domainhound.dev';
 const publishedApi = 'https://domainhound-mcp.domainhound.workers.dev';
+const testHeaders = { 'x-domain-hound-test': '1' };
 const isLoopback = url => ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname);
 const preview = isLoopback(site) && isLoopback(api);
 const engines = (process.env.E2E_ENGINES || 'webkit,chromium').split(',');
@@ -182,7 +183,7 @@ async function runViewport(browser, engine, width, watchWorker) {
     }
     const request = response.request();
     const url = new URL(request.url());
-    if (!url.pathname.startsWith('/v1/') || !response.ok() || request.method() === 'OPTIONS') return;
+    if (!url.pathname.startsWith('/v1/') || url.pathname === '/v1/event' || !response.ok() || request.method() === 'OPTIONS') return;
     const read = response.json().then(data => traffic.push({
       path: url.pathname, queried: url.searchParams.get('name'), body: request.postDataJSON(), data
     })).catch(error => errors.push(summary + ': ' + error.message));
@@ -214,10 +215,11 @@ async function runViewport(browser, engine, width, watchWorker) {
     }
     if (!preview) {
       assert.equal(url.origin, api.origin, 'The live page uses a different API_BASE');
-      return route.continue();
+      return route.continue({ headers: { ...await request.allHeaders(), ...testHeaders } });
     }
     // Keep separate local scenarios from spending each other's rate budgets.
-    const headers = { origin: site.origin, 'cf-connecting-ip': client + (parseInt(caseGroup, 16) ^ scenario).toString(16) + '::1' };
+    const headers = { ...testHeaders, origin: site.origin,
+      'cf-connecting-ip': client + (parseInt(caseGroup, 16) ^ scenario).toString(16) + '::1' };
     if (request.method() === 'POST') headers['content-type'] = 'application/json';
     const reply = await fetch(new URL(url.pathname + url.search, api), {
       method: request.method(), headers, body: request.postDataBuffer(), redirect: 'error'
@@ -241,7 +243,7 @@ async function runViewport(browser, engine, width, watchWorker) {
       assert.equal(request.method(), 'GET');
       assert.equal(url.pathname, '/manage');
     }
-    const headers = { ...request.headers(), origin: site.origin, 'cf-connecting-ip': client + caseGroup + '::1' };
+    const headers = { ...request.headers(), ...testHeaders, origin: site.origin, 'cf-connecting-ip': client + caseGroup + '::1' };
     const reply = await watchWorker.fetch(url, { method: request.method(), headers, body });
     return route.fulfill({ status: reply.status, headers: Object.fromEntries(reply.headers),
       body: Buffer.from(await reply.arrayBuffer()) });
