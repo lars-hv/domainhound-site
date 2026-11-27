@@ -1,0 +1,22 @@
+.vote-page { background: var(--mist); min-height: 100vh; }
+.ballot-wrap { max-width: 56rem; margin: auto; padding-inline: clamp(1rem, 5vw, 3rem); }
+.ballot-head { color: var(--paper); background: var(--forest); padding-block: clamp(1.25rem, 4vw, 3rem); border-bottom: 2px solid var(--pine); }
+.ballot-head .paper-art { width: 145px; height: 65px; margin-bottom: 1.15rem; }
+.ballot-head .paper-word { font-size: 1.65rem; }
+.ballot-head h1 { max-width: none; }
+.ballot-head p { color: var(--mint); }
+.choices { list-style: none; padding: 0; margin-block: .75rem; }
+.candidate { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6rem; align-items: center; border-bottom: 1px solid var(--forest); padding-block: 1rem; }
+.candidate h2 { font-size: clamp(1.55rem, 4vw, 2.55rem); overflow-wrap: anywhere; }
+.candidate:last-child h2 { font-size: 1.05rem; }
+.candidate .domain { margin-top: .5rem; overflow-wrap: anywhere; font-family: var(--mono); }
+.domain b { display: inline-block; background: var(--mint); padding: .08rem .42rem; font: 800 .82rem/1.5 Mulish, sans-serif; }
+.candidate .ballot-price { margin-top: .3rem; }
+.conflict { font-size: .94rem; font-weight: 500; }
+.vote-page button, .vote-page input { min-height: 44px; }
+.count { white-space: nowrap; font: 750 1.05rem var(--mono); }
+.quiet { border: 0; padding: .25rem 0; text-decoration: underline; color: var(--forest); background: transparent; }
+.own-search { margin-block: 1.5rem 3rem; }
+.own-search h2 { font-size: clamp(1.5rem, 3.8vw, 2.2rem); margin-bottom: .8rem; }
+.own-search form { display: flex; flex-wrap: wrap; gap: .5rem; }
+.own-search input { flex: 1 1 9rem; max-width: 16rem; min-width: 0; color: var(--pine); background: var(--paper); border: 1px solid var(--forest); border-radius: .3rem; padding: .4rem .65rem; }

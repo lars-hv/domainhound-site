@@ -1,4 +1,5 @@
 import { guessMode, normalize, validDomainForm } from './search-mode.mjs';
+import { askFriend, referral } from './ask-friend.mjs';
 import { recordUsage } from './usage.mjs';
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
@@ -178,6 +179,8 @@ function dateOf(value) {
 function updateFootnote() {
   const note = pages.querySelector('.quote-caption');
   if (!note) return;
+  const friendLine = pages.querySelector('.friend-referral');
+  if (friendLine) friendLine.hidden = !pages.querySelector('.offer-row');
   const dates = new Set();
   let unknown = 0;
   for (const group of pages.querySelectorAll('.hunt-card')) {
@@ -201,6 +204,11 @@ function nameCard(name, items, best, { suggestion, priceDate, requested, showNam
   card.setAttribute('aria-label', name);
   if (showName) card.append(el('h3', '', name));
   const available = items.filter(item => item.status === 'available');
+  const shared = available.find(item => item.domain === best?.domain) || available[0];
+  const quote = best?.pickPrice || shared?.quotes[0];
+  card.dataset.voteName = JSON.stringify({ name, domain: shared?.domain ?? null, pick: Boolean(shared && shared.domain === best?.domain),
+    now: quote?.firstPaymentUsd ?? null, renew: quote?.renewalPaymentUsd ?? null, term: quote?.minimumYears ?? 1 });
+  card.dataset.conflict = 'unknown';
   const dates = available.flatMap(item => item.quotes.map(quote => dateOf(quote.checkedAt || quote.snapshotDate || priceDate)));
   card.dataset.priceDates = [...new Set(dates)].join(' ');
   card.dataset.unknown = items.filter(item => item.status === 'unknown').length;
@@ -421,6 +429,11 @@ function checksPanel(name, source, signal, firstChecks = {}, appleName = name) {
     const appStore = !workerApple || ['unknown', 'pending'].includes(workerApple.status)
       ? browserApple ?? (checkingApple ? { status: 'pending' } : workerApple) : workerApple;
     const us = data.trademarks?.us;
+    const apps = [appStore?.status, data.googlePlay?.status];
+    const appMatch = apps.some(s => ['taken', 'exact_match_found'].includes(s));
+    const markMatch = us?.status === 'exact_match_found';
+    const clear = apps.every(s => ['no_match_found', 'not-found'].includes(s)) && us?.status === 'no_exact_match_found';
+    host.dataset.conflict = markMatch ? (appMatch ? 'both' : 'mark') : appMatch ? 'app' : clear ? 'clear' : 'unknown';
     slot.replaceChildren(...appChecks({ ...data, appStore }, name, pending));
     const track = currentSearch?.controller.signal === signal && currentSearch.track;
     if (['taken', 'exact_match_found'].some(status =>
@@ -688,6 +701,7 @@ async function recover(query, signal, box, seenDomains) {
   };
   failure(variantOutcome, 'Couldn’t check similar spellings.');
   failure(ideaOutcome, preview && !ideaList.hidden ? 'Couldn’t load more names.' : 'Couldn’t load name ideas.');
+  if (variantList.childElementCount || ideaList.childElementCount) box.append(voteFromCards(box));
   if (!variantList.childElementCount && !ideaList.childElementCount) {
     if (!notes.length) notes.push('We couldn’t confirm any similar names are available.');
   }
@@ -784,6 +798,11 @@ function renderIdeas(page, sharing, input, response, signal) {
   };
 }
 
+function voteFromCards(scope, selector = '[data-vote-name]') {
+  return askFriend(() => [...scope.querySelectorAll(selector)].map(card =>
+    ({ ...JSON.parse(card.dataset.voteName), conflict: card.dataset.conflict })));
+}
+
 function renderPage(mode, input, response, signal) {
   const items = response.items;
   const head = el('header', 'results-head');
@@ -839,6 +858,10 @@ function renderPage(mode, input, response, signal) {
   }
   sharing.prepend(el('small', 'quote-caption'));
   page.append(sharing);
+  head.append(voteFromCards(pages, mode === 'name' ? ':scope > [data-vote-name]' : '[data-vote-name]'));
+  const friendLine = referral();
+  friendLine.hidden = true;
+  page.append(friendLine);
   pages.replaceChildren(page);
   selectedDomain = null;
   syncChecks();
@@ -1095,3 +1118,13 @@ function openLinkedPath() {
 }
 openLinkedPath();
 window.addEventListener('hashchange', openLinkedPath);
+
+// The vote page hands a visitor's own search back in a fragment so it stays out of request URLs.
+const sharedSearch = new URLSearchParams(location.hash.slice(1)).get('check');
+if (sharedSearch && sharedSearch.length <= 100) {
+  const field = document.getElementById('name');
+  field.value = sharedSearch;
+  field.dispatchEvent(new Event('input'));
+  history.replaceState(null, '', location.pathname + location.search);
+  field.form.requestSubmit();
+}

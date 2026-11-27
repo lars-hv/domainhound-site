@@ -1,3 +1,4 @@
+import { askFriend, createVote } from '../assets/ask-friend.mjs';
 import { recordUsage } from '../assets/usage.mjs';
 import { readShareFragment } from './share-format.mjs';
 
@@ -86,7 +87,21 @@ function nameGroup({ name, verdict, records, takenDomains }) {
   return card;
 }
 
+let currentNames = [];
+let previewLink;
+
+function receiptNames(groups) {
+  return groups.map(group => {
+    const row = group.records.find(row => row.pick) || group.records.find(row => ['Available', 'Shop confirmed'].includes(row.status));
+    const conflict = { 'No conflict found': 'receiptClear', 'Check first': 'review', Avoid: 'avoid' }[group.verdict] || 'unknown';
+    return { name: group.name, domain: row?.domain ?? null, pick: row?.pick ?? false,
+      now: row?.now ?? null, renew: row?.renew ?? null, term: row?.term ?? 1, conflict };
+  });
+}
+
 async function showReceipt() {
+  currentNames = [];
+  previewLink = undefined;
   const hash = location.hash;
   receipt.hidden = true;
   unavailable.hidden = true;
@@ -105,6 +120,8 @@ async function showReceipt() {
     time.dateTime = data.checkedAt;
     time.textContent = timestamp.format(new Date(data.checkedAt)) + ' UTC';
     groups.replaceChildren(...data.groups.map(nameGroup));
+    currentNames = receiptNames(data.groups);
+    document.getElementById('vote-share').replaceChildren(askFriend(() => currentNames));
     receipt.hidden = false;
     copyButton.hidden = false;
   } catch {
@@ -113,15 +130,39 @@ async function showReceipt() {
 }
 
 copyButton.addEventListener('click', async () => {
-  const url = location.href;
-  feedback.textContent = '';
+  const fragment = location.hash;
+  if (!currentNames.length) return;
+  copyButton.disabled = true;
+  feedback.textContent = 'Preparing the share link…';
+  // Start the clipboard operation within the tap. WebKit accepts a promised ClipboardItem.
+  previewLink ??= createVote(currentNames).then(url => url + fragment);
+  const pending = previewLink;
   try {
-    await navigator.clipboard.writeText(url);
+    if (typeof ClipboardItem === 'function' && navigator.clipboard?.write) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/plain': pending.then(url => new Blob([url], { type: 'text/plain' })) })]);
+    } else {
+      await navigator.clipboard.writeText(await pending);
+    }
     recordUsage('copy_confirmed');
-    if (url === location.href) feedback.textContent = 'Link copied.';
+    recordUsage('friend_link_copied');
+    if (fragment === location.hash) feedback.textContent = 'Link copied.';
   } catch {
-    if (url === location.href) feedback.textContent = 'Copy the full link from your address bar.';
-  }
+    try {
+      const url = await pending;
+      if (fragment !== location.hash) return;
+      const field = element('input');
+      field.readOnly = true;
+      field.value = url;
+      field.setAttribute('aria-label', 'Share link');
+      feedback.replaceChildren('Copy this link ', field);
+      field.focus();
+      field.select();
+    } catch {
+      if (fragment !== location.hash) return;
+      previewLink = undefined;
+      feedback.textContent = 'Couldn’t create a preview. You can copy the full link from your address bar.';
+    }
+  } finally { copyButton.disabled = false; }
 });
 
 window.addEventListener('hashchange', showReceipt);
