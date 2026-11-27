@@ -1,99 +1,134 @@
 const select = document.getElementById('batch-select');
-const columns = [...document.querySelectorAll('.column')];
-const details = document.querySelector('.batch-details');
+const charts = [...document.querySelectorAll('[data-batch]')];
+const latest = select.value;
+const shareStatus = document.getElementById('share-status');
 
-async function enableChart() {
-  const response = await fetch('/data/sf/endings.json');
-  if (!response.ok) return;
-  const { batches } = await response.json();
-  const choose = batch => {
-    const row = batches.find(row => row.batch === batch);
-    if (!row) return;
-    select.value = batch;
-    for (const bar of columns) bar.setAttribute('aria-pressed', String(bar.dataset.batch === batch));
-    const share = ending => row.endings[ending]?.pct || 0;
-    document.getElementById('batch-summary').textContent =
-      `${row.websites} sites · ${share('.com')}% .com · ${share('.ai')}% .ai`;
-    details.querySelector('caption').textContent = batch;
-    const body = details.querySelector('tbody');
-    body.replaceChildren();
-    for (const [ending, { count, pct }] of Object.entries(row.endings)) {
-      const tr = body.insertRow();
-      const heading = document.createElement('th');
-      heading.scope = 'row';
-      heading.textContent = ending;
-      tr.append(heading);
-      tr.insertCell().textContent = count;
-      tr.insertCell().textContent = pct + '%';
-    }
-  };
-  select.disabled = false;
-  select.addEventListener('change', () => choose(select.value));
-  for (const bar of columns) {
-    bar.disabled = false;
-    bar.addEventListener('click', () => choose(bar.dataset.batch));
-  }
+function showBatch(batch) {
+  const active = charts.find(chart => chart.dataset.batch === batch) || charts.at(-1);
+  for (const chart of charts) chart.hidden = chart !== active;
+  select.value = active.dataset.batch;
+  shareStatus.textContent = '';
 }
-enableChart().catch(() => {}); // The static chart, latest batch and download remain readable offline.
+
+function batchUrl() {
+  const url = new URL(location.href);
+  url.hash = '';
+  url.search = '';
+  url.searchParams.set('batch', select.value);
+  return url;
+}
+
+select.disabled = false;
+select.addEventListener('change', () => {
+  showBatch(select.value);
+  // Sandboxed and file previews may have an opaque origin.
+  try { history.pushState(null, '', batchUrl()); } catch {}
+});
+const restoreBatch = () => showBatch(new URL(location.href).searchParams.get('batch') || latest);
+window.addEventListener('popstate', restoreBatch);
+restoreBatch();
+
+const share = document.getElementById('share');
+share.hidden = !/^https?:$/.test(location.protocol);
+share.addEventListener('click', async () => {
+  const url = batchUrl().href;
+  try {
+    if (navigator.share) await navigator.share({ title: 'SF Startup Domains', url });
+    else if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url);
+      shareStatus.textContent = 'Link copied.';
+    } else shareStatus.textContent = url;
+  } catch (error) {
+    if (error.name !== 'AbortError') shareStatus.textContent = url;
+  }
+});
 
 const form = document.getElementById('check-form');
 const field = document.getElementById('candidate');
 const status = document.getElementById('check-status');
 const matches = document.getElementById('matches');
+const watch = document.getElementById('watch-link');
 let current;
 function resetSearch() {
   current?.abort();
   matches.replaceChildren();
+  watch.hidden = true;
+  watch.removeAttribute('href');
   status.textContent = '';
   field.setCustomValidity('');
 }
 field.addEventListener('input', resetSearch);
+
+// The hosted checker accepts requests from the product's origin. Portable previews
+// can read these two public registry records directly with the registry's CORS permission.
+const registries = {
+  com: 'https://rdap.verisign.com/com/v1/domain/',
+  ai: 'https://rdap.identitydigital.services/rdap/domain/',
+};
+async function registryResult(label, ending, signal) {
+  const domain = label + '.' + ending;
+  let status = 'unknown';
+  try {
+    const response = await fetch(registries[ending] + domain, {
+      signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]),
+      credentials: 'omit', referrerPolicy: 'no-referrer', cache: 'no-store', redirect: 'error',
+    });
+    const record = await response.json();
+    if (response.ok && record.objectClassName === 'domain' && record.ldhName?.toLowerCase() === domain) status = 'taken';
+    if (response.status === 404 && record.errorCode === 404) status = 'no_record';
+  } catch { /* A registry can be temporarily unreachable. */ }
+  return { domain, status };
+}
+
+function nameLabel(input) {
+  const text = input.normalize('NFC').toLowerCase().replace(/\s+/gu, '').replace(/\.(ai|com)\.?$/, '');
+  if (!/^[\p{L}\p{M}\p{N}-]+$/u.test(text)) return null;
+  try {
+    const ascii = new URL('https://' + text + '.example').hostname.split('.')[0];
+    return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(ascii) ? ascii : null;
+  } catch { return null; }
+}
+
 form.addEventListener('submit', async event => {
   event.preventDefault();
   resetSearch();
-  const name = field.value.trim();
-  if (!name) {
-    field.setCustomValidity('Enter a name or domain.');
+  const label = nameLabel(field.value.trim());
+  if (!label) {
+    field.setCustomValidity('Enter a startup name, such as Example or Example.ai.');
     field.reportValidity();
     return;
   }
   const request = current = new AbortController();
-  status.textContent = 'Checking endings…';
+  status.textContent = 'Checking domains…';
   try {
-    const { runSearch } = await import('/assets/search-api.mjs');
+    let items;
+    const portable = location.origin !== 'https://domainhound.dev' || document.documentElement.hasAttribute('data-registry-preview');
+    if (portable) {
+      items = await Promise.all(Object.keys(registries).map(ending => registryResult(label, ending, request.signal)));
+    } else {
+      const { runSearch } = await import('../assets/search-api.mjs');
+      if (request.signal.aborted) return;
+      items = (await runSearch('name', { name: label }, request.signal)).items;
+    }
     if (request.signal.aborted) return;
-    const result = await runSearch('name', { name }, request.signal);
-    if (request.signal.aborted) return;
-    const labels = { taken: 'Taken', available: 'Available', reserved: 'Reserved', unknown: 'Unconfirmed' };
-    for (const item of result.items) {
+    const labels = { taken: 'Taken', available: 'Available', reserved: 'Reserved', no_record: 'No registry record', unknown: 'Unconfirmed' };
+    for (const item of items) {
       const li = document.createElement('li');
       const domain = document.createElement('b');
       domain.textContent = item.domain;
       li.append(domain, labels[item.status]);
       matches.append(li);
     }
-    status.textContent = result.items.length ? 'Domain check results' : 'No endings confirmed. Try another name.';
+    status.textContent = items.some(item => item.status !== 'unknown')
+      ? (portable ? 'Live registry results' : 'Domain check results') : 'No endings confirmed. Please try again.';
+    const exact = label + '.com';
+    if (items.some(item => item.domain === exact && item.status === 'taken')) {
+      watch.href = 'https://domainhound.dev/watch/?' + new URLSearchParams({ domain: exact });
+      watch.hidden = false;
+    }
   } catch (error) {
     if (!request.signal.aborted) status.textContent = error.status === 429
       ? 'Too many checks. Try again in a few minutes.' : 'Couldn’t check that name. Please try again.';
   }
 });
 form.hidden = false;
-
-const share = document.getElementById('share');
-if (navigator.share || navigator.clipboard?.writeText) {
-  share.hidden = false;
-  share.addEventListener('click', async () => {
-    const url = new URL('/sf/', location.origin).href;
-    const message = document.getElementById('share-status');
-    try {
-      if (navigator.share) await navigator.share({ title: 'What SF startups launch on', url });
-      else {
-        await navigator.clipboard.writeText(url);
-        message.textContent = 'Link copied.';
-      }
-    } catch (error) {
-      if (error.name !== 'AbortError') message.textContent = url;
-    }
-  });
-}
