@@ -43,6 +43,18 @@ h2 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.025em; font-weight: 
 .batch-readout span { font-size: .96rem; }
 summary { cursor: pointer; padding-block: .7rem; font-weight: 850; width: fit-content; }
 .chart-note { max-width: 67ch; margin-top: 1rem; }
+.ai-trend { max-width: 42rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--forest); }
+.ai-trend h2 { font-size: clamp(1.65rem, 3vw, 2.45rem); }
+.ai-trend figure { margin: 1.15rem 0 0; --batch: 6.1rem; --percent: 3rem; --size: 4.2rem; }
+.trend-head { display: grid; grid-template-columns: var(--batch) 1fr auto; border-bottom: 2px solid var(--forest); padding-bottom: .35rem; font: 600 .76rem/1.35 var(--mono); }
+.trend-plot { position: relative; }
+.trend-row { display: grid; grid-template-columns: var(--batch) minmax(0, 1fr) var(--percent) var(--size); align-items: center; min-height: 2rem; border-bottom: 1px solid var(--mist); font-size: .91rem; }
+.trend-row b, .trend-size { text-align: right; font-variant-numeric: tabular-nums; }
+.trend-line { position: absolute; inset: 0 calc(var(--percent) + var(--size)) 0 var(--batch); color: var(--forest); pointer-events: none; }
+.trend-line svg { display: block; width: 100%; height: 100%; }
+.trend-track { position: relative; }
+.trend-track i { position: absolute; top: 50%; width: 8px; height: 8px; border: 2px solid var(--forest); background: var(--mint); border-radius: 50%; transform: translate(-50%, -50%); }
+.trend-sites { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .facts-band { background: var(--mint); }
 .cards { display: grid; border-block: 2px solid var(--pine); margin: 1.5rem 0 .7rem; }
 .cards article { padding: 1.4rem 0; }

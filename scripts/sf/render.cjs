@@ -42,6 +42,24 @@ function tableRows(entries) {
     `<tr><th scope="row">${key}</th><td>${count(value.count)}</td><td>${value.pct}%</td></tr>`).join('\n');
 }
 
+const aiCount = batch => batch.endings['.ai']?.count || 0;
+const aiRatio = batch => aiCount(batch) / batch.websites;
+const aiPercent = batch => Number((100 * aiRatio(batch)).toFixed(1));
+const aiSample = batch => `${count(aiCount(batch))} of ${count(batch.websites)} sites`;
+const trendPeak = batches.reduce((best, row) => aiRatio(row) > aiRatio(best) ? row : best);
+
+// Time runs down the page so every batch label and denominator fits on a phone.
+function trend() {
+  const limit = Math.max(50, ...batches.map(row => Math.ceil(10 * aiRatio(row)) * 10));
+  const position = row => 100 * aiRatio(row) / limit * 100;
+  const points = batches.map((row, i) => `${position(row)},${i + .5}`);
+  const rows = batches.map(row =>
+    `<div class="trend-row"><span>${row.batch}</span><span class="trend-track" aria-hidden="true"><i style="left:${position(row)}%"></i></span>
+      <b>${aiPercent(row)}%</b><span class="trend-size">${count(row.websites)}<span class="trend-sites"> sites</span></span></div>`);
+  return `<div class="trend-line" aria-hidden="true"><svg viewBox="0 0 100 ${batches.length}" preserveAspectRatio="none">
+    <polyline points="${points.join(' ')}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>${rows.join('')}`;
+}
+
 const values = {
   fundingHeadline: top.length ? `${com} of the top ${top.length} list a .com domain` : 'Funding by company',
   matched: count(matched.length), visible: count(Math.min(fundingTable.pageSize, ranked.length)),
@@ -58,6 +76,8 @@ const values = {
   latest: latest.batch, batches: batches.length, tableRows: tableRows(latest.endings),
   summary: `${latest.websites} sites · ${share(latest, '.com')}% .com · ${share(latest, '.ai')}% .ai`,
   firstAi: share(first, '.ai'), lastAi: share(latest, '.ai'), peakAi: share(peak, '.ai'), peakBatch: peak.batch,
+  trendPeak: `${aiPercent(trendPeak)}% in ${trendPeak.batch} (${aiSample(trendPeak)})`,
+  trendLatest: `${aiPercent(latest)}% (${aiSample(latest)})`, trend: trend(),
   median: facts.median_label, shortest: facts.shortest_label, longest: facts.longest_label,
   prefixCount: Object.values(facts.exact_prefixes).reduce((a, b) => a + b, 0),
   ...facts.exact_prefixes, comCount: endings['.com']?.count || 0, different: facts.different_com,

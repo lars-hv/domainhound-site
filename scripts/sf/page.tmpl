@@ -54,6 +54,14 @@
       <table><caption>{{latest}}</caption><thead><tr><th>Ending</th><th>Sites</th><th>Share</th></tr></thead><tbody>{{tableRows}}</tbody></table>
     </details>
     <p class="chart-note">In Winter 2023, {{firstAi}}% used .ai. Its share peaked at {{peakAi}}% in {{peakBatch}} and reached {{lastAi}}% in {{latest}}.</p>
+    <section class="ai-trend" aria-labelledby="ai-trend-title">
+      <h2 id="ai-trend-title">Has .ai peaked?</h2>
+      <p class="chart-note">Its highest share was <strong>{{trendPeak}}</strong>. In {{latest}}, it was {{trendLatest}}.</p>
+      <figure aria-label="Share of sites using .ai by YC batch">
+        <div class="trend-head" aria-hidden="true"><span>YC batch</span><span>.ai share</span><span>Batch size</span></div>
+        <div class="trend-plot">{{trend}}</div>
+      </figure>
+    </section>
   </div></section>
   <section class="facts-band"><div class="frame">
     <h2>Behind the dot</h2>

@@ -47,6 +47,23 @@ test('SF chart and name check work without publishing a search to the page URL o
       return route.fulfill({ json: { domains: [{ domain: 'example.com', status: 'taken' }] } });
     });
     await page.goto(site + '/sf/');
+    const trend = page.locator('.ai-trend');
+    const trendRows = data.batches.map(row => {
+      const ai = row.endings['.ai']?.count ?? 0;
+      return [row.batch, `${Number((100 * ai / row.websites).toFixed(1))}%`, row.websites];
+    });
+    assert.deepEqual(await trend.locator('.trend-row').evaluateAll(rows => rows.map(row => [
+      row.firstElementChild.textContent, row.querySelector('b').textContent,
+      Number(row.querySelector('.trend-size').firstChild.textContent.replaceAll(',', '')),
+    ])), trendRows);
+    const trendNote = await trend.locator('.chart-note').innerText();
+    const aiCount = row => row.endings['.ai']?.count ?? 0;
+    const peak = data.batches.reduce((best, row) =>
+      aiCount(row) * best.websites > aiCount(best) * row.websites ? row : best);
+    for (const row of [peak, data.batches.at(-1)]) {
+      assert.ok(trendNote.includes(row.batch));
+      assert.ok(trendNote.includes(`(${aiCount(row).toLocaleString('en-US')} of ${row.websites.toLocaleString('en-US')} sites)`));
+    }
     const body = page.locator('#company-table tbody tr');
     const more = page.getByRole('button', { name: 'Show all', exact: true });
     await more.waitFor();
