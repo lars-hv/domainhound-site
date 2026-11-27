@@ -24,14 +24,14 @@ def portable_script():
     chart = replace_once(chart, """  const response = await fetch('/data/sf/endings.json');
   if (!response.ok) return;
   const { batches } = await response.json();""", "  const { batches } = endings;")
-    chart = replace_once(chart, """    const { runSearch } = await import('/assets/search-api.mjs');
-    if (request.signal.aborted) return;
-    const result = await runSearch('name', { name }, request.signal);""", """    const query = name.normalize('NFKC').toLowerCase().replace(/\\.$/, '');
-    const domains = new Set(companies.filter(row =>
-      row.company.normalize('NFKC').toLowerCase() === query ||
-      row.domain === query || row.domain.slice(0, -row.ending.length) === query
-    ).map(row => row.domain));
-    const result = { items: [...domains].map(domain => ({ domain, status: 'taken' })) };""")
+    chart = replace_once(chart, """  const { runSearch } = await import('/assets/search-api.mjs');
+  signal.throwIfAborted();
+  return runSearch('name', { name, extraEnding: 'si' }, signal);""", """  const query = name.normalize('NFKC').toLowerCase().replace(/\\.$/, '');
+  const domains = new Set(companies.filter(row =>
+    row.company.normalize('NFKC').toLowerCase() === query ||
+    row.domain === query || row.domain.slice(0, -row.ending.length) === query
+  ).map(row => row.domain));
+  return { items: [...domains].map(domain => ({ domain, status: 'taken' })) };""")
     chart = replace_once(chart, "taken: 'Taken'", "taken: 'Listed in the snapshot'")
     chart = replace_once(chart, "'Domain check results' : 'No endings confirmed. Try another name.'",
                          "'Snapshot matches' : 'No matching name or domain in this snapshot.'")
@@ -57,7 +57,7 @@ def portable_script():
 def package(output):
     files = ["assets/home.css", "assets/palette.css", "assets/mulish-latin-wght-normal.woff2",
              "assets/OFL.txt", "assets/hound-mark.svg", "sf/page.css", "sf/share.png",
-             "data/sf/endings.json", "data/sf/companies.json"]
+             "data/sf/endings.json", "data/sf/companies.json", "data/sf/prices.json"]
     for file in files:
         target = output / file
         target.parent.mkdir(exist_ok=True, parents=True)
@@ -78,10 +78,11 @@ def package(output):
     html = replace_once(html, '''  <script type="module" src="sf/page.mjs"></script>
   <script type="module" src="sf/funding-table.mjs"></script>''',
                         '  <script defer src="sf/page.js"></script>')
-    html = replace_once(html, 'Check your own name. Free.', 'Look up a name in this snapshot.')
-    html = replace_once(html, 'Check endings</button>', 'Look up a name</button>')
-    html = replace_once(html, 'Turn on JavaScript for a live domain check.',
+    html = html.replace('· Free check', '· Snapshot lookup')
+    html = html.replace('Check endings</button>', 'Look up name</button>')
+    html = html.replace('Turn on JavaScript to check a name.',
                         'Turn on JavaScript to look up a name in this snapshot.')
+    html = replace_once(html, 'Which ending can you get?', 'Is your name in the snapshot?')
     (output / "index.html").write_text(html)
     (output / "sf/page.js").write_text(portable_script())
 

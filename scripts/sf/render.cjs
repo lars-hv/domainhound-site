@@ -17,10 +17,10 @@ const matched = ranked.filter(row => row.funding);
 const top = matched.slice(0, 20);
 const com = top.filter(row => row.ending === '.com').length;
 const { batches, facts, endings } = data;
+const prices = require('../../data/sf/prices.json');
 const first = batches[0];
 const latest = batches.at(-1);
 const share = (batch, ending) => batch.endings[ending]?.pct || 0;
-const peak = batches.reduce((best, row) => share(row, '.ai') > share(best, '.ai') ? row : best);
 const count = number => number.toLocaleString('en-US');
 const shortSeason = { Winter: 'W', Spring: 'Sp', Summer: 'Su', Fall: 'F' };
 const years = Map.groupBy(batches, row => row.batch.split(' ')[1]);
@@ -60,8 +60,49 @@ function trend() {
     <polyline points="${points.join(' ')}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>${rows.join('')}`;
 }
 
+const priceDay = new Date(prices.checked).toLocaleDateString('en-US', {
+  month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+});
+const verdict = {
+  '.com': 'Get your exact name here if it’s available at the standard price.',
+  '.ai': 'If you build AI, this ending says so before anyone clicks.',
+  '.si': 'Keep the name and a small renewal bill if you’re happy to spell out the ending.',
+};
+const dollars = value => '$' + value.toFixed(2);
+const cheapest = offers => offers.reduce((a, b) => a.threeYearUsd <= b.threeYearUsd ? a : b);
+
+function pickCard(ending, offers) {
+  const best = cheapest(offers);
+  const sites = endings[ending]?.count ?? 0;
+  const term = best.minimumYears > 1
+    ? `Pay for ${best.minimumYears} years at a time. ${dollars(best.firstPaymentUsd)} upfront.` : '';
+  return `<article><h3>${ending}</h3>
+    <p>${count(sites)} of ${count(data.websites)} sites · ${share(data, ending)}%</p>
+    <dl><div><dt>First year</dt><dd>${dollars(best.firstYearUsd)}</dd></div>
+    <div><dt>Yearly renewal</dt><dd>${dollars(best.renewalUsd)}</dd></div></dl>
+    <p class="shop">${best.shop}${term ? ' · ' + term : ''}</p>
+    <p>${verdict[ending]}</p></article>`;
+}
+
+function checkBox(id) {
+  return `<form class="name-check" hidden autocomplete="off">
+    <label for="${id}">Name or domain <span>· Free check</span></label>
+    <div class="field"><input id="${id}" type="text" maxlength="253" required placeholder="Your startup name" autocapitalize="none" spellcheck="false">
+    <button type="submit">Check endings</button></div>
+    <p class="check-status" role="status"></p><ul class="matches"></ul>
+  </form><noscript><p>Turn on JavaScript to check a name.</p></noscript>`;
+}
+
 const values = {
-  fundingHeadline: top.length ? `${com} of the top ${top.length} list a .com domain` : 'Funding by company',
+  heroCheck: checkBox('candidate'), closingCheck: checkBox('closing-candidate'),
+  picks: Object.entries(prices.offers).map(([ending, offers]) => pickCard(ending, offers)).join('\n'),
+  priceDay, sampleSize: prices.availableNames.length,
+  priceSources: Object.entries(prices.offers).map(([ending, offers]) => {
+    const best = cheapest(offers);
+    return `<a href="${best.source}">${ending} at ${best.shop}</a>`;
+  }).join(' · '),
+  siCount: endings['.si']?.count ?? 0,
+  fundingHeadline: top.length ? `${com} of the top ${top.length} by funding use .com` : 'Funding by company',
   matched: count(matched.length), visible: count(Math.min(fundingTable.pageSize, ranked.length)),
   companyRows: fundingTable.tableRows(ranked.slice(0, fundingTable.pageSize)),
   fundingHeaders: Object.entries(fundingTable.columns).map(([key, label]) =>
@@ -75,14 +116,14 @@ const values = {
   options: batches.map(row => `<option${row === latest ? ' selected' : ''}>${row.batch}</option>`).join(''),
   latest: latest.batch, batches: batches.length, tableRows: tableRows(latest.endings),
   summary: `${latest.websites} sites · ${share(latest, '.com')}% .com · ${share(latest, '.ai')}% .ai`,
-  firstAi: share(first, '.ai'), lastAi: share(latest, '.ai'), peakAi: share(peak, '.ai'), peakBatch: peak.batch,
+  firstBatch: first.batch, firstAi: share(first, '.ai'),
   trendPeak: `${aiPercent(trendPeak)}% in ${trendPeak.batch} (${aiSample(trendPeak)})`,
   trendLatest: `${aiPercent(latest)}% (${aiSample(latest)})`, trend: trend(),
   median: facts.median_label, shortest: facts.shortest_label, longest: facts.longest_label,
   prefixCount: Object.values(facts.exact_prefixes).reduce((a, b) => a + b, 0),
   ...facts.exact_prefixes, comCount: endings['.com']?.count || 0, different: facts.different_com,
   distinct: facts.distinct_endings, single: facts.singleton_endings, hyphen: facts.hyphenated, digits: facts.digits,
-  shapes: tableRows(data.brand_shapes), eligible: count(data.eligible_companies), excluded: data.excluded_websites,
+  shapes: tableRows(data.brand_shapes).replace('Possibly made-up', 'Possibly invented'), eligible: count(data.eligible_companies), excluded: data.excluded_websites,
 };
 
 async function render() {
@@ -108,7 +149,7 @@ async function render() {
       strong{display:block;font-size:108px;line-height:1.05;letter-spacing:-3px} aside span{font-size:28px}
       footer{border-top:2px dashed var(--leaf);padding-top:26px;font-size:25px}
     </style><header><b><img src="data:image/svg+xml;base64,${dog}" alt="">Domain Hound</b><span>${values.month}</span></header>
-    <main><h1>What SF startups launch on.</h1><aside><strong>${values.ai}%</strong><span>of sites end in .ai</span></aside></main>
+    <main><h1>Your .com is taken. Now what?</h1><aside><strong>${values.ai}%</strong><span>of sites end in .ai</span></aside></main>
     <footer><span>${values.total} Bay Area YC startup websites</span><span>domainhound.dev/sf/</span></footer>`);
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: path.join(output, 'share.png') });

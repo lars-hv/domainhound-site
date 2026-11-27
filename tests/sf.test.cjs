@@ -43,8 +43,14 @@ test('SF chart and name check work without publishing a search to the page URL o
         return route.fulfill({ body: await fs.readFile(path.join(__dirname, '..', asset)), contentType });
       }
       assert.equal(url.pathname, '/v1/check');
-      checked.push(url.searchParams.get('name'));
-      return route.fulfill({ json: { domains: [{ domain: 'example.com', status: 'taken' }] } });
+      const name = url.searchParams.get('name');
+      checked.push(name);
+      const exact = name.endsWith('.si');
+      const ascii = name.split('.')[0];
+      return route.fulfill({ json: {
+        query: { ascii, exactDomain: exact ? name : null },
+        domains: [{ domain: exact ? name : ascii + '.com', ending: exact ? 'si' : 'com', status: 'taken' }],
+      } });
     });
     await page.goto(site + '/sf/');
     const trend = page.locator('.ai-trend');
@@ -89,10 +95,16 @@ test('SF chart and name check work without publishing a search to the page URL o
     assert.equal(await page.locator('.column[aria-pressed=true]').getAttribute('data-batch'), data.batches[1].batch);
     assert.equal(await page.locator('#weekly').isVisible(), false);
     await page.getByRole('link', { name: 'Check a name' }).click();
-    await page.getByLabel('Name or domain').fill('example');
-    await page.getByRole('button', { name: 'Check endings' }).click();
-    await page.getByText('Taken', { exact: false }).waitFor();
-    assert.deepEqual(checked, ['example']);
+    const forms = page.locator('.name-check');
+    assert.equal(await forms.count(), 2);
+    for (const [i, name] of ['example', 'secondexample'].entries()) {
+      const form = forms.nth(i);
+      await form.getByLabel('Name or domain').fill(name);
+      await form.getByRole('button', { name: 'Check endings' }).click();
+      await form.getByText(name + '.si', { exact: true }).waitFor();
+      assert.deepEqual(await form.locator('.matches b').allTextContents(), [name + '.com', name + '.si']);
+    }
+    assert.deepEqual(checked, ['example', 'example.si', 'secondexample', 'secondexample.si']);
     assert.equal(page.url(), site + '/sf/#check');
     assert.deepEqual(await page.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0]);
     assert.equal(requests.filter(url => url.origin === site && url.search).length, 0);

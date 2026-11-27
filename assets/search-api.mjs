@@ -287,8 +287,23 @@ export async function runSearch(mode, input, signal, cap = Infinity) {
   let data;
   if (mode === 'idea') data = await request('/v1/generate', signal, { ...input, idea: input.idea.replace(/\s+/g, ' ').trim() });
   else if (mode === 'personal') data = await request('/v1/personal', signal, input);
-  else if (mode === 'name') data = await checkEndings(input.name, signal);
-  else throw new Error('Unknown search mode');
+  else if (mode === 'name') {
+    data = await checkEndings(input.name, signal);
+    const query = checkedQuery(data.query);
+    if (input.extraEnding && query && !data.domains.some(row => row.ending === input.extraEnding)) {
+      const domain = query.ascii + '.' + input.extraEnding;
+      let extra;
+      try {
+        const exact = await checkName(domain, signal);
+        extra = exact.domains.find(row => row.domain === domain);
+      } catch (error) {
+        if (signal?.aborted) throw error;
+      }
+      const afterAi = data.domains.findIndex(row => row.ending === 'ai') + 1;
+      const row = extra ?? { domain, ending: input.extraEnding, status: 'unknown' };
+      data.domains.splice(afterAi || data.domains.length, 0, row);
+    }
+  } else throw new Error('Unknown search mode');
   if (mode === 'idea') return ideaResult(data);
 
   const items = mode === 'personal' ? data.results.map(personalItem) : data.domains.map(row => domainItem(row, cap));
