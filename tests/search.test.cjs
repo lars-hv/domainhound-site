@@ -1663,3 +1663,28 @@ test('one to six domains keep the shared checks below every card', async t => {
     assert.ok(panelTop >= Math.max(...bounds.map(rect => rect.bottom)) - 1);
   }
 });
+
+test('a long shortlist shares only the names selected for the vote', async t => {
+  const items = ['Mapfern', 'Trailfin', 'Mossfold', 'Firpost', 'Baypalm', 'Reedway'];
+  let shared;
+  const { page } = await openShortlistPage(t, call => {
+    if (call.path === '/v1/votes') {
+      shared = call.body.names;
+      return { status: 201, json: { path: '/v/' + 'a'.repeat(32) } };
+    }
+    return { json: ideas(items.map(name => [name, name.toLowerCase() + '.example.com'])) };
+  });
+  await search(page, 'idea', ideaText);
+  await page.getByRole('button', { name: 'Ask a friend' }).click();
+  const choices = page.getByRole('group', { name: 'Choose up to five names' });
+  const included = await choices.locator('input:checked').first().locator('..').innerText();
+  const excluded = await choices.locator('input:not(:checked)').locator('..').innerText();
+  await choices.getByRole('checkbox', { name: excluded, exact: true }).check();
+  assert.equal(await choices.getByRole('button').isEnabled(), false);
+  await choices.getByRole('checkbox', { name: included, exact: true }).uncheck();
+  await choices.getByRole('button', { name: 'Create vote link' }).click();
+  await page.getByRole('link', { name: 'See tally' }).waitFor();
+  assert.equal(shared.length, 5);
+  assert.ok(shared.some(row => row.name === excluded));
+  assert.ok(shared.every(row => row.name !== included));
+});

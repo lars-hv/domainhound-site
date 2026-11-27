@@ -1,0 +1,9 @@
+.ask-friend, .friend-links { display: flex; gap: .5rem 1rem; align-items: center; flex-wrap: wrap; }
+.ask-friend .action { font: inherit; font-weight: 800; cursor: pointer; min-height: 44px; }
+.ask-friend [role=status], .friend-referral { font-size: .95rem; }
+.ask-friend fieldset { min-width: 0; border: 1px solid currentColor; }
+.ask-friend label { display: flex; gap: .5rem; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
+.ask-friend input[readonly], .friend-referral input { width: min(15rem, 100%); font-size: 1rem; }
+.friend-referral { margin-top: 1rem; }
+.friend-text { background: none; border: 0; color: inherit; font: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: .2em; min-height: 44px; }
+.ask-friend [hidden] { display: none; }

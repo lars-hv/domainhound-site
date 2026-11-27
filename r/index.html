@@ -2,15 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'none'; worker-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src https://domainhound-mcp.domainhound.workers.dev; worker-src 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="Domain shortlist | Domain Hound">
+  <meta property="og:description" content="Compare the names and their renewal prices.">
+  <meta property="og:image" content="https://domainhound.dev/assets/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
   <title>Domain shortlist | Domain Hound</title>
   <link rel="stylesheet" href="/assets/site.css">
   <link rel="stylesheet" href="/assets/brand-b.css">
   <link rel="stylesheet" href="./viewer.css">
+  <link rel="stylesheet" href="/assets/friend.css">
   <script type="module" src="./viewer.mjs"></script>
 </head>
 <body>
@@ -24,6 +29,8 @@
     <p class="copy-feedback" id="copy-feedback" role="status"></p>
     <h1>Domain shortlist.</h1>
     <div id="receipt" hidden>
+      <div id="vote-share"></div>
+      <p class="receipt-meta">Copying a share link or asking a friend creates a 30-day preview of these names and prices.</p>
       <p class="receipt-meta">Checked <time id="checked-at"></time>. Prices in USD. List prices are before tax.</p>
       <div id="groups"></div>
     </div>
