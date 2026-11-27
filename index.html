@@ -96,39 +96,67 @@
         <h1>Your agent finds a name you can buy.</h1>
         <p class="subline">Free. Checks price, renewal, trademarks, app stores and handles before you buy.</p>
         <div class="setup" id="install" tabindex="-1">
-          <p id="setup-label">Copy setup for your agent</p>
-          <div class="clients" role="group" aria-labelledby="setup-label">
+          <p id="setup-label">Choose one setup for your agent</p>
+          <div class="clients" role="group" aria-labelledby="setup-label" hidden>
             <button type="button" data-client="claude">Claude</button>
             <button type="button" data-client="claude-code">Claude Code</button>
-            <button type="button" data-client="codex">Codex</button>
+            <button type="button" data-client="codex">Codex (terminal)</button>
+            <button type="button" data-client="codex-app">Codex app</button>
             <button type="button" data-client="chatgpt">ChatGPT</button>
           </div>
-          <div class="install-step" id="setup-step" hidden>
-            <ol data-for-client="claude" hidden>
-              <li>Open Settings &gt; Connectors &gt; Add custom connector.</li>
-              <li>Name it Domain Hound and paste the URL.</li>
-              <li>Ask “Is brightboard.com available? Find me the best domain.”</li>
-            </ol>
-            <p data-for-client="claude-code" hidden>Paste in your terminal, not in the chat. Requires Node.js 20+.</p>
-            <p data-for-client="codex" hidden>With Node.js 20+ installed, run this in your terminal.</p>
-            <p data-for-client="chatgpt" hidden>In Plugins, choose +, then Add custom MCP server. Name it Domain Hound, paste the URL in the server URL field and choose No authentication. Review, create and install.</p>
-            <code id="command" tabindex="0"></code>
-            <a data-for-client="claude" href="/docs/claude/" hidden>Full guide</a>
-            <a id="plugins" data-for-client="chatgpt" href="https://chatgpt.com/plugins" hidden>Open ChatGPT Plugins</a>
+          <div class="install-step" id="setup-step">
+            <div data-for-client="claude">
+              <noscript><h3>Claude</h3></noscript>
+              <ol>
+                <li>Open Settings &gt; Connectors &gt; Add custom connector.</li>
+                <li>Name it Domain Hound and paste the URL.</li>
+                <li>Ask “Is brightboard.com available? Find me the best domain.”</li>
+              </ol>
+              <code data-copy tabindex="0">https://domainhound-mcp.domainhound.workers.dev/mcp</code>
+              <a href="/docs/claude/">Full guide</a>
+            </div>
+            <div data-for-client="claude-code">
+              <noscript><h3>Claude Code</h3></noscript>
+              <p>Requires Node.js 20+. Paste in your terminal, not in the chat. Then start a new Claude Code session.</p>
+              <code data-copy tabindex="0">claude mcp add domain-hound -- npx -y domain-hound</code>
+            </div>
+            <div data-for-client="codex">
+              <noscript><h3>Codex (terminal)</h3></noscript>
+              <p>Install Node.js 20+ and Codex. Sign in with <kbd>codex login</kbd> if needed. Run this in your terminal, then start a new Codex session.</p>
+              <code data-copy tabindex="0">codex mcp add domain-hound -- npx -y domain-hound</code>
+            </div>
+            <div data-for-client="codex-app">
+              <noscript><h3>Codex app</h3></noscript>
+              <p>Already set up in the terminal on this computer? Restart the app and start a new local Codex chat. Adding it again can duplicate the tools.</p>
+              <ol>
+                <li>For a new setup, install Node.js 20+ and sign in to Codex.</li>
+                <li>Open Settings &gt; MCP servers &gt; Add server &gt; STDIO.</li>
+                <li>Enter <kbd>domain-hound</kbd> for the name and <kbd>npx</kbd> for the command. Add two separate arguments, <kbd>-y</kbd> and <kbd>domain-hound</kbd>.</li>
+                <li>Save, select Restart, then start a new local Codex chat. Ask “Is brightboard.com available?”</li>
+              </ol>
+            </div>
+            <div data-for-client="chatgpt">
+              <noscript><h3>ChatGPT</h3></noscript>
+              <p>Set this up on the ChatGPT web app. If you use ChatGPT on desktop, open ChatGPT in your browser.</p>
+              <p>Pro supports read-only connections. On Business, ask an admin or owner to set it up. On Enterprise or Edu, admins, owners and members with permission can add it.</p>
+              <ol>
+                <li>Open <a id="plugins" href="https://chatgpt.com/plugins">ChatGPT Plugins</a>, choose +, then Add custom MCP server.</li>
+                <li>Name it Domain Hound. Paste the URL below under Connection and choose No authentication.
+                  <code id="chatgpt-url" tabindex="0">https://domainhound-mcp.domainhound.workers.dev/mcp</code>
+                  <button type="button" class="setup-copy" id="chatgpt-copy" hidden>Copy URL</button>
+                </li>
+                <li>Read the risk warning, tick the acknowledgment and choose Create as a plugin. Review the tools, then install.</li>
+                <li>Start a new chat, select @Domain Hound and ask “Is brightboard.com available?”</li>
+              </ol>
+            </div>
             <p id="copied" role="status"></p>
             <details class="other-setup">
               <summary>Other MCP clients</summary>
               <code id="other-config">{"mcpServers":{"domain-hound":{"command":"npx","args":["-y","domain-hound"]}}}</code>
-              <button type="button" class="other-copy">Copy config</button>
+              <button type="button" class="setup-copy" id="other-copy" hidden>Copy config</button>
               <span role="status" id="other-status"></span>
             </details>
           </div>
-          <noscript>
-            <p>Claude: <a href="/docs/claude/">Full guide</a></p><code>https://domainhound-mcp.domainhound.workers.dev/mcp</code>
-            <p>Claude Code: Paste in your terminal, not in the chat.</p><code>claude mcp add domain-hound -- npx -y domain-hound</code>
-            <p>Codex</p><code>codex mcp add domain-hound -- npx -y domain-hound</code>
-            <p>ChatGPT</p><code>https://domainhound-mcp.domainhound.workers.dev/mcp</code>
-          </noscript>
         </div>
         <div id="search">
           <form class="hunt-form" id="main-search" data-mode="auto">
@@ -223,7 +251,7 @@
 <footer>
   <div class="wrap">
     <span>Domain Hound · BrightBoard AS</span>
-    <nav aria-label="More"><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a><a href="https://github.com/lars-hv/domain-hound">Open source</a></nav>
+    <nav aria-label="More"><a href="/guides/">Guides</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/lars-hv/domain-hound">Open source</a></nav>
     <small>Independent of the shops and platforms named.</small>
   </div>
 </footer>

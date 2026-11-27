@@ -34,6 +34,7 @@ Website DNS presets cover GitHub Pages, Vercel, Netlify and Cloudflare Pages (ww
 - [npm package](https://www.npmjs.com/package/domain-hound): Published software.
 - [Source and MIT license](https://github.com/lars-hv/domain-hound): Code, configuration and documentation.
 - [Watch a domain](https://domainhound.dev/watch/): Email alerts for a taken domain.
+- [Terms of service](https://domainhound.dev/terms/)
 - [Privacy](https://domainhound.dev/privacy/): Local lookups and hosted watch alerts.
 - [Data](https://domainhound.dev/data/): Dated samples, registrar sources and downloadable tables.
 - [Guide index](https://domainhound.dev/guides/): Answers with measured examples.

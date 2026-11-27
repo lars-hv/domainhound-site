@@ -252,7 +252,7 @@ for (const width of [390, 1440]) {
     assert.match(await hero.locator('#real-search').innerText(), /tripfixer\.app[\s\S]*\$8\.28[\s\S]*\$14\.49/);
     assert.equal(await page.locator('#setup-step').isVisible(), false);
     const buttons = page.locator('.clients button');
-    assert.deepEqual(await buttons.allTextContents(), ['Claude', 'Claude Code', 'Codex', 'ChatGPT']);
+    assert.deepEqual(await buttons.allTextContents(), ['Claude', 'Claude Code', 'Codex (terminal)', 'Codex app', 'ChatGPT']);
     const rows = await buttons.evaluateAll(nodes => nodes.map(node => node.offsetTop));
     assert.equal(rows[0], rows[1]);
     assert.equal(rows[2], rows[3]);
@@ -294,7 +294,7 @@ for (const width of [390, 1440]) {
     const installLink = results.locator('.taken-group a[href="#install"]');
     await installLink.click();
     const setup = page.locator('#install');
-    await setup.getByRole('button', { name: 'Codex', exact: true }).waitFor();
+    await setup.getByRole('button', { name: 'Codex (terminal)', exact: true }).waitFor();
     assert.equal(new URL(page.url()).hash, '#install');
   });
 }
@@ -408,38 +408,59 @@ test('search has a readable fallback when scripts are off', async t => {
   for (const command of ['claude mcp add', 'codex mcp add']) {
     assert.ok(await setup.locator('code').filter({ hasText: command }).isVisible());
   }
+  await setup.getByText(/Settings > MCP servers > Add server > STDIO/).waitFor();
+  await setup.getByText(/Pro supports read-only connections/).waitFor();
+  assert.equal(await setup.getByRole('button').count(), 0);
 });
 
-test('agent setup offers working copy actions for both terminals and the hosted connector', async t => {
-  const { page } = await openPage(t, () => assert.fail('Unexpected search'));
-  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
-    configurable: true, value: { writeText(text) { window.copiedSetup = text; } }
-  }));
-  const setup = page.locator('#install');
-  for (const [client, expected] of [
-    ['Claude', 'https://domainhound-mcp.domainhound.workers.dev/mcp'],
-    ['Claude Code', 'claude mcp add domain-hound -- npx -y domain-hound'],
-    ['Codex', 'codex mcp add domain-hound -- npx -y domain-hound'],
-    ['ChatGPT', 'https://domainhound-mcp.domainhound.workers.dev/mcp'],
-  ]) {
-    await setup.getByRole('button', { name: client, exact: true }).click();
-    assert.equal(await setup.locator('#command').textContent(), expected);
-    assert.equal(await page.evaluate(() => window.copiedSetup), expected);
-    const guide = setup.getByRole('link', { name: 'Full guide' });
-    assert.equal(await guide.isVisible(), client === 'Claude');
-    assert.equal(await setup.getByRole('list').isVisible(), client === 'Claude');
-    if (client === 'Claude') {
-      assert.equal(await guide.getAttribute('href'), '/docs/claude/');
-      assert.deepEqual(await setup.getByRole('listitem').allTextContents(), [
-        'Open Settings > Connectors > Add custom connector.',
-        'Name it Domain Hound and paste the URL.',
-        'Ask “Is brightboard.com available? Find me the best domain.”'
-      ]);
+for (const width of [390, 1440]) {
+  test('agent setup buttons, clipboard and terms at ' + width + 'px', async t => {
+    const { page } = await openPage(t, () => assert.fail('Unexpected search'), { width });
+    await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText(text) { window.copiedSetup = text; } }
+    }));
+    const setup = page.locator('#install');
+    const url = 'https://domainhound-mcp.domainhound.workers.dev/mcp';
+    for (const [client, expected, instructions] of [
+      ['Claude', url, ['Add custom connector', 'Full guide']],
+      ['Claude Code', 'claude mcp add domain-hound -- npx -y domain-hound', ['Node.js 20+', 'Paste in your terminal, not in the chat.']],
+      ['Codex (terminal)', 'codex mcp add domain-hound -- npx -y domain-hound', ['Node.js 20+', 'codex login', 'new Codex session']],
+      ['Codex app', null, ['Node.js 20+', 'Settings > MCP servers > Add server > STDIO', 'domain-hound', 'npx', '-y', 'Restart', 'new local Codex chat']],
+      ['ChatGPT', url, ['web', 'desktop', 'Pro', 'Business', 'Enterprise', 'Edu', 'Add custom MCP server', 'Connection', 'No authentication', 'Create as a plugin', '@Domain Hound']]
+    ]) {
+      await page.evaluate(() => { window.copiedSetup = 'untouched'; });
+      const button = setup.getByRole('button', { name: client, exact: true });
+      await button.focus();
+      await button.press('Enter');
+      assert.equal(await button.getAttribute('aria-pressed'), 'true');
+      const panel = setup.locator('[data-for-client]:visible');
+      const text = await panel.innerText();
+      for (const step of instructions) assert.ok(text.includes(step), client + ': ' + step);
+      if (client === 'Claude') {
+        assert.equal(await panel.getByRole('link', { name: 'Full guide' }).getAttribute('href'), '/docs/claude/');
+        assert.deepEqual(await panel.getByRole('listitem').allTextContents(), [
+          'Open Settings > Connectors > Add custom connector.',
+          'Name it Domain Hound and paste the URL.',
+          'Ask “Is brightboard.com available? Find me the best domain.”'
+        ]);
+      }
+      if (client === 'ChatGPT') {
+        assert.equal(await page.evaluate(() => window.copiedSetup), 'untouched');
+        const copy = panel.getByRole('button', { name: 'Copy URL' });
+        const eligibility = panel.getByText(/Business/);
+        assert.ok((await eligibility.boundingBox()).y < (await copy.boundingBox()).y);
+        await copy.click();
+      }
+      assert.equal(await page.evaluate(() => window.copiedSetup), expected ?? 'untouched');
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      if (['Codex app', 'ChatGPT'].includes(client)) await screenshot(page, client.toLowerCase().replace(' ', '-') + '-' + width, setup);
     }
-    if (client === 'Claude Code') assert.match(await setup.innerText(), /Paste in your terminal, not in the chat\./);
-    if (client === 'ChatGPT') assert.match(await setup.innerText(), /paste the URL in the server URL field/i);
-  }
-});
+    await page.locator('footer').getByRole('link', { name: 'Terms', exact: true }).click();
+    await page.getByRole('heading', { name: 'Terms', exact: true }).waitFor();
+    await page.getByText('Last updated 26 November 2026').waitFor();
+    assert.equal(await page.locator('main a[href^="mailto:"]').getAttribute('href'), 'mailto:privacy@domainhound.dev');
+  });
+}
 
 test('a stale name response cannot replace a newly selected search', async t => {
   let release, started;
