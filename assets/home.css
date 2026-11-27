@@ -164,7 +164,7 @@ footer small { flex-basis: 100%; font: 500 .8rem/1.5 Mulish,sans-serif; }
     padding-block: 2.3rem;
   }
   .lead { padding-block: .6rem; }
-  h1 { font-size: clamp(3.2rem, 6.2vw, 6.2rem); }
+  h1 { max-width: none; font-size: clamp(3.2rem, 5.2vw, 5.2rem); }
   .stage { display: grid; place-items: center; margin: 0; padding: 0; background: transparent; }
   .stage::before { display: none; }
   .phone {

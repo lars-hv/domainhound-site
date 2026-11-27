@@ -252,7 +252,8 @@ for (const width of [390, 1440]) {
     const submit = hero.getByRole('button', { name: 'Check', exact: true });
     await field.waitFor();
     await page.evaluate(() => document.fonts.ready);
-    assert.equal(await hero.locator('h1').innerText(), 'Your agent finds a name you can buy.');
+    assert.equal(await hero.locator('h1').innerText(), 'Ask Claude or ChatGPT for a name or domain. Get one you can buy.');
+    assert.equal(await hero.locator('.subline').innerText(), 'It checks the domain, the cheapest shop including renewal, the app stores and US trademarks, in one answer. Free.');
     assert.equal(await field.inputValue(), 'concierge.com');
     assert.equal(await page.locator('#watch-domain').inputValue(), '');
     assert.equal(await page.locator('#watch-stamp').isVisible(), false);

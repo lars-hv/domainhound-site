@@ -1,26 +1,45 @@
 # Domain Hound
 
-> Domain Hound 0.1.6 is a free, MIT licensed MCP server that runs locally. It helps your agent find a name, compare registration and renewal prices, draft a message to an owner, or buy an available domain through your own Spaceship account.
+> Ask Claude or ChatGPT for a name or domain. Get one you can buy.
+>
+> It checks the domain, the cheapest shop including renewal, the app stores and US trademarks, in one answer. Free.
 
-## Install
+Use this when you want to know if a domain is available and where it is cheapest, or when you need a good name for your business and have none yet. Domain Hound checks ten endings (.com, .ai, .io, .dev, .app, .co, .so, .sh, .tech, .inc) and finds the cheapest of six shops, renewal included. It shows the first-year price, renewal price and total cost over three years, and suggests cheaper endings. If your name is taken, it helps you find names with a meaning behind them, each with an available domain. It also checks app names on the App Store and Google Play, shows exact US trademark matches only, and shows other businesses found using the name. Similar names aren't checked for trademarks.
 
-Use Node.js 20 or later. Add the server in your terminal and start a fresh client session.
+Buy opens the shop. Dated list prices, source shown. Trademark results are a search aid, not legal advice. No account, no cost.
 
-- Claude Code: `claude mcp add domain-hound -- npx -y domain-hound`
-- Codex: `codex mcp add domain-hound -- npx -y domain-hound`
-- Other local MCP clients: command `npx`, arguments `-y` and `domain-hound`, transport stdio.
+Works in your agent (Claude, ChatGPT, Codex) and on domainhound.dev. Made by BrightBoard AS. Privacy policy https://domainhound.dev/privacy/ and terms of service https://domainhound.dev/terms/
 
-## Tools
+## Use Domain Hound
 
-- `check_domains`: Check one domain or up to 20 names for availability and prices. Bare names cover fourteen default endings. Results label list prices and confirmed quotes separately.
-- `triage_names`: Screen candidates for domains, similar trademarks, apps, companies, handles, search results and rude words in 14 languages. US trademark checks run automatically. EU and Norwegian checks use free keys, with search links otherwise.
-- `naming_method`: Give the assistant a recipe for generating candidates and screening the shortlist.
-- `broker_find`: Legacy alias for `check_domains`.
-- `watch_domain`: Check the registry, expiry and website for a domain. Request free alerts with an email address and confirm in your inbox.
-- `taken_domain_dossier`: Check owner clues, active or parked sites, resale listings and expiry. Look for a public asking price and up to three available alternatives screened for trademarks. It can draft an inquiry for you to send.
-- `quote_domain`: Get a live Spaceship quote for registration and renewal, including the term and premium status. The quote expires in ten minutes.
-- `buy_domain`: Recheck the quote against your limit and the $30 default cap. Spaceship’s connector previews the price for your approval. You must enable direct orders and approve each purchase. An uncertain order blocks a repeat.
-- `setup_domain`: Verify ownership in your Spaceship account or preview website and email DNS changes and apply them with approval.
+- [Website](https://domainhound.dev/). Search domains and find names in your browser. Buy opens the shop.
+- [Hosted connector for Claude and ChatGPT](https://domainhound.dev/#install). Buy opens the shop.
+- [Claude Code and Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/). Install the npm package with Node.js 20 or later. Never buys without your yes. With your Spaceship key and your yes, your agent can buy it and set up DNS.
+  - Claude Code: `claude mcp add domain-hound -- npx -y domain-hound`
+  - Codex: `codex mcp add domain-hound -- npx -y domain-hound`
+  - Other local clients: command `npx`, arguments `-y` and `domain-hound`, transport stdio.
+
+## Hosted connector tools
+
+- `domainhound_check_domains` checks a name or domain, compares endings and prices, and checks app names on the App Store and Google Play. Exact US trademark matches only. Similar names aren't checked.
+- `domainhound_generate_names` generates name ideas and checks their domains.
+- `naming_brief` supplies a creative brief when your agent writes the candidates.
+- `check_batch` checks up to 60 names from your agent and returns up to five picks with domain, app and trademark results.
+- `domainhound_check_app_name` checks the US App Store and Google Play for a proposed app name.
+
+## npm package tools
+
+- `check_domains` checks availability and compares dated list prices, including renewal.
+- `triage_names` finds names for an idea or checks a list of candidates.
+- `check_batch` checks up to 60 names from your agent and returns up to five picks.
+- `naming_guide` explains the naming method.
+- `quote_domain` gets a live quote from Spaceship.
+- `buy_domain` orders through your Spaceship account after you approve the exact price. Direct ordering is opt-in.
+- `setup_domain` previews and applies approved website or email DNS changes in your Spaceship account.
+- `taken_domain_dossier` looks for public information about a taken domain and available alternatives.
+- `watch_domain` checks the registry, expiry and website for a taken domain.
+- `move_domain` compares transfer and renewal prices.
+- `my_domains` checks domains you own for expiry, DNS and renewal prices.
 
 Share up to five shortlisted names from the results page. The shortlist travels after the # in a domainhound.dev/r/ link. The viewer reads it in the browser. Anyone with the full link can read it.
 
