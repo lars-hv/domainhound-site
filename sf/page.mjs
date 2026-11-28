@@ -2,10 +2,10 @@ const select = document.getElementById('batch-select');
 const columns = [...document.querySelectorAll('.column')];
 const details = document.querySelector('.batch-details');
 
-async function enableChart() {
-  const response = await fetch('/data/sf/endings.json');
-  if (!response.ok) return;
-  const { batches } = await response.json();
+const snapshot = document.getElementById('offline-directory');
+const directory = snapshot ? JSON.parse(snapshot.textContent) : null;
+
+function enableChart(batches) {
   const choose = batch => {
     const row = batches.find(row => row.batch === batch);
     if (!row) return;
@@ -23,8 +23,9 @@ async function enableChart() {
       heading.scope = 'row';
       heading.textContent = ending;
       tr.append(heading);
-      tr.insertCell().textContent = count;
-      tr.insertCell().textContent = pct + '%';
+      const sites = tr.insertCell();
+      sites.textContent = count;
+      sites.title = pct + '% of sites';
     }
   };
   select.disabled = false;
@@ -34,7 +35,7 @@ async function enableChart() {
     bar.addEventListener('click', () => choose(bar.dataset.batch));
   }
 }
-enableChart().catch(() => {}); // The static chart, latest batch and download remain readable offline.
+enableChart(JSON.parse(document.getElementById('batch-data').textContent));
 
 const form = document.getElementById('check-form');
 const field = document.getElementById('candidate');
@@ -55,6 +56,20 @@ form.addEventListener('submit', async event => {
   if (!name) {
     field.setCustomValidity('Enter a name or domain.');
     field.reportValidity();
+    return;
+  }
+  if (directory) {
+    const query = name.toLowerCase();
+    const hits = directory.filter(([brand, domain]) =>
+      brand.toLowerCase() === query || domain === query);
+    for (const [brand, domain] of hits) {
+      const row = document.createElement('li');
+      const address = document.createElement('b');
+      address.textContent = domain;
+      row.append(brand, address);
+      matches.append(row);
+    }
+    status.textContent = hits.length ? 'Listed in this snapshot' : 'No listing for that name in this snapshot.';
     return;
   }
   const request = current = new AbortController();
@@ -81,13 +96,13 @@ form.addEventListener('submit', async event => {
 form.hidden = false;
 
 const share = document.getElementById('share');
-if (navigator.share || navigator.clipboard?.writeText) {
+if (!directory && (navigator.share || navigator.clipboard?.writeText)) {
   share.hidden = false;
   share.addEventListener('click', async () => {
     const url = new URL('/sf/', location.origin).href;
     const message = document.getElementById('share-status');
     try {
-      if (navigator.share) await navigator.share({ title: 'What SF startups launch on', url });
+      if (navigator.share) await navigator.share({ title: document.title, url });
       else {
         await navigator.clipboard.writeText(url);
         message.textContent = 'Link copied.';

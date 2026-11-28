@@ -6,6 +6,8 @@ import io
 import json
 import re
 import subprocess
+import sys
+import time
 import zipfile
 from collections import Counter, defaultdict
 from datetime import date
@@ -13,11 +15,10 @@ from pathlib import Path
 from statistics import median
 from tempfile import TemporaryDirectory
 from urllib.parse import urlsplit
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
-import tldextract
 
-from edgar import funding
+AGENT = "Domain Hound research privacy@domainhound.dev"
 
 ROOT = Path(__file__).resolve().parents[2]
 FEED = "https://yc-oss.github.io/api"
@@ -174,12 +175,33 @@ def apply_com_redirects(companies, as_of):
             row["com_redirect"] = {key: observed[key] for key in ("from_host", "to_host", "checked")}
 
 
+def directory_examples(companies, directory):
+    profiles = {r["id"]: r for r in directory}
+    result = {}
+    for ending in (".ai", ".io", ".dev", ".co", ".so"):
+        rows = [row for row in companies if row["ending"] == ending]
+
+        def priority(row):
+            profile = profiles[row["id"]]
+            return (not profile.get("top_company"), -(profile.get("team_size") or 0),
+                    row["company"].casefold(), row["id"])
+
+        result[ending] = [
+            {"id": row["id"], "top_company": profiles[row["id"]].get("top_company"),
+             "team_size": profiles[row["id"]].get("team_size")}
+            for row in sorted(rows, key=priority)[:3]
+        ]
+    return result
+
+
 def fetch(url):
-    with urlopen(url, timeout=60) as response:
+    time.sleep(0.23)
+    with urlopen(Request(url, headers={"User-Agent": AGENT}), timeout=60) as response:
         return response.read()
 
 
 def main():
+    import tldextract
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--revision", help="Replay a specific yc-oss/api commit")
     args = parser.parse_args()
@@ -205,13 +227,17 @@ def main():
                       "psl": PSL, "psl_version": re.search(rb"// VERSION: (.+)", psl)[1].decode(),
                       "wordnet": WORDNET}
     apply_com_redirects(companies, as_of.isoformat())
-    public = funding(companies, {row["id"]: row for row in rows}, as_of.isoformat())
+    public = {"as_of": as_of.isoformat(), "companies": companies}
     with TemporaryDirectory(dir=ROOT) as staging:
         stage = Path(staging)
         (stage / "companies.json").write_text(json.dumps(public, ensure_ascii=False, indent=2) + "\n")
         (stage / "endings.json").write_text(json.dumps(data, indent=2) + "\n")
+        (stage / "examples.json").write_text(json.dumps(directory_examples(companies, rows), indent=2) + "\n")
+        subprocess.run([sys.executable, str(ROOT / "scripts/sf/check-com.py"),
+                        "--input-dir", staging, "--cache", str(stage / "checks.jsonl")], check=True)
         subprocess.run(["node", str(ROOT / "scripts/sf/render.cjs"), staging], check=True)
         outputs = (("companies.json", "data/sf"), ("endings.json", "data/sf"),
+                   ("examples.json", "data/sf"), ("com-taken.json", "data/sf"),
                    ("index.html", "sf"), ("share.png", "sf"))
         for file, directory in outputs:
             (stage / file).replace(ROOT / directory / file)

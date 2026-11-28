@@ -1,0 +1,87 @@
+{
+  ".ai": [
+    {
+      "id": 28845,
+      "top_company": false,
+      "team_size": 190
+    },
+    {
+      "id": 28864,
+      "top_company": false,
+      "team_size": 120
+    },
+    {
+      "id": 31205,
+      "top_company": false,
+      "team_size": 100
+    }
+  ],
+  ".io": [
+    {
+      "id": 27666,
+      "top_company": false,
+      "team_size": 40
+    },
+    {
+      "id": 30542,
+      "top_company": false,
+      "team_size": 25
+    },
+    {
+      "id": 28822,
+      "top_company": false,
+      "team_size": 18
+    }
+  ],
+  ".dev": [
+    {
+      "id": 29524,
+      "top_company": false,
+      "team_size": 25
+    },
+    {
+      "id": 27673,
+      "top_company": false,
+      "team_size": 15
+    },
+    {
+      "id": 29523,
+      "top_company": false,
+      "team_size": 10
+    }
+  ],
+  ".co": [
+    {
+      "id": 29369,
+      "top_company": false,
+      "team_size": 52
+    },
+    {
+      "id": 29295,
+      "top_company": false,
+      "team_size": 50
+    },
+    {
+      "id": 27862,
+      "top_company": false,
+      "team_size": 15
+    }
+  ],
+  ".so": [
+    {
+      "id": 29377,
+      "top_company": false,
+      "team_size": 25
+    },
+    {
+      "id": 29346,
+      "top_company": false,
+      "team_size": 13
+    },
+    {
+      "id": 30670,
+      "top_company": false,
+      "team_size": 10
+    }
+  ]
+}
