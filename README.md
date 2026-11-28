@@ -18,7 +18,7 @@ node scripts/sf/render.cjs
 node scripts/sf/artifact.cjs "$SF_TOOLS/preview"
 ```
 
-The second command builds a standalone preview. The hosted page checks a name through Domain Hound. The offline form looks up exact names or domains in the bundled directory. Edit the article in `scripts/sf/page.tmpl`.
+The second command builds a standalone preview. The form on the hosted page opens Domain Hound’s checker in the same tab. The form in the offline preview opens the hosted checker in a new tab. Edit the article in `scripts/sf/page.tmpl`. Use `node scripts/sf/verify-copy.cjs /path/to/COPY-v10.md "$SF_TOOLS/preview"` to verify the rendered edition against the approved copy.
 
 To collect a new edition, install Python 3.10+, curl and `tldextract==5.4.0` in a virtual environment, then run `python scripts/sf/refresh.py` in that environment with the same Node settings. The refresh stages the directory counts, examples, registry checks and rendered files together. Pass `--revision <yc-oss-commit>` to choose a directory revision. Registry and redirect checks always observe the date of the run.
 

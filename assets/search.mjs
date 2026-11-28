@@ -968,6 +968,13 @@ const hints = {
   idea: ['Name ideas', 'Search as a name']
 };
 
+const linkedSearch = new URL(location.href);
+const linkedName = linkedSearch.searchParams.get('q')?.trim();
+if (linkedSearch.searchParams.has('q')) {
+  linkedSearch.searchParams.delete('q');
+  history.replaceState(history.state, '', linkedSearch);
+}
+
 for (const form of document.querySelectorAll('.hunt-form')) {
   const field = form.querySelector('input');
   const submit = form.querySelector('.hunt-submit');
@@ -1058,8 +1065,13 @@ for (const form of document.querySelectorAll('.hunt-form')) {
     } else if (currentSearch?.submit.hasAttribute('aria-disabled')) cancelSearch();
     status.textContent = '';
   });
-  updateHint();
   submit.disabled = false;
+  if (form.id === 'main-search' && linkedName) {
+    field.value = linkedName.slice(0, field.maxLength);
+    override = 'name';
+    run(override);
+  }
+  updateHint();
 }
 
 for (const path of paths) {

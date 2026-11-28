@@ -306,6 +306,25 @@ for (const width of [390, 1440]) {
   });
 }
 
+test('the SF form opens the real name search with prices, app stores and trademarks', async t => {
+  const { page, calls } = await openPage(t, call => {
+    assert.equal(call.path, '/v1/check');
+    assert.equal(call.query.get('name'), 'Mapfern');
+    return { json: { ...checkReply(), ...profileChecks('mapfern') } };
+  });
+  await page.goto(site + '/sf/');
+  await page.getByRole('textbox', { name: 'Check your name' }).fill(' Mapfern ');
+  await page.getByRole('button', { name: 'Check my name' }).click();
+  const results = page.locator('#search-results');
+  await results.locator('.best-domain').getByText('mapfern.com', { exact: true }).waitFor();
+  assert.match(await results.locator('.best-domain').innerText(), /Renewal \$9\.00\/year/);
+  assert.match(await results.innerText(), /App Store/);
+  assert.match(await results.innerText(), /trademark/i);
+  assert.equal(new URL(page.url()).search, '');
+  assert.equal(new URL(page.url()).pathname, '/');
+  assert.equal(calls.length, 1);
+});
+
 test('browser RDAP recovers the Hound’s pick ten times at 390px', async t => {
   const name = 'brightboard';
   const domain = name + '.dev';
