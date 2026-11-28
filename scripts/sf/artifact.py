@@ -61,7 +61,7 @@ def package(output):
         copy2(ROOT / file, target)
 
     html = (ROOT / "sf/index.html").read_text()
-    html = html.replace('href="/data/sf/', 'href="data/sf/')
+    html = re.sub(r'<a\b[^>]*\sdownload\b[^>]*>[^<]*</a>', '', html)
     html = re.sub(r'<a href="(https://[^"<>]+)"([^<>]*)>([^<]*)</a>',
                   lambda match: (f'<span{match[2]}>{match[3]}</span>' if ' title=' in match[2]
                                  else f'<span title="{match[1]}"{match[2]}>{match[3]}</span>'), html)
@@ -79,9 +79,9 @@ def package(output):
     html = html.replace('Check endings</button>', 'Look up name</button>')
     html = html.replace('Turn on JavaScript to check a name.',
                         'Turn on JavaScript to look up a name in this snapshot.')
-    html = replace_once(html, 'Which ending can you get?', 'Is your name in the snapshot?')
-    html = replace_once(html, 'Price depends on your exact name. <a href="#check-yours">Check yours below.</a>',
-                        '<a href="#check-yours">Look up your name in this snapshot.</a>')
+    html = replace_once(html, 'Check what’s available and what your exact name costs to renew.',
+                        'Look up a company or domain in this directory snapshot.')
+    html = replace_once(html, '>Check a name</a>', '>Look up a name</a>')
     (output / "index.html").write_text(html)
     (output / "sf/page.js").write_text(portable_script())
 

@@ -1,7 +1,7 @@
 {
   "directory_snapshot": "https://raw.githubusercontent.com/yc-oss/api/3164430271c7fd083eee684c2abe5de3c79b6bfc/companies/all.json",
   "funding_checked": "2026-11-27",
-  "candidate_count": 174,
+  "candidate_count": 175,
   "companies": [
     {
       "id": 29646,
@@ -62,7 +62,58 @@
             "final_url": "https://corgi.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI financial infrastructure"
+    },
+    {
+      "id": 29765,
+      "company": "Emergent",
+      "domain": "emergent.sh",
+      "ending": ".sh",
+      "team_size": null,
+      "raised_usd": 230000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 7000000,
+          "date": "2024",
+          "source_url": "https://emergent.sh/news/emergent-now-a-unicorn-at-1-5-billion-valuation"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 23000000,
+          "date": "2025-09",
+          "source_url": "https://emergent.sh/news/emergent-now-a-unicorn-at-1-5-billion-valuation"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 70000000,
+          "date": "2026-01",
+          "source_url": "https://emergent.sh/news/emergent-now-a-unicorn-at-1-5-billion-valuation"
+        },
+        {
+          "round": "Series C",
+          "amount_usd": 130000000,
+          "date": "2026-07-16",
+          "source_url": "https://emergent.sh/news/emergent-now-a-unicorn-at-1-5-billion-valuation"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "emergent.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/emergent.com",
+        "rdap_status": 200,
+        "final_url": "https://emergent.com/",
+        "http_attempts": [
+          {
+            "url": "https://emergent.com/",
+            "http_status": 200,
+            "final_url": "https://emergent.com/"
+          }
+        ]
+      },
+      "what_they_do": "Builds apps from plain-language instructions"
     },
     {
       "id": 29069,
@@ -111,7 +162,8 @@
             "final_url": "https://www.happyrobot.ai/"
           }
         ]
-      }
+      },
+      "what_they_do": "Intelligence that runs business operations"
     },
     {
       "id": 27735,
@@ -160,7 +212,8 @@
             "final_url": "https://www.numeral.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI-native sales tax software"
     },
     {
       "id": 28804,
@@ -219,7 +272,8 @@
             "final_url": "https://www.bland.ai/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI phone calls for enterprises"
     },
     {
       "id": 29254,
@@ -272,7 +326,8 @@
             "final_url": "https://www.reducto.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI agents for document processing"
     },
     {
       "id": 28845,
@@ -325,7 +380,8 @@
             "final_url": "https://www.campfire.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI-native enterprise resource planning"
     },
     {
       "id": 28929,
@@ -339,13 +395,13 @@
           "round": "Seed",
           "amount_usd": 4800000,
           "date": "2023-11-08",
-          "source_url": "https://www.axios.com/pro/fintech-deals/2023/11/08/exclusive-anti-money-laundering-ai-startup-greenlite-4m"
+          "source_url": "https://www.bretton.com/blog/greenlite-seed-round"
         },
         {
           "round": "Series A",
           "amount_usd": 15000000,
           "date": "2025-05-21",
-          "source_url": "https://www.bretton.com/blog"
+          "source_url": "https://www.bretton.com/blog/greenlite-ai-raises-15-million-series-a"
         },
         {
           "round": "Series B",
@@ -368,7 +424,8 @@
             "final_url": "https://www.bretton.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI-powered operations for banks"
     },
     {
       "id": 27700,
@@ -399,7 +456,8 @@
             "final_url": "https://www.latenthealth.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Clinical AI to help patients access medicines"
     },
     {
       "id": 29226,
@@ -407,13 +465,13 @@
       "domain": "greptile.com",
       "ending": ".com",
       "team_size": 35,
-      "raised_usd": 79000000,
+      "raised_usd": 79100000,
       "rounds": [
         {
-          "round": "Seed, as previously reported",
-          "amount_usd": 4000000,
-          "date": "2025-07-18",
-          "source_url": "https://techcrunch.com/2025/07/18/benchmark-in-talks-to-lead-series-a-for-greptile-valuing-ai-code-reviewer-at-180m-sources-say/"
+          "round": "Seed",
+          "amount_usd": 4100000,
+          "date": "2024-06-09",
+          "source_url": "https://www.greptile.com/blog/seed"
         },
         {
           "round": "Series A",
@@ -442,7 +500,8 @@
             "final_url": "https://www.greptile.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI code reviews with full codebase context"
     },
     {
       "id": 29180,
@@ -485,7 +544,8 @@
             "final_url": "https://www.gumloop.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Collaborative AI agent builder"
     },
     {
       "id": 29231,
@@ -522,7 +582,8 @@
             "final_url": "https://www.ubicloud.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Open-source alternative to AWS"
     },
     {
       "id": 29108,
@@ -569,7 +630,8 @@
             "final_url": "https://giga.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI support agents for enterprises"
     },
     {
       "id": 27808,
@@ -600,7 +662,8 @@
             "final_url": "https://www.trysalient.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI loan servicing for auto lenders"
     },
     {
       "id": 27664,
@@ -614,7 +677,7 @@
           "round": "Seed",
           "amount_usd": 2800000,
           "date": "2023-07-03",
-          "source_url": "https://pitchbook.com/profiles/company/523135-36"
+          "source_url": "https://infisical.com/blog/infisical-seed-round"
         },
         {
           "round": "Series A",
@@ -643,7 +706,8 @@
             "final_url": "https://infisical.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Security infrastructure for developers and agents"
     },
     {
       "id": 28864,
@@ -654,7 +718,7 @@
       "raised_usd": 51000000,
       "rounds": [
         {
-          "round": "Seed funding, as disclosed with Series A",
+          "round": "Prior funding, implied rounded balance through Series A",
           "amount_usd": 4000000,
           "date": "2025-06-11",
           "source_url": "https://www.globenewswire.com/news-release/2025/06/11/3097668/0/en/Startup-Outset-Raises-17M-Series-A-to-Help-Enterprises-Scale-Accelerate-Customer-Research-with-AI-Agent-led-Interviews.html"
@@ -696,7 +760,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "AI-powered user interviews"
     },
     {
       "id": 28069,
@@ -739,7 +804,8 @@
             "final_url": "https://www.usepylon.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI customer support platform for B2B"
     },
     {
       "id": 28589,
@@ -771,7 +837,8 @@
             "final_url": "https://www.hockeystack.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Tools for inbound B2B revenue"
     },
     {
       "id": 30288,
@@ -802,7 +869,8 @@
             "final_url": "https://www.harperinsure.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI-native commercial insurance brokerage"
     },
     {
       "id": 30644,
@@ -849,7 +917,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "Helps AI systems run faster"
     },
     {
       "id": 29295,
@@ -896,7 +965,8 @@
             "final_url": "https://www.cadence.com/en_US/home/tools/silicon-solutions/artisan-ip.html"
           }
         ]
-      }
+      },
+      "what_they_do": "AI workers for sales and other tasks"
     },
     {
       "id": 30304,
@@ -943,7 +1013,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "JavaScript framework for building AI agents"
     },
     {
       "id": 28811,
@@ -990,7 +1061,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "Technology for banks"
     },
     {
       "id": 30275,
@@ -1033,7 +1105,8 @@
             "final_url": "https://www.solidroad.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI customer support training and QA"
     },
     {
       "id": 28817,
@@ -1080,7 +1153,8 @@
             "final_url": "https://every.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Banking, payroll, benefits, bookkeeping and tax"
     },
     {
       "id": 30522,
@@ -1127,7 +1201,8 @@
             "final_url": "https://domains.atom.com/lpd/name/usenaive.com"
           }
         ]
-      }
+      },
+      "what_they_do": "Infrastructure for autonomous companies"
     },
     {
       "id": 29858,
@@ -1174,7 +1249,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "Medical search that reasons like a clinician"
     },
     {
       "id": 29524,
@@ -1221,7 +1297,8 @@
             "final_url": "https://www.coval.com/en-us"
           }
         ]
-      }
+      },
+      "what_they_do": "Simulates and evaluates voice and chat agents"
     },
     {
       "id": 27959,
@@ -1262,7 +1339,8 @@
             "final_url": "https://www.vitalize.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Labor optimization for health systems"
     },
     {
       "id": 30804,
@@ -1299,7 +1377,8 @@
             "final_url": "https://www.luminal.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Faster AI on any hardware"
     },
     {
       "id": 30303,
@@ -1330,7 +1409,8 @@
             "final_url": "https://www.afterquery.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Curates data for foundation models"
     },
     {
       "id": 29008,
@@ -1367,7 +1447,8 @@
             "final_url": "https://www.andromedasurgical.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Autonomous surgical robots"
     },
     {
       "id": 29290,
@@ -1404,7 +1485,8 @@
             "final_url": "https://www.furtherai.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI workforce for the insurance industry"
     },
     {
       "id": 29649,
@@ -1445,7 +1527,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "AI agents designed for reliability"
     },
     {
       "id": 29369,
@@ -1481,7 +1564,8 @@
             "final_url": "https://www.astromecha.co/"
           }
         ]
-      }
+      },
+      "what_they_do": "Supersonic flight technology"
     },
     {
       "id": 31041,
@@ -1522,7 +1606,8 @@
             "final_url": "https://ploy.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Turns company websites into growth channels"
     },
     {
       "id": 29000,
@@ -1553,7 +1638,8 @@
             "final_url": "https://www.safetykit.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI agents for risk, compliance and safety"
     },
     {
       "id": 29715,
@@ -1600,7 +1686,8 @@
             "final_url": "https://www.kastle.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI workers for regulated finance"
     },
     {
       "id": 27926,
@@ -1637,7 +1724,8 @@
             "final_url": "https://www.variance.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI agents for fraud reviews and investigations"
     },
     {
       "id": 30230,
@@ -1674,7 +1762,8 @@
             "final_url": "https://salespatriot.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Supply chain AI for distribution and procurement"
     },
     {
       "id": 29585,
@@ -1721,7 +1810,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "Memory for AI agents"
     },
     {
       "id": 30762,
@@ -1762,7 +1852,8 @@
             "final_url": "https://www.kernel.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Open-source internet access infrastructure for AI agents"
     },
     {
       "id": 28073,
@@ -1803,7 +1894,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "Accessible voice AI"
     },
     {
       "id": 29263,
@@ -1840,7 +1932,8 @@
             "final_url": "https://www.alex.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI recruiting and hiring"
     },
     {
       "id": 29407,
@@ -1887,7 +1980,8 @@
             "final_url": "https://www.getjust.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "AI agents for marketing"
     },
     {
       "id": 27673,
@@ -1934,7 +2028,8 @@
             "final_url": "https://www.reflex.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Tools for building software"
     },
     {
       "id": 27667,
@@ -1971,7 +2066,8 @@
             "final_url": "https://www.stackai.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Enterprise AI transformation platform"
     },
     {
       "id": 27854,
@@ -2008,7 +2104,8 @@
             "final_url": "https://www.fours.com/"
           }
         ]
-      }
+      },
+      "what_they_do": "Infrastructure for indirect revenue channels"
     },
     {
       "id": 29256,
@@ -2055,7 +2152,8 @@
             "final_url": null
           }
         ]
-      }
+      },
+      "what_they_do": "AI quality assurance for software releases"
     },
     {
       "id": 28911,
@@ -2092,44 +2190,8 @@
             "final_url": "https://www.candoriq.com/"
           }
         ]
-      }
-    },
-    {
-      "id": 28788,
-      "company": "Hyperbound",
-      "domain": "hyperbound.ai",
-      "ending": ".ai",
-      "team_size": 30,
-      "raised_usd": 18300000,
-      "rounds": [
-        {
-          "round": "Prior funding as disclosed with Series A",
-          "amount_usd": 3300000,
-          "date": "2025-09-15",
-          "source_url": "https://www.hyperbound.ai/blog/series-a"
-        },
-        {
-          "round": "Series A",
-          "amount_usd": 15000000,
-          "date": "2025-09-15",
-          "source_url": "https://www.hyperbound.ai/blog/series-a"
-        }
-      ],
-      "com": {
-        "status": "yes",
-        "checked": "2026-11-27",
-        "domain": "hyperbound.com",
-        "rdap_url": "https://rdap.verisign.com/com/v1/domain/hyperbound.com",
-        "rdap_status": 200,
-        "final_url": "https://www.hyperbound.ai/",
-        "http_attempts": [
-          {
-            "url": "https://hyperbound.com/",
-            "http_status": 200,
-            "final_url": "https://www.hyperbound.ai/"
-          }
-        ]
-      }
+      },
+      "what_they_do": "Headcount and compensation management"
     }
   ]
 }
