@@ -26,7 +26,7 @@ def portable_script():
   const { batches } = await response.json();""", "  const { batches } = endings;")
     chart = replace_once(chart, """  const { runSearch } = await import('/assets/search-api.mjs');
   signal.throwIfAborted();
-  return runSearch('name', { name, extraEnding: 'si' }, signal);""", """  const query = name.normalize('NFKC').toLowerCase().replace(/\\.$/, '');
+  return runSearch('name', { name, extraEnding: 'io' }, signal);""", """  const query = name.normalize('NFKC').toLowerCase().replace(/\\.$/, '');
   const domains = new Set(companies.filter(row =>
     row.company.normalize('NFKC').toLowerCase() === query ||
     row.domain === query || row.domain.slice(0, -row.ending.length) === query
@@ -34,37 +34,34 @@ def portable_script():
   return { items: [...domains].map(domain => ({ domain, status: 'listed' })) };""")
     chart = replace_once(chart, "taken: 'Taken'", "listed: 'Listed in the snapshot'")
     chart = replace_once(chart, "'Domain check results' : 'No endings confirmed. Try another name.'",
-                         "'Snapshot matches' : 'No matching name or domain in this snapshot.'")
+                         "'Snapshot matches' : 'We couldn’t find that name in this snapshot.'")
     chart = replace_once(chart, "new URL('/sf/', location.origin)", "new URL('./index.html', location.href)")
 
     funding = re.sub(r"^export ", "", (ROOT / "sf/funding.mjs").read_text(), flags=re.M)
-    funding = replace_once(funding, """      const source = `https://www.sec.gov/edgar/browse/?CIK=${encodeURIComponent(f.cik)}&amp;owner=exclude&amp;forms=D`;
-      amount = `<a href="${source}" title="Latest filing: ${escape(f.latest_filing)}"
-        aria-label="${escape(row.company)}, ${dollars}, view SEC filings">${dollars}</a>`;""",
-                           '      amount = `<span title="Latest filing: ${escape(f.latest_filing)}">${dollars}</span>`;')
     table = (ROOT / "sf/funding-table.mjs").read_text().split("\n", 1)[1]
-    table = replace_once(table, """  const response = await fetch('/data/sf/companies.json');
+    table = replace_once(table, """  const response = await fetch('/data/sf/top50.json');
   if (!response.ok) return;
   const { companies } = await response.json();
-""", "")
+""", "  const { companies } = top50;\n")
 
     endings = inline_data("endings", ["batches"])
     companies = inline_data("companies", ["companies"])
+    top50 = inline_data("top50", ["companies"])
     return (f"(() => {{\nconst endings = {endings};\nconst {{ companies }} = {companies};\n"
-            f"(() => {{\n{chart}}})();\n{funding}{table}}})();\n")
+            f"const top50 = {top50};\n(() => {{\n{chart}}})();\n{funding}{table}}})();\n")
 
 
 def package(output):
     files = ["assets/home.css", "assets/palette.css", "assets/mulish-latin-wght-normal.woff2",
              "assets/OFL.txt", "assets/hound-mark.svg", "sf/page.css", "sf/share.png",
-             "data/sf/endings.json", "data/sf/companies.json"]
+             "data/sf/endings.json", "data/sf/companies.json", "data/sf/top50.json"]
     for file in files:
         target = output / file
         target.parent.mkdir(exist_ok=True, parents=True)
         copy2(ROOT / file, target)
 
     html = (ROOT / "sf/index.html").read_text()
-    html = re.sub(r'<a\b[^>]*\bdownload\b[^>]*>[^<]*</a>', '', html)
+    html = html.replace('href="/data/sf/', 'href="data/sf/')
     html = re.sub(r'<a href="(https://[^"<>]+)"([^<>]*)>([^<]*)</a>',
                   lambda match: (f'<span{match[2]}>{match[3]}</span>' if ' title=' in match[2]
                                  else f'<span title="{match[1]}"{match[2]}>{match[3]}</span>'), html)

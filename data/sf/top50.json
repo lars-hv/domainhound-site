@@ -1,0 +1,2135 @@
+{
+  "directory_snapshot": "https://raw.githubusercontent.com/yc-oss/api/3164430271c7fd083eee684c2abe5de3c79b6bfc/companies/all.json",
+  "funding_checked": "2026-11-27",
+  "candidate_count": 174,
+  "companies": [
+    {
+      "id": 29646,
+      "company": "Corgi",
+      "domain": "corgi.com",
+      "ending": ".com",
+      "team_size": 450,
+      "raised_usd": 460877877,
+      "rounds": [
+        {
+          "round": "Seed and Series A combined",
+          "amount_usd": 108000000,
+          "date": "2026-01",
+          "source_url": "https://www.prnewswire.com/news-releases/corgi-insurance-raises-108-million-receives-regulatory-approval-to-launch-the-first-full-stack-insurance-carrier-for-startups-302657727.html"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 160000000,
+          "date": "2026-05-06",
+          "source_url": "https://www.corgi.insure/press-releases/series-b"
+        },
+        {
+          "round": "Series B1",
+          "amount_usd": 106000000,
+          "date": "2026-05-28",
+          "source_url": "https://www.corgi.insure/press-releases/series-b1"
+        },
+        {
+          "round": "Series B-2, Form D amount sold",
+          "amount_usd": 40678902,
+          "date": "2026-08-24",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2074564/000207456426000004/primary_doc.xml"
+        },
+        {
+          "round": "Series B-3, Form D amount sold",
+          "amount_usd": 16199417,
+          "date": "2026-09-04",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2074564/000207456426000005/primary_doc.xml"
+        },
+        {
+          "round": "Series B-4, Form D amount sold",
+          "amount_usd": 29999558,
+          "date": "2026-10-30",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2074564/000207456426000006/primary_doc.xml"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "corgi.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/corgi.com",
+        "rdap_status": 200,
+        "final_url": "https://corgi.com/",
+        "http_attempts": [
+          {
+            "url": "https://corgi.com/",
+            "http_status": 200,
+            "final_url": "https://corgi.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29069,
+      "company": "HappyRobot",
+      "domain": "happyrobot.ai",
+      "ending": ".ai",
+      "team_size": 80,
+      "raised_usd": 211500000,
+      "rounds": [
+        {
+          "round": "Seed funding, as disclosed with Series A",
+          "amount_usd": 1900000,
+          "date": "2024-12-04",
+          "source_url": "https://www.happyrobot.ai/blog/series-a-announcement"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 15600000,
+          "date": "2024-12-04",
+          "source_url": "https://www.happyrobot.ai/blog/series-a-announcement"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 44000000,
+          "date": "2025-09-03",
+          "source_url": "https://www.happyrobot.ai/blog/series-b-announcement"
+        },
+        {
+          "round": "Series C",
+          "amount_usd": 150000000,
+          "date": "2026-08-04",
+          "source_url": "https://www.happyrobot.ai/blog/happyrobot-seriesc-fundraising-announcement"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "happyrobot.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/happyrobot.com",
+        "rdap_status": 200,
+        "final_url": "https://www.happyrobot.ai/",
+        "http_attempts": [
+          {
+            "url": "https://happyrobot.com/",
+            "http_status": 200,
+            "final_url": "https://www.happyrobot.ai/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27735,
+      "company": "Numeral",
+      "domain": "numeral.com",
+      "ending": ".com",
+      "team_size": 130,
+      "raised_usd": 157000000,
+      "rounds": [
+        {
+          "round": "Series A",
+          "amount_usd": 18000000,
+          "date": "2025-03",
+          "source_url": "https://www.numeral.com/blog/series-c"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 35000000,
+          "date": "2025-09",
+          "source_url": "https://www.numeral.com/blog/series-c"
+        },
+        {
+          "round": "Seed, disclosed again with Series B",
+          "amount_usd": 4000000,
+          "date": "2025-09-18",
+          "source_url": "https://eprnews.com/numeral-raises-35-million-series-b-led-by-mayfield-687380/"
+        },
+        {
+          "round": "Series C",
+          "amount_usd": 100000000,
+          "date": "2026-09-23",
+          "source_url": "https://www.numeral.com/blog/series-c"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "numeral.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/numeral.com",
+        "rdap_status": 200,
+        "final_url": "https://www.numeral.com/",
+        "http_attempts": [
+          {
+            "url": "https://numeral.com/",
+            "http_status": 200,
+            "final_url": "https://www.numeral.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28804,
+      "company": "Bland AI",
+      "domain": "bland.com",
+      "ending": ".com",
+      "team_size": 65,
+      "raised_usd": 115000000,
+      "rounds": [
+        {
+          "round": "Series A",
+          "amount_usd": 16000000,
+          "date": "2024-08",
+          "source_url": "https://www.scalevp.com/press/bland-ai-emerges-from-stealth-with--16m-series-a-led-by-scale-venture-partners"
+        },
+        {
+          "round": "Prior funding implied by the company’s disclosed total",
+          "amount_usd": 9000000,
+          "date": "2025-02",
+          "source_url": "https://www.bland.ai/blog/bland-raises-a-40m-series-b"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 40000000,
+          "date": "2025-02",
+          "source_url": "https://www.bland.ai/blog/bland-raises-a-40m-series-b"
+        },
+        {
+          "round": "Series C",
+          "amount_usd": 50000000,
+          "date": "2026-06-16",
+          "source_url": "https://www.bland.ai/blog/series-c"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "bland.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/bland.com",
+        "rdap_status": 200,
+        "final_url": "https://www.bland.ai/",
+        "http_attempts": [
+          {
+            "url": "https://bland.com/",
+            "http_status": 200,
+            "final_url": "https://www.bland.ai/"
+          },
+          {
+            "url": "http://bland.com/",
+            "http_status": 200,
+            "final_url": "https://www.bland.ai/"
+          },
+          {
+            "url": "https://www.bland.com/",
+            "http_status": 200,
+            "final_url": "https://www.bland.ai/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29254,
+      "company": "Reducto",
+      "domain": "reducto.ai",
+      "ending": ".ai",
+      "team_size": 30,
+      "raised_usd": 107900000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 8400000,
+          "date": "2024-10",
+          "source_url": "https://www.globenewswire.com/news-release/2025/04/25/3068298/0/en/Reducto-Raises-24-5M-Series-A-Round-to-Help-Enterprises-Unlock-Unstructured-Data.html"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 24500000,
+          "date": "2025-04-25",
+          "source_url": "https://www.globenewswire.com/news-release/2025/04/25/3068298/0/en/Reducto-Raises-24-5M-Series-A-Round-to-Help-Enterprises-Unlock-Unstructured-Data.html"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 75000000,
+          "date": "2025-10-14",
+          "source_url": "https://reducto.ai/blog/reducto-series-b-funding"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "reducto.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/reducto.com",
+        "rdap_status": 200,
+        "final_url": "https://reducto.com/",
+        "http_attempts": [
+          {
+            "url": "https://reducto.com/",
+            "http_status": 200,
+            "final_url": "https://reducto.com/"
+          },
+          {
+            "url": "http://reducto.com/",
+            "http_status": 200,
+            "final_url": "http://reducto.com/"
+          },
+          {
+            "url": "https://www.reducto.com/",
+            "http_status": 200,
+            "final_url": "https://www.reducto.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28845,
+      "company": "Campfire",
+      "domain": "campfire.ai",
+      "ending": ".ai",
+      "team_size": 190,
+      "raised_usd": 103500000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 3500000,
+          "date": "2024-02",
+          "source_url": "https://campfire.ai/blog/campfire-raises-35m-series-a-from-accel"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 35000000,
+          "date": "2025-06-30",
+          "source_url": "https://techcrunch.com/2025/06/30/tiny-ai-erp-startup-campfire-is-winning-so-many-startups-from-netsuite-accel-led-a-35m-series-a/"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 65000000,
+          "date": "2025-10-15",
+          "source_url": "https://www.prnewswire.com/news-releases/campfire-raises-65-million-series-b-to-redefine-how-finance-works-in-the-ai-era-302585077.html"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "campfire.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/campfire.com",
+        "rdap_status": 200,
+        "final_url": "http://www.campfire.com/",
+        "http_attempts": [
+          {
+            "url": "https://campfire.com/",
+            "http_status": 200,
+            "final_url": "http://www.campfire.com/"
+          },
+          {
+            "url": "http://campfire.com/",
+            "http_status": 200,
+            "final_url": "http://www.campfire.com/"
+          },
+          {
+            "url": "https://www.campfire.com/",
+            "http_status": 200,
+            "final_url": "https://www.campfire.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28929,
+      "company": "Bretton AI",
+      "domain": "bretton.com",
+      "ending": ".com",
+      "team_size": 34,
+      "raised_usd": 94800000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 4800000,
+          "date": "2023-11-08",
+          "source_url": "https://www.axios.com/pro/fintech-deals/2023/11/08/exclusive-anti-money-laundering-ai-startup-greenlite-4m"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 15000000,
+          "date": "2025-05-21",
+          "source_url": "https://www.bretton.com/blog"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 75000000,
+          "date": "2026-02-10",
+          "source_url": "https://www.bretton.com/blog/bretton-raises-75m-series-b-to-modernize-aml-kyc-staffing"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "bretton.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/bretton.com",
+        "rdap_status": 200,
+        "final_url": "https://www.bretton.com/",
+        "http_attempts": [
+          {
+            "url": "https://bretton.com/",
+            "http_status": 200,
+            "final_url": "https://www.bretton.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27700,
+      "company": "Latent",
+      "domain": "latenthealth.com",
+      "ending": ".com",
+      "team_size": 140,
+      "raised_usd": 80000000,
+      "rounds": [
+        {
+          "round": "Series A",
+          "amount_usd": 80000000,
+          "date": "2026-03-18",
+          "source_url": "https://www.latenthealth.com/blog/latent-raises-80m-to-close-the-gap-between-diagnosis-and-treatment"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "latenthealth.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/latenthealth.com",
+        "rdap_status": 200,
+        "final_url": "https://www.latenthealth.com/",
+        "http_attempts": [
+          {
+            "url": "https://latenthealth.com/",
+            "http_status": 200,
+            "final_url": "https://www.latenthealth.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29226,
+      "company": "Greptile",
+      "domain": "greptile.com",
+      "ending": ".com",
+      "team_size": 35,
+      "raised_usd": 79000000,
+      "rounds": [
+        {
+          "round": "Seed, as previously reported",
+          "amount_usd": 4000000,
+          "date": "2025-07-18",
+          "source_url": "https://techcrunch.com/2025/07/18/benchmark-in-talks-to-lead-series-a-for-greptile-valuing-ai-code-reviewer-at-180m-sources-say/"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 25000000,
+          "date": "2025-09-23",
+          "source_url": "https://www.greptile.com/blog/series-a"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 50000000,
+          "date": "2026-10-19",
+          "source_url": "https://www.greptile.com/blog/series-b"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "greptile.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/greptile.com",
+        "rdap_status": 200,
+        "final_url": "https://www.greptile.com/",
+        "http_attempts": [
+          {
+            "url": "https://greptile.com/",
+            "http_status": 200,
+            "final_url": "https://www.greptile.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29180,
+      "company": "Gumloop",
+      "domain": "gumloop.com",
+      "ending": ".com",
+      "team_size": 44,
+      "raised_usd": 70000000,
+      "rounds": [
+        {
+          "round": "Seed funding, as disclosed with Series A",
+          "amount_usd": 3000000,
+          "date": "2025-01-10",
+          "source_url": "https://www.gumloop.com/blog/gumloops-17m-series-a"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 17000000,
+          "date": "2025-01-10",
+          "source_url": "https://www.gumloop.com/blog/gumloops-17m-series-a"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 50000000,
+          "date": "2026-03-12",
+          "source_url": "https://www.gumloop.com/blog/series-b"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "gumloop.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/gumloop.com",
+        "rdap_status": 200,
+        "final_url": "https://www.gumloop.com/",
+        "http_attempts": [
+          {
+            "url": "https://gumloop.com/",
+            "http_status": 200,
+            "final_url": "https://www.gumloop.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29231,
+      "company": "Ubicloud",
+      "domain": "ubicloud.com",
+      "ending": ".com",
+      "team_size": 15,
+      "raised_usd": 65649761,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 16000000,
+          "date": "2024-03-05",
+          "source_url": "https://www.ubicloud.com/about-ubicloud"
+        },
+        {
+          "round": "Form D amount sold",
+          "amount_usd": 49649761,
+          "date": "2026-11-09",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2161980/000216198026000001/primary_doc.xml"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "ubicloud.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/ubicloud.com",
+        "rdap_status": 200,
+        "final_url": "https://www.ubicloud.com/",
+        "http_attempts": [
+          {
+            "url": "https://ubicloud.com/",
+            "http_status": 200,
+            "final_url": "https://www.ubicloud.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29108,
+      "company": "Giga",
+      "domain": "giga.ai",
+      "ending": ".ai",
+      "team_size": 30,
+      "raised_usd": 64600000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 3600000,
+          "date": "2023-10-23",
+          "source_url": "https://www.nasdaq.com/press-release/giga-ml-secures-%243.6m-seed-funding-to-revolutionize-enterprise-deployment-of-large"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 61000000,
+          "date": "2025-11-05",
+          "source_url": "https://giga.ai/news/series-a"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "giga.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/giga.com",
+        "rdap_status": 200,
+        "final_url": "https://giga.com/",
+        "http_attempts": [
+          {
+            "url": "https://giga.com/",
+            "http_status": 200,
+            "final_url": "https://giga.com/"
+          },
+          {
+            "url": "http://giga.com/",
+            "http_status": 200,
+            "final_url": "https://giga.com/"
+          },
+          {
+            "url": "https://www.giga.com/",
+            "http_status": 200,
+            "final_url": "https://giga.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27808,
+      "company": "Salient",
+      "domain": "trysalient.com",
+      "ending": ".com",
+      "team_size": 40,
+      "raised_usd": 60000000,
+      "rounds": [
+        {
+          "round": "Funding disclosed in July 2025",
+          "amount_usd": 60000000,
+          "date": "2025-07-28",
+          "source_url": "https://www.finsmes.com/2025/07/salient-raises-usd60m-in-funding.html"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "trysalient.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/trysalient.com",
+        "rdap_status": 200,
+        "final_url": "https://www.trysalient.com/",
+        "http_attempts": [
+          {
+            "url": "https://trysalient.com/",
+            "http_status": 200,
+            "final_url": "https://www.trysalient.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27664,
+      "company": "Infisical",
+      "domain": "infisical.com",
+      "ending": ".com",
+      "team_size": 70,
+      "raised_usd": 58800000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 2800000,
+          "date": "2023-07-03",
+          "source_url": "https://pitchbook.com/profiles/company/523135-36"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 16000000,
+          "date": "2025-06-06",
+          "source_url": "https://www.prnewswire.com/news-releases/infisical-secures-16m-series-a-to-redefine-enterprise-secrets-identity-and-access-management-302475063.html"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 40000000,
+          "date": "2026-10-27",
+          "source_url": "https://infisical.com/blog/series-b"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "infisical.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/infisical.com",
+        "rdap_status": 200,
+        "final_url": "https://infisical.com/",
+        "http_attempts": [
+          {
+            "url": "https://infisical.com/",
+            "http_status": 200,
+            "final_url": "https://infisical.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28864,
+      "company": "Outset",
+      "domain": "outset.ai",
+      "ending": ".ai",
+      "team_size": 120,
+      "raised_usd": 51000000,
+      "rounds": [
+        {
+          "round": "Seed funding, as disclosed with Series A",
+          "amount_usd": 4000000,
+          "date": "2025-06-11",
+          "source_url": "https://www.globenewswire.com/news-release/2025/06/11/3097668/0/en/Startup-Outset-Raises-17M-Series-A-to-Help-Enterprises-Scale-Accelerate-Customer-Research-with-AI-Agent-led-Interviews.html"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 17000000,
+          "date": "2025-06-11",
+          "source_url": "https://www.globenewswire.com/news-release/2025/06/11/3097668/0/en/Startup-Outset-Raises-17M-Series-A-to-Help-Enterprises-Scale-Accelerate-Customer-Research-with-AI-Agent-led-Interviews.html"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 30000000,
+          "date": "2025-12-10",
+          "source_url": "https://www.globenewswire.com/news-release/2025/12/10/3203401/0/en/Outset-Secures-30-Million-Series-B-to-Launch-the-World-s-First-AI-Native-Customer-Experience-Management-Platform.html"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "outset.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/outset.com",
+        "rdap_status": 200,
+        "final_url": null,
+        "http_attempts": [
+          {
+            "url": "https://outset.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "http://outset.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "https://www.outset.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 28069,
+      "company": "Pylon",
+      "domain": "usepylon.com",
+      "ending": ".com",
+      "team_size": 120,
+      "raised_usd": 51000000,
+      "rounds": [
+        {
+          "round": "Seed funding, as disclosed with Series A",
+          "amount_usd": 3000000,
+          "date": "2024-08",
+          "source_url": "https://www.usepylon.com/blog/pylon-raises-17m-series-a-led-by-andreessen-horowitz"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 17000000,
+          "date": "2024-08",
+          "source_url": "https://www.usepylon.com/blog/pylon-raises-17m-series-a-led-by-andreessen-horowitz"
+        },
+        {
+          "round": "Series B",
+          "amount_usd": 31000000,
+          "date": "2025-08-19",
+          "source_url": "https://www.usepylon.com/blog/announcing-our-31m-series-b"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "usepylon.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/usepylon.com",
+        "rdap_status": 200,
+        "final_url": "https://www.usepylon.com/",
+        "http_attempts": [
+          {
+            "url": "https://usepylon.com/",
+            "http_status": 200,
+            "final_url": "https://www.usepylon.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28589,
+      "company": "HockeyStack",
+      "domain": "hockeystack.com",
+      "ending": ".com",
+      "team_size": 32,
+      "raised_usd": 50000000,
+      "rounds": [
+        {
+          "round": "Announced cumulative total through April 2026, individual new round amount withheld",
+          "amount_usd": 50000000,
+          "date": "2026-04-15",
+          "source_url": "https://www.prnewswire.com/news-releases/hockeystack-raises-50m-to-build-revenue-agents-for-the-enterprise-302742217.html"
+        }
+      ],
+      "raised_is_floor": true,
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "hockeystack.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/hockeystack.com",
+        "rdap_status": 200,
+        "final_url": "https://www.hockeystack.com/",
+        "http_attempts": [
+          {
+            "url": "https://hockeystack.com/",
+            "http_status": 200,
+            "final_url": "https://www.hockeystack.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 30288,
+      "company": "Harper",
+      "domain": "harperinsure.com",
+      "ending": ".com",
+      "team_size": 25,
+      "raised_usd": 46800000,
+      "rounds": [
+        {
+          "round": "Seed and Series A combined",
+          "amount_usd": 46800000,
+          "date": "2026-02-25",
+          "source_url": "https://techcrunch.com/2026/02/25/ai-insurance-brokerage-harper-raises-45m-series-a-and-seed/"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "harperinsure.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/harperinsure.com",
+        "rdap_status": 200,
+        "final_url": "https://www.harperinsure.com/",
+        "http_attempts": [
+          {
+            "url": "https://harperinsure.com/",
+            "http_status": 200,
+            "final_url": "https://www.harperinsure.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 30644,
+      "company": "Wafer",
+      "domain": "wafer.ai",
+      "ending": ".ai",
+      "team_size": 21,
+      "raised_usd": 44000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 4000000,
+          "date": "2026-04-14",
+          "source_url": "https://www.wafer.ai/blog/seed-round"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 40000000,
+          "date": "2026-09-01",
+          "source_url": "https://www.wafer.ai/blog/series-a"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "wafer.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/wafer.com",
+        "rdap_status": 200,
+        "final_url": "https://wafer.com/",
+        "http_attempts": [
+          {
+            "url": "https://wafer.com/",
+            "http_status": 200,
+            "final_url": "https://wafer.com/"
+          },
+          {
+            "url": "http://wafer.com/",
+            "http_status": 200,
+            "final_url": "http://wafer.com/"
+          },
+          {
+            "url": "https://www.wafer.com/",
+            "http_status": "SSLCertVerificationError",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 29295,
+      "company": "Artisan",
+      "domain": "artisan.co",
+      "ending": ".co",
+      "team_size": 50,
+      "raised_usd": 36500000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 11500000,
+          "date": "2024-09-30",
+          "source_url": "https://www.artisan.co/blog/artisan-seed-round"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 25000000,
+          "date": "2025-04-09",
+          "source_url": "https://www.artisan.co/blog/artisan-series-a"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "artisan.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/artisan.com",
+        "rdap_status": 200,
+        "final_url": "https://www.cadence.com/en_US/home/tools/silicon-solutions/artisan-ip.html",
+        "http_attempts": [
+          {
+            "url": "https://artisan.com/",
+            "http_status": 403,
+            "final_url": "https://www.cadence.com/en_US/home/tools/silicon-solutions/artisan-ip.html"
+          },
+          {
+            "url": "http://artisan.com/",
+            "http_status": 200,
+            "final_url": "https://www.cadence.com/en_US/home/tools/silicon-solutions/artisan-ip.html"
+          },
+          {
+            "url": "https://www.artisan.com/",
+            "http_status": 200,
+            "final_url": "https://www.cadence.com/en_US/home/tools/silicon-solutions/artisan-ip.html"
+          }
+        ]
+      }
+    },
+    {
+      "id": 30304,
+      "company": "Mastra",
+      "domain": "mastra.ai",
+      "ending": ".ai",
+      "team_size": 30,
+      "raised_usd": 35000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 13000000,
+          "date": "2025-10-08",
+          "source_url": "https://mastra.ai/blog/seed-round"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 22000000,
+          "date": "2026-04-09",
+          "source_url": "https://mastra.ai/blog/series-a"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "mastra.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/mastra.com",
+        "rdap_status": 200,
+        "final_url": null,
+        "http_attempts": [
+          {
+            "url": "https://mastra.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "http://mastra.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "https://www.mastra.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 28811,
+      "company": "Casca",
+      "domain": "cascading.ai",
+      "ending": ".ai",
+      "team_size": 40,
+      "raised_usd": 32900000,
+      "rounds": [
+        {
+          "round": "Pre-seed",
+          "amount_usd": 3900000,
+          "date": "2024-02-09",
+          "source_url": "https://pitchbook.com/profiles/company/534447-82"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 29000000,
+          "date": "2025-08-19",
+          "source_url": "https://www.cascading.ai/company/series-a-announcement"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "cascading.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/cascading.com",
+        "rdap_status": 200,
+        "final_url": null,
+        "http_attempts": [
+          {
+            "url": "https://cascading.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "http://cascading.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "https://www.cascading.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 30275,
+      "company": "Solidroad",
+      "domain": "solidroad.com",
+      "ending": ".com",
+      "team_size": 6,
+      "raised_usd": 32700000,
+      "rounds": [
+        {
+          "round": "Pre-seed",
+          "amount_usd": 1200000,
+          "date": "2024-07",
+          "source_url": "https://www.solidroad.com/resources/series-a"
+        },
+        {
+          "round": "Seed",
+          "amount_usd": 6500000,
+          "date": "2025",
+          "source_url": "https://solidroad.com/resources/solidroad-raises-6-5m-to-help-cx-teams-increase-csat-without-increasing-cost"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 25000000,
+          "date": "2026-04-16",
+          "source_url": "https://solidroad.com/resources/series-a-funding"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "solidroad.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/solidroad.com",
+        "rdap_status": 200,
+        "final_url": "https://www.solidroad.com/",
+        "http_attempts": [
+          {
+            "url": "https://solidroad.com/",
+            "http_status": 200,
+            "final_url": "https://www.solidroad.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28817,
+      "company": "Every",
+      "domain": "every.io",
+      "ending": ".io",
+      "team_size": 12,
+      "raised_usd": 32000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 9500000,
+          "date": "2023-11-28",
+          "source_url": "https://www.every.io/about"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 22500000,
+          "date": "2024-09",
+          "source_url": "https://www.every.io/blog-post/why-i-built-every-announcing-our-22-5m-series-a-to-transform-back-office-stress-into-founder-success"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "every.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/every.com",
+        "rdap_status": 200,
+        "final_url": "https://every.com/",
+        "http_attempts": [
+          {
+            "url": "https://every.com/",
+            "http_status": 200,
+            "final_url": "https://every.com/"
+          },
+          {
+            "url": "http://every.com/",
+            "http_status": 200,
+            "final_url": "https://every.com/"
+          },
+          {
+            "url": "https://www.every.com/",
+            "http_status": 200,
+            "final_url": "https://every.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 30522,
+      "company": "Naïve",
+      "domain": "usenaive.ai",
+      "ending": ".ai",
+      "team_size": 12,
+      "raised_usd": 32000000,
+      "rounds": [
+        {
+          "round": "Prior funding implied by approximate announced total",
+          "amount_usd": 3500000,
+          "date": "2026-08-06",
+          "source_url": "https://techcrunch.com/2026/08/06/naive-raises-28-5m-to-automate-the-grunt-work-of-setting-up-and-running-a-company/"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 28500000,
+          "date": "2026-08-06",
+          "source_url": "https://techcrunch.com/2026/08/06/naive-raises-28-5m-to-automate-the-grunt-work-of-setting-up-and-running-a-company/"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "usenaive.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/usenaive.com",
+        "rdap_status": 200,
+        "final_url": "https://domains.atom.com/lpd/name/usenaive.com",
+        "http_attempts": [
+          {
+            "url": "https://usenaive.com/",
+            "http_status": 403,
+            "final_url": "https://domains.atom.com/lpd/name/usenaive.com"
+          },
+          {
+            "url": "http://usenaive.com/",
+            "http_status": 403,
+            "final_url": "https://domains.atom.com/lpd/name/usenaive.com"
+          },
+          {
+            "url": "https://www.usenaive.com/",
+            "http_status": 403,
+            "final_url": "https://domains.atom.com/lpd/name/usenaive.com"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29858,
+      "company": "Vera Health",
+      "domain": "vera-health.ai",
+      "ending": ".ai",
+      "team_size": 12,
+      "raised_usd": 32000000,
+      "rounds": [
+        {
+          "round": "Prior funding as disclosed with Series A",
+          "amount_usd": 3500000,
+          "date": "2026-10-27",
+          "source_url": "https://www.prnewswire.com/news-releases/vera-health-quietly-became-one-of-the-worlds-most-used-clinical-tools-now-it-has-raised-32-million-to-give-every-clinician-in-the-world-the-best-medical-knowledge-in-seconds-302920905.html"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 28500000,
+          "date": "2026-10-27",
+          "source_url": "https://www.prnewswire.com/news-releases/vera-health-quietly-became-one-of-the-worlds-most-used-clinical-tools-now-it-has-raised-32-million-to-give-every-clinician-in-the-world-the-best-medical-knowledge-in-seconds-302920905.html"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "vera-health.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/vera-health.com",
+        "rdap_status": 200,
+        "final_url": "https://vera-health.com/",
+        "http_attempts": [
+          {
+            "url": "https://vera-health.com/",
+            "http_status": 404,
+            "final_url": "https://vera-health.com/"
+          },
+          {
+            "url": "http://vera-health.com/",
+            "http_status": 404,
+            "final_url": "https://vera-health.com/"
+          },
+          {
+            "url": "https://www.vera-health.com/",
+            "http_status": "SSLCertVerificationError",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 29524,
+      "company": "Coval",
+      "domain": "coval.dev",
+      "ending": ".dev",
+      "team_size": 25,
+      "raised_usd": 31300000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 3300000,
+          "date": "2024",
+          "source_url": "https://www.coval.ai/blog/coval-raises-3-3-to-to-bring-self-driving-car-simulation-to-ai-voice-chat-agents"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 28000000,
+          "date": "2026-06-24",
+          "source_url": "https://www.coval.ai/blog/coval-series-a"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "coval.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/coval.com",
+        "rdap_status": 200,
+        "final_url": "https://www.coval.com/en-us",
+        "http_attempts": [
+          {
+            "url": "https://coval.com/",
+            "http_status": 200,
+            "final_url": "https://www.coval.com/en-us"
+          },
+          {
+            "url": "http://coval.com/",
+            "http_status": 200,
+            "final_url": "https://www.coval.com/en-us"
+          },
+          {
+            "url": "https://www.coval.com/",
+            "http_status": 200,
+            "final_url": "https://www.coval.com/en-us"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27959,
+      "company": "Vitalize",
+      "domain": "vitalize.care",
+      "ending": ".care",
+      "team_size": 28,
+      "raised_usd": 31000000,
+      "rounds": [
+        {
+          "round": "Series A",
+          "amount_usd": 31000000,
+          "date": "2026-10-06",
+          "source_url": "https://www.oakhcft.com/news/vitalize-raises-31m-series-a-to-bring-air-traffic-control-to-healthcare"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "vitalize.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/vitalize.com",
+        "rdap_status": 200,
+        "final_url": "https://vitalize.com/",
+        "http_attempts": [
+          {
+            "url": "https://vitalize.com/",
+            "http_status": 200,
+            "final_url": "https://vitalize.com/"
+          },
+          {
+            "url": "http://vitalize.com/",
+            "http_status": 200,
+            "final_url": "http://vitalize.com/"
+          },
+          {
+            "url": "https://www.vitalize.com/",
+            "http_status": 200,
+            "final_url": "https://www.vitalize.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 30804,
+      "company": "Luminal",
+      "domain": "luminal.com",
+      "ending": ".com",
+      "team_size": 7,
+      "raised_usd": 30300000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 5300000,
+          "date": "2025-11-18",
+          "source_url": "https://blog.luminal.com/p/announcing-our-53m-seed-round"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 25000000,
+          "date": "2026-11-12",
+          "source_url": "https://www.standardcap.com/changelog/post/luminal-series-a-led-by-standard-capital"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "luminal.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/luminal.com",
+        "rdap_status": 200,
+        "final_url": "https://www.luminal.com/",
+        "http_attempts": [
+          {
+            "url": "https://luminal.com/",
+            "http_status": 200,
+            "final_url": "https://www.luminal.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 30303,
+      "company": "AfterQuery",
+      "domain": "afterquery.com",
+      "ending": ".com",
+      "team_size": 30,
+      "raised_usd": 30000000,
+      "rounds": [
+        {
+          "round": "Series A",
+          "amount_usd": 30000000,
+          "date": "2026-04",
+          "source_url": "https://techcrunch.com/2026/09/01/afterquery-reportedly-becomes-y-combinators-fastest-ever-unicorn-now-valued-at-3-2b/"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "afterquery.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/afterquery.com",
+        "rdap_status": 200,
+        "final_url": "https://www.afterquery.com/",
+        "http_attempts": [
+          {
+            "url": "https://afterquery.com/",
+            "http_status": 200,
+            "final_url": "https://www.afterquery.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29008,
+      "company": "Andromeda Surgical",
+      "domain": "andromedasurgical.com",
+      "ending": ".com",
+      "team_size": 12,
+      "raised_usd": 30000000,
+      "rounds": [
+        {
+          "round": "Prior funding as disclosed with Series A",
+          "amount_usd": 15000000,
+          "date": "2026-07-29",
+          "source_url": "https://phazeventures.com/andromeda-surgical-raises-15m-series-a"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 15000000,
+          "date": "2026-07-29",
+          "source_url": "https://phazeventures.com/andromeda-surgical-raises-15m-series-a"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "andromedasurgical.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/andromedasurgical.com",
+        "rdap_status": 200,
+        "final_url": "https://www.andromedasurgical.com/",
+        "http_attempts": [
+          {
+            "url": "https://andromedasurgical.com/",
+            "http_status": 200,
+            "final_url": "https://www.andromedasurgical.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29290,
+      "company": "FurtherAI",
+      "domain": "furtherai.com",
+      "ending": ".com",
+      "team_size": 36,
+      "raised_usd": 30000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 5000000,
+          "date": "2025-04-02",
+          "source_url": "https://www.furtherai.com/blog/furtherai-raises-new-funding-to-help-commercial-insurers-reduce-expense-ratios-by-50"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 25000000,
+          "date": "2025-10-07",
+          "source_url": "https://www.furtherai.com/blog/furtherai-announces-25m-series-a-from-andreessen-horowitz-to-transform-insurance-workflows-with-ai-automating-busywork"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "furtherai.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/furtherai.com",
+        "rdap_status": 200,
+        "final_url": "https://www.furtherai.com/",
+        "http_attempts": [
+          {
+            "url": "https://furtherai.com/",
+            "http_status": 200,
+            "final_url": "https://www.furtherai.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29649,
+      "company": "Wordware",
+      "domain": "wordware.ai",
+      "ending": ".ai",
+      "team_size": 15,
+      "raised_usd": 30000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 30000000,
+          "date": "2024-11-25",
+          "source_url": "https://www.wordware.ai/announcement"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "wordware.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/wordware.com",
+        "rdap_status": 200,
+        "final_url": null,
+        "http_attempts": [
+          {
+            "url": "https://wordware.com/",
+            "http_status": "TimeoutError",
+            "final_url": null
+          },
+          {
+            "url": "http://wordware.com/",
+            "http_status": "TimeoutError",
+            "final_url": null
+          },
+          {
+            "url": "https://www.wordware.com/",
+            "http_status": "SSLError",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 29369,
+      "company": "Astro Mechanica",
+      "domain": "astromecha.co",
+      "ending": ".co",
+      "team_size": 52,
+      "raised_usd": 27100000,
+      "rounds": [
+        {
+          "round": "Series A",
+          "amount_usd": 27100000,
+          "date": "2025-04-17",
+          "source_url": "https://www.astromecha.co/press/astro-mechanica-raises-27-1m-for-supersonic-flight"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "astromecha.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/astromecha.com",
+        "rdap_status": 200,
+        "final_url": "https://www.astromecha.co/",
+        "http_attempts": [
+          {
+            "url": "https://astromecha.com/",
+            "http_status": "TimeoutError",
+            "final_url": null
+          },
+          {
+            "url": "http://astromecha.com/",
+            "http_status": 200,
+            "final_url": "https://www.astromecha.co/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 31041,
+      "company": "Ploy",
+      "domain": "ploy.ai",
+      "ending": ".ai",
+      "team_size": 14,
+      "raised_usd": 27000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 27000000,
+          "date": "2026-06",
+          "source_url": "https://ploy.ai/blog/ploy-raises-27m"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "ploy.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/ploy.com",
+        "rdap_status": 200,
+        "final_url": "https://ploy.com/",
+        "http_attempts": [
+          {
+            "url": "https://ploy.com/",
+            "http_status": 200,
+            "final_url": "https://ploy.com/"
+          },
+          {
+            "url": "http://ploy.com/",
+            "http_status": 200,
+            "final_url": "http://ploy.com/"
+          },
+          {
+            "url": "https://www.ploy.com/",
+            "http_status": 200,
+            "final_url": "https://ploy.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29000,
+      "company": "SafetyKit",
+      "domain": "safetykit.com",
+      "ending": ".com",
+      "team_size": 10,
+      "raised_usd": 27000000,
+      "rounds": [
+        {
+          "round": "Announced funding",
+          "amount_usd": 27000000,
+          "date": "2025-06-03",
+          "source_url": "https://www.safetykit.com/news/safetykit-raises-27m-to-make-ai-do-techs-dirty-work"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "safetykit.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/safetykit.com",
+        "rdap_status": 200,
+        "final_url": "https://www.safetykit.com/",
+        "http_attempts": [
+          {
+            "url": "https://safetykit.com/",
+            "http_status": 200,
+            "final_url": "https://www.safetykit.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29715,
+      "company": "Kastle",
+      "domain": "kastle.ai",
+      "ending": ".ai",
+      "team_size": 17,
+      "raised_usd": 26300000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 2300000,
+          "date": "2025",
+          "source_url": "https://www.linkedin.com/jobs/view/founding-applied-ai-engineer-at-kastle-at-kastle-4149755326"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 24000000,
+          "date": "2026-09-17",
+          "source_url": "https://www.prnewswire.com/news-releases/kastle-raises-24m-series-a-led-by-insight-partners-to-build-the-ai-workforce-for-banking-operations-302881290.html"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "kastle.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/kastle.com",
+        "rdap_status": 200,
+        "final_url": "https://www.kastle.com/",
+        "http_attempts": [
+          {
+            "url": "https://kastle.com/",
+            "http_status": 200,
+            "final_url": "https://www.kastle.com/"
+          },
+          {
+            "url": "http://kastle.com/",
+            "http_status": 200,
+            "final_url": "https://www.kastle.com/"
+          },
+          {
+            "url": "https://www.kastle.com/",
+            "http_status": 200,
+            "final_url": "https://www.kastle.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27926,
+      "company": "Variance",
+      "domain": "variance.com",
+      "ending": ".com",
+      "team_size": 12,
+      "raised_usd": 26000000,
+      "rounds": [
+        {
+          "round": "Prior funding as disclosed with Series A",
+          "amount_usd": 4500000,
+          "date": "2026-03-31",
+          "source_url": "https://finance.yahoo.com/sectors/technology/articles/variance-raises-21-5m-series-130000664.html"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 21500000,
+          "date": "2026-03-31",
+          "source_url": "https://finance.yahoo.com/sectors/technology/articles/variance-raises-21-5m-series-130000664.html"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "variance.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/variance.com",
+        "rdap_status": 200,
+        "final_url": "https://www.variance.com/",
+        "http_attempts": [
+          {
+            "url": "https://variance.com/",
+            "http_status": 200,
+            "final_url": "https://www.variance.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 30230,
+      "company": "SalesPatriot",
+      "domain": "salespatriot.com",
+      "ending": ".com",
+      "team_size": 30,
+      "raised_usd": 24999918,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 5000000,
+          "date": "2025-10",
+          "source_url": "https://www.thesaasnews.com/news/salespatriot-raises-5-million-seed-round/"
+        },
+        {
+          "round": "Form D amount sold",
+          "amount_usd": 19999918,
+          "date": "2026-11-18",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2165599/000216559926000001/primary_doc.xml"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "salespatriot.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/salespatriot.com",
+        "rdap_status": 200,
+        "final_url": "https://salespatriot.com/",
+        "http_attempts": [
+          {
+            "url": "https://salespatriot.com/",
+            "http_status": 200,
+            "final_url": "https://salespatriot.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29585,
+      "company": "Mem0",
+      "domain": "mem0.ai",
+      "ending": ".ai",
+      "team_size": 10,
+      "raised_usd": 23900000,
+      "rounds": [
+        {
+          "round": "Seed, disclosed with Series A",
+          "amount_usd": 3900000,
+          "date": "2025-10-28",
+          "source_url": "https://techcrunch.com/2025/10/28/mem0-raises-24m-from-yc-peak-xv-and-basis-set-to-build-the-memory-layer-for-ai-apps/"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 20000000,
+          "date": "2025-10-28",
+          "source_url": "https://techcrunch.com/2025/10/28/mem0-raises-24m-from-yc-peak-xv-and-basis-set-to-build-the-memory-layer-for-ai-apps/"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "mem0.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/mem0.com",
+        "rdap_status": 200,
+        "final_url": "http://mem0.com/",
+        "http_attempts": [
+          {
+            "url": "https://mem0.com/",
+            "http_status": "ConnectionRefusedError",
+            "final_url": null
+          },
+          {
+            "url": "http://mem0.com/",
+            "http_status": 200,
+            "final_url": "http://mem0.com/"
+          },
+          {
+            "url": "https://www.mem0.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 30762,
+      "company": "KERNEL",
+      "domain": "kernel.sh",
+      "ending": ".sh",
+      "team_size": 22,
+      "raised_usd": 22000000,
+      "rounds": [
+        {
+          "round": "Seed and Series A combined",
+          "amount_usd": 22000000,
+          "date": "2025-10-09",
+          "source_url": "https://www.kernel.sh/blog/series-a-announcement"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "kernel.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/kernel.com",
+        "rdap_status": 200,
+        "final_url": "https://www.kernel.com/",
+        "http_attempts": [
+          {
+            "url": "https://kernel.com/",
+            "http_status": 200,
+            "final_url": "https://www.kernel.com/"
+          },
+          {
+            "url": "http://kernel.com/",
+            "http_status": 200,
+            "final_url": "https://www.kernel.com/"
+          },
+          {
+            "url": "https://www.kernel.com/",
+            "http_status": 200,
+            "final_url": "https://www.kernel.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28073,
+      "company": "PlayAI",
+      "domain": "play.ai",
+      "ending": ".ai",
+      "team_size": 35,
+      "raised_usd": 21000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 21000000,
+          "date": "2024-11-25",
+          "source_url": "https://finance.yahoo.com/news/playai-secures-21-million-seed-150000087.html"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "play.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/play.com",
+        "rdap_status": 200,
+        "final_url": "https://www.rakuten.com/",
+        "http_attempts": [
+          {
+            "url": "https://play.com/",
+            "http_status": "TimeoutError",
+            "final_url": null
+          },
+          {
+            "url": "http://play.com/",
+            "http_status": 200,
+            "final_url": "https://www.rakuten.com/"
+          },
+          {
+            "url": "https://www.play.com/",
+            "http_status": "TimeoutError",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 29263,
+      "company": "Alex",
+      "domain": "alex.com",
+      "ending": ".com",
+      "team_size": 30,
+      "raised_usd": 20000000,
+      "rounds": [
+        {
+          "round": "Seed funding, as disclosed with Series A",
+          "amount_usd": 3000000,
+          "date": "2025-09-29",
+          "source_url": "https://www.alex.com/blog/we-raised-20m-to-help-ai-hire-more-humans"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 17000000,
+          "date": "2025-09-29",
+          "source_url": "https://www.alex.com/blog/we-raised-20m-to-help-ai-hire-more-humans"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "alex.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/alex.com",
+        "rdap_status": 200,
+        "final_url": "https://www.alex.com/",
+        "http_attempts": [
+          {
+            "url": "https://alex.com/",
+            "http_status": 200,
+            "final_url": "https://www.alex.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29407,
+      "company": "JustAI",
+      "domain": "getjust.ai",
+      "ending": ".ai",
+      "team_size": 15,
+      "raised_usd": 19200000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 1700000,
+          "date": "2025",
+          "source_url": "https://www.getjust.ai/blog/we-closed-our-seed-round"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 17500000,
+          "date": "2026-06-23",
+          "source_url": "https://www.getjust.ai/blog/justai-seriesa"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "getjust.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/getjust.com",
+        "rdap_status": 200,
+        "final_url": "https://getjust.com/",
+        "http_attempts": [
+          {
+            "url": "https://getjust.com/",
+            "http_status": 200,
+            "final_url": "https://getjust.com/"
+          },
+          {
+            "url": "http://getjust.com/",
+            "http_status": 200,
+            "final_url": "https://getjust.com/"
+          },
+          {
+            "url": "https://www.getjust.com/",
+            "http_status": 200,
+            "final_url": "https://www.getjust.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27673,
+      "company": "Reflex",
+      "domain": "reflex.dev",
+      "ending": ".dev",
+      "team_size": 15,
+      "raised_usd": 19000000,
+      "rounds": [
+        {
+          "round": "Seed funding, as disclosed with Series A",
+          "amount_usd": 5000000,
+          "date": "2026-11-05",
+          "source_url": "https://reflex.dev/blog/series-a-announcement/"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 14000000,
+          "date": "2026-11-05",
+          "source_url": "https://reflex.dev/blog/series-a-announcement/"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "reflex.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/reflex.com",
+        "rdap_status": 200,
+        "final_url": "https://reflex.com/",
+        "http_attempts": [
+          {
+            "url": "https://reflex.com/",
+            "http_status": 200,
+            "final_url": "https://reflex.com/"
+          },
+          {
+            "url": "http://reflex.com/",
+            "http_status": 200,
+            "final_url": "https://reflex.com/"
+          },
+          {
+            "url": "https://www.reflex.com/",
+            "http_status": 200,
+            "final_url": "https://www.reflex.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27667,
+      "company": "StackAI",
+      "domain": "stackai.com",
+      "ending": ".com",
+      "team_size": 62,
+      "raised_usd": 19000000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 3000000,
+          "date": "2024-05-21",
+          "source_url": "https://www.stackai.com/blog/stack-ai-raises-3m-seed-round"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 16000000,
+          "date": "2025-05-06",
+          "source_url": "https://www.stackai.com/blog/stack-ai-raises-16m-series-a-to-create-ai-agents-for-every-job"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "stackai.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/stackai.com",
+        "rdap_status": 200,
+        "final_url": "https://www.stackai.com/",
+        "http_attempts": [
+          {
+            "url": "https://stackai.com/",
+            "http_status": 200,
+            "final_url": "https://www.stackai.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27854,
+      "company": "Fours",
+      "domain": "fours.com",
+      "ending": ".com",
+      "team_size": 76,
+      "raised_usd": 18700000,
+      "rounds": [
+        {
+          "round": "Seed funding, as disclosed with Series A",
+          "amount_usd": 3700000,
+          "date": "2025-02-11",
+          "source_url": "https://www.fours.com/resources/blog/series-a-funding/"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 15000000,
+          "date": "2025-02-11",
+          "source_url": "https://www.fours.com/resources/blog/series-a-funding/"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "fours.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/fours.com",
+        "rdap_status": 200,
+        "final_url": "https://www.fours.com/",
+        "http_attempts": [
+          {
+            "url": "https://fours.com/",
+            "http_status": 200,
+            "final_url": "https://www.fours.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 29256,
+      "company": "Momentic",
+      "domain": "momentic.ai",
+      "ending": ".ai",
+      "team_size": 18,
+      "raised_usd": 18700000,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 3700000,
+          "date": "2025-03-04",
+          "source_url": "https://www.globenewswire.com/news-release/2025/03/04/3036567/0/en/Momentic-Raises-Seed-Round-to-Help-Developers-Accelerate-Product-Delivery-with-Automated-QA.html"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 15000000,
+          "date": "2025-11-24",
+          "source_url": "https://momentic.ai/blog/series-a"
+        }
+      ],
+      "com": {
+        "status": "registered",
+        "checked": "2026-11-27",
+        "domain": "momentic.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/momentic.com",
+        "rdap_status": 200,
+        "final_url": null,
+        "http_attempts": [
+          {
+            "url": "https://momentic.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "http://momentic.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          },
+          {
+            "url": "https://www.momentic.com/",
+            "http_status": "dns-failure",
+            "final_url": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 28911,
+      "company": "CandorIQ",
+      "domain": "candoriq.com",
+      "ending": ".com",
+      "team_size": 4,
+      "raised_usd": 18343208,
+      "rounds": [
+        {
+          "round": "Seed",
+          "amount_usd": 4800000,
+          "date": "2025-07-22",
+          "source_url": "https://www.candoriq.com/blog/candoriq-raises-4-8m-seed-fundraise"
+        },
+        {
+          "round": "Form D amount sold",
+          "amount_usd": 13543208,
+          "date": "2026-10-21",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2160850/000216085026000001/primary_doc.xml"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "candoriq.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/candoriq.com",
+        "rdap_status": 200,
+        "final_url": "https://www.candoriq.com/",
+        "http_attempts": [
+          {
+            "url": "https://candoriq.com/",
+            "http_status": 200,
+            "final_url": "https://www.candoriq.com/"
+          }
+        ]
+      }
+    },
+    {
+      "id": 28788,
+      "company": "Hyperbound",
+      "domain": "hyperbound.ai",
+      "ending": ".ai",
+      "team_size": 30,
+      "raised_usd": 18300000,
+      "rounds": [
+        {
+          "round": "Prior funding as disclosed with Series A",
+          "amount_usd": 3300000,
+          "date": "2025-09-15",
+          "source_url": "https://www.hyperbound.ai/blog/series-a"
+        },
+        {
+          "round": "Series A",
+          "amount_usd": 15000000,
+          "date": "2025-09-15",
+          "source_url": "https://www.hyperbound.ai/blog/series-a"
+        }
+      ],
+      "com": {
+        "status": "yes",
+        "checked": "2026-11-27",
+        "domain": "hyperbound.com",
+        "rdap_url": "https://rdap.verisign.com/com/v1/domain/hyperbound.com",
+        "rdap_status": 200,
+        "final_url": "https://www.hyperbound.ai/",
+        "http_attempts": [
+          {
+            "url": "https://hyperbound.com/",
+            "http_status": 200,
+            "final_url": "https://www.hyperbound.ai/"
+          }
+        ]
+      }
+    }
+  ]
+}

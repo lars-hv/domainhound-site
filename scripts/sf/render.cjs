@@ -8,14 +8,10 @@ const output = stage || path.join(root, 'sf');
 const input = path.join(stage || path.join(root, 'data/sf'), 'endings.json');
 const data = JSON.parse(fs.readFileSync(input));
 const fundingTable = require('../../sf/funding.mjs');
-const { companies, as_of: fundingDate } = JSON.parse(fs.readFileSync(path.join(path.dirname(input), 'companies.json')));
-if (companies.length !== data.websites || fundingDate !== data.source.updated.slice(0, 10)) {
-  throw new Error('Funding and chart snapshots differ');
-}
-const ranked = fundingTable.sorted(companies, 'funding', 'desc');
-const matched = ranked.filter(row => row.funding);
-const top = matched.slice(0, 20);
-const com = top.filter(row => row.ending === '.com').length;
+const { companies, funding_checked: fundingDate } = JSON.parse(fs.readFileSync(path.join(root, 'data/sf/top50.json')));
+if (companies.length !== 50) throw new Error('Expected 50 sourced company rows');
+const ranked = fundingTable.sorted(companies, 'raised_usd', 'desc');
+const com = ranked.filter(row => row.com.status === 'yes').length;
 const { batches, facts, endings } = data;
 const first = batches[0];
 const latest = batches.at(-1);
@@ -31,9 +27,10 @@ const formatDate = options => stamp.toLocaleDateString('en-US', { ...options, ti
 function column(row) {
   const com = row.endings['.com']?.count || 0;
   const ai = row.endings['.ai']?.count || 0;
-  const counts = [com, ai, row.websites - com - ai];
-  const fills = counts.map((n, i) => `<i class="${['com', 'ai', 'rest'][i]}" style="flex-grow:${n}"></i>`).join('');
-  const label = `${row.batch}, ${row.websites} sites, ${share(row, '.com')}% .com, ${share(row, '.ai')}% .ai`;
+  const io = row.endings['.io']?.count || 0;
+  const counts = [com, ai, io, row.websites - com - ai - io];
+  const fills = counts.map((n, i) => `<i class="${['com', 'ai', 'io', 'rest'][i]}" style="flex-grow:${n}"></i>`).join('');
+  const label = `${row.batch}, ${row.websites} sites, ${share(row, '.com')}% .com, ${share(row, '.ai')}% .ai, ${share(row, '.io')}% .io`;
   return `<button disabled class="column" aria-label="${label}" aria-pressed="${row === latest}" data-batch="${row.batch}">
     <span class="stack" aria-hidden="true">${fills}</span><span class="season">${shortSeason[row.batch.split(' ')[0]]}</span></button>`;
 }
@@ -64,7 +61,7 @@ function trend() {
 const verdicts = {
   '.com': 'Pick it if you can get your exact name.',
   '.ai': 'If you build AI, this ending says so before anyone clicks.',
-  '.si': 'Try this less familiar ending to keep your exact name.',
+  '.io': 'Try it for a tech product if your exact .com is taken.',
 };
 
 function pickCard(ending, verdict) {
@@ -87,21 +84,20 @@ const values = {
   headline: `${headlineLead} ${headlineFollowup}`, headlineLead, headlineFollowup,
   heroCheck: checkBox('candidate'), closingCheck: checkBox('closing-candidate'),
   picks: Object.entries(verdicts).map(([ending, verdict]) => pickCard(ending, verdict)).join('\n'),
-  siCount: endings['.si']?.count ?? 0,
-  fundingHeadline: top.length ? `${com} of the top ${top.length} by funding use .com` : 'Funding by company',
-  matched: count(matched.length), visible: count(Math.min(fundingTable.pageSize, ranked.length)),
-  companyRows: fundingTable.tableRows(ranked.slice(0, fundingTable.pageSize)),
+  fundingHeadline: `${com} of the 50 own their .com.`,
+  fundingDay: new Date(fundingDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }),
+  companyRows: fundingTable.tableRows(ranked),
   fundingHeaders: Object.entries(fundingTable.columns).map(([key, label]) =>
-    `<th scope="col" data-key="${key}"${key === 'funding' ? ' aria-sort="descending"' : ''}><button type="button" disabled>${label}</button></th>`).join(''),
-  total: count(data.websites), ai: share(data, '.ai'), aiCount: count(endings['.ai']?.count || 0),
+    `<th scope="col" data-key="${key}"${key === 'raised_usd' ? ' aria-sort="descending"' : ''}><button type="button" disabled>${label}</button></th>`).join(''),
+  total: count(data.websites), io: share(data, '.io'), ioCount: count(endings['.io']?.count || 0),
   years: `2023 to ${latest.batch.split(' ')[1]}`, month: formatDate({ month: 'short', year: 'numeric' }),
   day: formatDate({ month: 'long', day: 'numeric', year: 'numeric' }),
-  description: `${share(data, '.ai')}% of ${count(data.websites)} Bay Area YC startup websites use .ai.`,
+  description: `.io ranks third among ${count(data.websites)} Bay Area YC startup websites. See the domains of 50 startups ranked by announced funding.`,
   bars: [...years].map(([year, rows]) => `<div class="year" style="--batches:${rows.length}">
     <div class="columns">${rows.map(column).join('')}</div><span class="year-label">${year}</span></div>`).join('\n'),
   options: batches.map(row => `<option${row === latest ? ' selected' : ''}>${row.batch}</option>`).join(''),
   latest: latest.batch, batches: batches.length, tableRows: tableRows(latest.endings),
-  summary: `${latest.websites} sites · ${share(latest, '.com')}% .com · ${share(latest, '.ai')}% .ai`,
+  summary: `${latest.websites} sites · ${share(latest, '.com')}% .com · ${share(latest, '.ai')}% .ai · ${share(latest, '.io')}% .io`,
   firstBatch: first.batch, firstAi: share(first, '.ai'),
   trendPeak: `${aiPercent(trendPeak)}% in ${trendPeak.batch} (${aiSample(trendPeak)})`,
   trendLatest: `${aiPercent(latest)}% (${aiSample(latest)})`, trend: trend(),
@@ -135,7 +131,7 @@ async function render() {
       strong{display:block;font-size:108px;line-height:1.05;letter-spacing:-3px} aside span{font-size:28px}
       footer{border-top:2px dashed var(--leaf);padding-top:26px;font-size:25px}
     </style><header><b><img src="data:image/svg+xml;base64,${dog}" alt="">Domain Hound</b><span>${values.month}</span></header>
-    <main><h1>${headlineLead}<br>${headlineFollowup}</h1><aside><strong>${values.ai}%</strong><span>of sites end in .ai</span></aside></main>
+    <main><h1>${headlineLead}<br>${headlineFollowup}</h1><aside><strong>${values.io}%</strong><span>of sites end in .io</span></aside></main>
     <footer><span>${values.total} Bay Area YC startup websites</span><span>domainhound.dev/sf/</span></footer>`);
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: path.join(output, 'share.png') });

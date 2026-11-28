@@ -26,6 +26,7 @@ h2 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.025em; font-weight: 
 .legend i { width: .9rem; height: .9rem; border: 1px solid var(--pine); }
 .com { background: var(--forest); }
 .ai { background: var(--leaf); }
+.io { background: var(--mint); }
 .rest { background: var(--amber); }
 .plot { --height: clamp(10rem, 17vw, 15rem); display: flex; margin-top: 1.5rem; gap: .45rem; }
 .axis { display: flex; flex-direction: column; justify-content: space-between; align-items: end; height: var(--height); font-size: .64rem; }
@@ -96,13 +97,11 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
 
 .funding-jump { display: inline-block; margin-top: .8rem; font-size: 1rem; font-weight: 800; }
 .funding-band { background: var(--paper); padding-block: clamp(2.5rem, 5vw, 4.8rem); }
-.funding-band .eyebrow { color: var(--forest); margin-bottom: .6rem; }
 .funding-band h2 { text-wrap: balance; }
 .funding-band .deck { max-width: 62ch; margin-bottom: .25rem; }
 .funding-note { font-size: 1rem; }
 .funding-tools { display: flex; align-items: center; gap: .7rem 1.2rem; flex-wrap: wrap; margin-top: 1.3rem; }
-#funding-count { font-size: .88rem; font-weight: 750; }
-#funding-more, .funding-picker select { min-height: 42px; background: var(--mint); color: var(--pine); border: 1px solid var(--forest); border-radius: .25rem; padding: .45rem .85rem; font: 800 .95rem Mulish, sans-serif; }
+.funding-picker select { min-height: 44px; background: var(--mint); color: var(--pine); border: 1px solid var(--forest); border-radius: .25rem; padding: .45rem .85rem; font: 800 .95rem Mulish, sans-serif; }
 #company-table { width: 100%; margin: .8rem 0 0; }
 #company-table :is(th, td) { text-align: left; padding: .7rem .55rem; }
 #company-table thead { background: var(--forest); color: var(--paper); }
@@ -110,8 +109,8 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
 #company-table [aria-sort] button::after { content: ''; display: inline-block; margin-left: .4em; vertical-align: middle; border-inline: .32em solid transparent; border-top: .42em solid; }
 #company-table [aria-sort="ascending"] button::after { transform: rotate(180deg); }
 #company-table .site-domain { font: 500 .88rem var(--mono); overflow-wrap: anywhere; }
-#company-table .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
-#company-table .amount a { font-weight: 850; text-underline-offset: .18em; }
+#company-table .amount { font-variant-numeric: tabular-nums; font-weight: 850; white-space: nowrap; }
+#funding-source { margin-top: .8rem; }
 .funding-picker { display: none; }
 @media (max-width: 800px) {
   .funding-picker:not([hidden]) { display: flex; align-items: center; gap: .65rem; flex-basis: 100%; font-size: .95rem; font-weight: 800; }
