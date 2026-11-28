@@ -10,7 +10,7 @@ header, .intro, .check-band { background: var(--forest); color: var(--paper); }
 .eyebrow { color: var(--mint); }
 h1 { font-size: clamp(2.6rem, 6.2vw, 5.55rem); max-width: none; font-weight: 850; line-height: .94; margin: .19em 0 .22em; letter-spacing: -.035em; text-wrap: initial; }
 h2 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.025em; font-weight: 850; }
-.lede, .deck { max-width: 40ch; font-size: clamp(1.05rem, 1.4vw, 1.28rem); }
+.deck { font-size: clamp(1.05rem, 1.4vw, 1.28rem); }
 .ticket { position: relative; background: var(--mint); color: var(--pine); padding: 1.2rem 1.55rem; transform: rotate(-2deg); width: min(100% - .5rem, 28rem); justify-self: center; }
 .ticket-top { border-bottom: 1px solid var(--forest); padding-bottom: .5rem; }
 .ticket-top b { font: 850 1.45rem/1 var(--mono); text-transform: lowercase; }
@@ -20,7 +20,7 @@ h2 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.025em; font-weight: 
 .ticket-foot { margin-top: 1rem; border-top: 2px dashed var(--forest); padding-top: .7rem; font-size: .72rem; }
 .chart-band, .facts-band, .method, .check-band { padding-block: clamp(2.5rem, 5vw, 4.8rem); }
 .chart-band { background: var(--paper); }
-.deck { margin-block: .65rem 1.25rem; max-width: none; }
+.deck { margin-block: .65rem 1.25rem; }
 .legend { display: flex; flex-wrap: wrap; gap: .6rem 1.3rem; }
 .legend span { display: inline-flex; align-items: center; gap: .4rem; }
 .legend i { width: .9rem; height: .9rem; border: 1px solid var(--pine); }
@@ -75,8 +75,9 @@ caption { font-weight: 850; }
 .field button { flex-shrink: 0; padding: .7em 1em; border: 0; border-left: 2px solid var(--pine); border-radius: 0; background: var(--leaf); color: var(--pine); font-weight: 900; }
 .check-status:not(:empty), .matches:not(:empty) { margin-top: 1rem; }
 .matches { list-style: none; padding: 0; max-width: 34rem; }
-.matches li { display: flex; justify-content: space-between; gap: .75rem; border-top: 1px solid var(--leaf); padding: .5em 0; }
+.matches li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem .75rem; border-top: 1px solid var(--leaf); padding: .5em 0; }
 .matches b { overflow-wrap: anywhere; }
+.matches p { grid-column: 1 / -1; overflow-wrap: anywhere; }
 .method h2 { font-size: clamp(1.65rem, 3vw, 2.45rem); }
 .method p, details p { max-width: 66ch; margin-block: .7rem; }
 .foot-links { justify-content: flex-start; flex-wrap: wrap; border-top: 1px solid var(--pine); padding-top: 1rem; margin-top: .7rem; }
@@ -126,10 +127,6 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
 }
 
 .pick-cards h3 { font: 900 2.65rem/1.2 Mulish, sans-serif; letter-spacing: -.03em; }
-.pick-cards dl { margin: 1rem 0 .4rem; font-variant-numeric: tabular-nums; }
-.pick-cards dl div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--forest); padding-block: .35rem; }
-.pick-cards dd { margin: 0; font-weight: 900; }
-.pick-cards .shop, .price-date { font: 600 .84rem/1.55 var(--mono); }
-.pick-cards .shop { margin-bottom: .8rem; }
+.pick-cards p + p { margin-top: .45rem; }
 .pick-rule { margin-top: 1.25rem; max-width: 64ch; }
 .name-check label span { color: var(--mint); }
