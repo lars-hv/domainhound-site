@@ -121,13 +121,15 @@ async function render() {
     const dog = fs.readFileSync(path.join(root, 'assets/hound-mark.svg')).toString('base64');
     const palette = fs.readFileSync(path.join(root, 'assets/palette.css'), 'utf8')
       .replace('mulish-latin-wght-normal.woff2', 'data:font/woff2;base64,' + font);
+    const sfPalette = fs.readFileSync(path.join(root, 'sf/palette.css'), 'utf8');
     await page.setContent(`<style>${palette}
-      *{box-sizing:border-box}body{margin:0;padding:48px 64px;background:var(--forest);color:var(--paper);font:750 32px Mulish,sans-serif}
+${sfPalette}
+      *{box-sizing:border-box}body{margin:0;padding:48px 64px;background:var(--paper);color:var(--pine);font:750 32px Mulish,sans-serif}
       header,footer{display:flex;align-items:center;justify-content:space-between}
       header{border-bottom:2px solid var(--leaf);padding-bottom:20px} header span{font:600 23px monospace}
       img{width:64px;vertical-align:middle;margin-right:12px} main{display:flex;align-items:center;gap:50px;height:360px}
       h1{font-size:64px;line-height:1.04;letter-spacing:-2px;margin:0;max-width:590px}
-      aside{background:var(--mint);color:var(--pine);padding:20px 30px 28px;transform:rotate(-3deg);text-align:center}
+      aside{background:var(--leaf);color:var(--pine);padding:20px 30px 28px;transform:rotate(-3deg);text-align:center}
       strong{display:block;font-size:108px;line-height:1.05;letter-spacing:-3px} aside span{font-size:28px}
       footer{border-top:2px dashed var(--leaf);padding-top:26px;font-size:25px}
     </style><header><b><img src="data:image/svg+xml;base64,${dog}" alt="">Domain Hound</b><span>${values.month}</span></header>
