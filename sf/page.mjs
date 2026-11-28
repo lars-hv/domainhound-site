@@ -42,6 +42,18 @@ async function lookup(name, signal) {
   return runSearch('name', { name, extraEnding: 'si' }, signal);
 }
 
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', currencyDisplay: 'code' });
+
+function priceNote(item) {
+  if (item.status === 'taken') return 'The owner sets the price.';
+  if (item.status !== 'available') return '';
+  const offer = item.quotes[0];
+  if (!offer) return 'No standard price listed.';
+  const term = offer.minimumYears > 1 ? ` for ${offer.minimumYears} years` : '';
+  return `${usd.format(offer.firstPaymentUsd)} upfront${term} at ${offer.shop}. ` +
+    `${usd.format(offer.renewalPaymentUsd)} to renew${term || ' each year'}.`;
+}
+
 for (const form of document.querySelectorAll('.name-check')) {
   const field = form.querySelector('input');
   const status = form.querySelector('.check-status');
@@ -73,7 +85,15 @@ for (const form of document.querySelectorAll('.name-check')) {
         const li = document.createElement('li');
         const domain = document.createElement('b');
         domain.textContent = item.domain;
-        li.append(domain, labels[item.status]);
+        const label = document.createElement('span');
+        label.textContent = labels[item.status];
+        li.append(domain, label);
+        const note = priceNote(item);
+        if (note) {
+          const price = document.createElement('p');
+          price.textContent = note;
+          li.append(price);
+        }
         matches.append(li);
       }
       status.textContent = result.items.length ? 'Domain check results' : 'No endings confirmed. Try another name.';

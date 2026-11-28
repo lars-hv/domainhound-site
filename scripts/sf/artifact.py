@@ -31,8 +31,8 @@ def portable_script():
     row.company.normalize('NFKC').toLowerCase() === query ||
     row.domain === query || row.domain.slice(0, -row.ending.length) === query
   ).map(row => row.domain));
-  return { items: [...domains].map(domain => ({ domain, status: 'taken' })) };""")
-    chart = replace_once(chart, "taken: 'Taken'", "taken: 'Listed in the snapshot'")
+  return { items: [...domains].map(domain => ({ domain, status: 'listed' })) };""")
+    chart = replace_once(chart, "taken: 'Taken'", "listed: 'Listed in the snapshot'")
     chart = replace_once(chart, "'Domain check results' : 'No endings confirmed. Try another name.'",
                          "'Snapshot matches' : 'No matching name or domain in this snapshot.'")
     chart = replace_once(chart, "new URL('/sf/', location.origin)", "new URL('./index.html', location.href)")
@@ -57,7 +57,7 @@ def portable_script():
 def package(output):
     files = ["assets/home.css", "assets/palette.css", "assets/mulish-latin-wght-normal.woff2",
              "assets/OFL.txt", "assets/hound-mark.svg", "sf/page.css", "sf/share.png",
-             "data/sf/endings.json", "data/sf/companies.json", "data/sf/prices.json"]
+             "data/sf/endings.json", "data/sf/companies.json"]
     for file in files:
         target = output / file
         target.parent.mkdir(exist_ok=True, parents=True)
@@ -83,6 +83,8 @@ def package(output):
     html = html.replace('Turn on JavaScript to check a name.',
                         'Turn on JavaScript to look up a name in this snapshot.')
     html = replace_once(html, 'Which ending can you get?', 'Is your name in the snapshot?')
+    html = replace_once(html, 'Price depends on your exact name. <a href="#check-yours">Check yours below.</a>',
+                        '<a href="#check-yours">Look up your name in this snapshot.</a>')
     (output / "index.html").write_text(html)
     (output / "sf/page.js").write_text(portable_script())
 

@@ -5,6 +5,7 @@ const fs = require('node:fs/promises');
 const { webkit } = require('playwright-core');
 const data = require('../data/sf/endings.json');
 const { companies } = require('../data/sf/companies.json');
+const headline = 'Your .com is taken. Here’s what 1,581 SF startups did.';
 
 test('SF counts reconcile across cohorts, endings, and brand shapes', () => {
   assert.equal(data.websites + data.excluded_websites, data.eligible_companies);
@@ -47,12 +48,37 @@ test('SF chart and name check work without publishing a search to the page URL o
       checked.push(name);
       const exact = name.endsWith('.si');
       const ascii = name.split('.')[0];
+      const domain = exact ? {
+        domain: name, ending: 'si', status: 'available', evidence: 'rdap-404',
+        checkedAt: '2026-11-27T12:00:00Z', priceShown: true,
+        prices: [{ shop: 'Example Shop', minimumYears: 2, firstYearUsd: 8, renewalUsd: 10,
+          firstPaymentUsd: 16, renewalPaymentUsd: 20, threeYearUsd: 36 }],
+      } : { domain: ascii + '.com', ending: 'com', status: 'taken' };
       return route.fulfill({ json: {
         query: { ascii, exactDomain: exact ? name : null },
-        domains: [{ domain: exact ? name : ascii + '.com', ending: exact ? 'si' : 'com', status: 'taken' }],
+        domains: [domain],
       } });
     });
     await page.goto(site + '/sf/');
+    assert.equal((await page.locator('h1').innerText()).replace(/\s+/g, ' '), headline);
+    assert.equal(await page.title(), headline);
+    assert.equal(await page.locator('meta[property="og:title"]').getAttribute('content'), headline);
+    const pick = page.getByRole('region', { name: 'Which ending should you pick?' });
+    const cards = pick.getByRole('article');
+    const endings = ['.com', '.ai', '.si'];
+    assert.deepEqual(await cards.locator('h3').allTextContents(), endings);
+    for (const [index, ending] of endings.entries()) {
+      const paragraphs = await cards.nth(index).locator('p').allTextContents();
+      assert.equal(paragraphs.length, 2);
+      const { count, pct } = data.endings[ending];
+      assert.equal(paragraphs[0], `${count.toLocaleString('en-US')} of ${data.websites.toLocaleString('en-US')} sites · ${pct}%`);
+      assert.ok(paragraphs[1].endsWith('.'));
+    }
+    assert.doesNotMatch(await pick.innerText(), /\$|first year|renewal|three years|Spaceship|Dynadot|where the prices come from/i);
+    assert.equal(await pick.locator('details').count(), 0);
+    await pick.getByRole('link', { name: 'Check yours below.' }).click();
+    assert.equal(page.url(), site + '/sf/#check-yours');
+    assert.equal(await page.locator(':target .name-check').count(), 1);
     const trend = page.locator('.ai-trend');
     const trendRows = data.batches.map(row => {
       const ai = row.endings['.ai']?.count ?? 0;
@@ -103,11 +129,16 @@ test('SF chart and name check work without publishing a search to the page URL o
       await form.getByRole('button', { name: 'Check endings' }).click();
       await form.getByText(name + '.si', { exact: true }).waitFor();
       assert.deepEqual(await form.locator('.matches b').allTextContents(), [name + '.com', name + '.si']);
+      assert.deepEqual(await form.locator('.matches li p').allTextContents(), [
+        'The owner sets the price.',
+        'USD 16.00 upfront for 2 years at Example Shop. USD 20.00 to renew for 2 years.',
+      ]);
     }
     assert.deepEqual(checked, ['example', 'example.si', 'secondexample', 'secondexample.si']);
     assert.equal(page.url(), site + '/sf/#check');
     assert.deepEqual(await page.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0]);
     assert.equal(requests.filter(url => url.origin === site && url.search).length, 0);
+    assert.ok(requests.every(url => !url.pathname.endsWith('/prices.json')));
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();

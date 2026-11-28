@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Your .com is taken. Now what? | Domain Hound</title>
+  <title>{{headline}}</title>
   <meta name="description" content="{{description}}">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Domain Hound">
-  <meta property="og:title" content="Your .com is taken. Now what?">
+  <meta property="og:title" content="{{headline}}">
   <meta property="og:description" content="{{description}}">
   <meta property="og:image" content="https://domainhound.dev/sf/share.png">
   <meta property="og:image:width" content="1200">
@@ -33,8 +33,7 @@
 <main>
   <section class="intro"><div class="frame spread">
     <div><p class="eyebrow">San Francisco Bay Area &nbsp;/&nbsp; {{years}}</p>
-    <h1>Your .com is taken.<br>Now what?</h1>
-    <p class="lede">See what {{total}} Y Combinator startups picked.</p>
+    <h1>{{headlineLead}}<br>{{headlineFollowup}}</h1>
     <div id="check">{{heroCheck}}</div>
     <a class="funding-jump" href="#funding">See funding by company</a></div>
     <div class="ticket"><div class="ticket-top"><span>Website ending</span><b>.ai</b></div>
@@ -44,7 +43,7 @@
   </div></section>
   <section class="chart-band"><div class="frame">
     <h2>What did startups pick?</h2>
-    <p class="deck">Each bar is one YC batch. Pick one to see its endings.</p>
+    <p class="deck">Each bar is one Y Combinator batch. Pick one to see its endings.</p>
     <div class="legend"><span><i class="com"></i>.com</span><span><i class="ai"></i>.ai</span><span><i class="rest"></i>Other endings</span></div>
     <div class="plot">
       <div class="axis" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
@@ -56,17 +55,10 @@
     </details>
     <p class="chart-note">.com was the most common ending overall. Just {{siCount}} of {{total}} sites used .si, shown under “Other endings”.</p>
   </div></section>
-  <section class="facts-band pick-band"><div class="frame">
-    <h2>Which ending should you pick?</h2>
-    <p class="deck">We priced the same {{sampleSize}} names with each ending. These shops had the lowest bill over three years.</p>
+  <section class="facts-band pick-band" aria-labelledby="pick-title"><div class="frame">
+    <h2 id="pick-title">Which ending should you pick?</h2>
     <div class="cards pick-cards">{{picks}}</div>
-    <p class="price-date">USD before tax · Domain Hound · {{priceDay}}</p>
-    <p class="pick-rule"><strong>Start with your exact .com.</strong> If it’s taken, pick .ai for an AI business or .si to keep the name for less. Want the .com? Try adding a word.</p>
-    <p class="chart-note">To buy a taken .com, you deal with its owner. Prices vary.</p>
-    <details><summary>Where the prices come from</summary>
-      <p>Domain Hound checked {{sampleSize}} available names per ending on {{priceDay}}. All {{sampleSize}} names got the same list price at each shop. We compared the payments due over three years, including renewals.</p>
-      <p>{{priceSources}}</p>
-    </details>
+    <p class="pick-rule">Price depends on your exact name. <a href="#check-yours">Check yours below.</a></p>
   </div></section>
   <div class="chart-band trend-band"><div class="frame">
     <section class="ai-trend" aria-labelledby="ai-trend-title">
@@ -123,7 +115,7 @@
     </details>
     <div class="foot-links"><a href="/data/sf/endings.json" download>Download the counts (JSON)</a><button id="share" hidden>Share this page</button><span id="share-status" role="status"></span></div>
   </div></section>
-  <section class="check-band"><div class="frame">
+  <section class="check-band" id="check-yours"><div class="frame">
     <h2>Which ending can you get?</h2>
     {{closingCheck}}
   </div></section>
