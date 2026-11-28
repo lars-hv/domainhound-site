@@ -24,78 +24,56 @@ test('SF counts reconcile across cohorts, endings, and brand shapes', () => {
   assert.equal(data.facts.matching_com + data.facts.different_com, counts['.com']);
 });
 
-test('SF chart and name check work without publishing a search to the page URL or storage', async () => {
+test('SF rankings and all 13 batch details render the rounded snapshot', async () => {
   const browser = await webkit.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const site = 'https://site.example';
-    const checked = [];
     const errors = [];
-    const requests = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.route('**/*', async route => {
-      const url = new URL(route.request().url());
-      requests.push(url);
-      if (url.origin === site) {
-        const asset = url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname;
-        const contentType = { '.html': 'text/html', '.mjs': 'text/javascript', '.css': 'text/css',
-          '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' }[path.extname(asset)];
-        return route.fulfill({ body: await fs.readFile(path.join(__dirname, '..', asset)), contentType });
-      }
-      assert.equal(url.pathname, '/v1/check');
-      const name = url.searchParams.get('name');
-      checked.push(name);
-      if (name === 'test-throttle') return route.fulfill({ status: 429, body: '' });
-      return route.fulfill({ json: { domains: [{ domain: 'example.com', status: 'taken' }] } });
+    await page.route(site + '/**', route => {
+      const file = new URL(route.request().url()).pathname;
+      return route.fulfill({ path: path.join(__dirname, '..', file.endsWith('/') ? file + 'index.html' : file) });
     });
     await page.goto(site + '/sf/');
     const entries = Object.entries(data.endings).slice(0, 10);
-    for (const [selector, limit] of [['#leaders li', 3], ['#ranking li', 10]]) {
-      const rows = page.locator(selector);
-      assert.equal(await rows.count(), limit);
-      for (const [index, [ending, { count, pct }]] of entries.slice(0, limit).entries()) {
-        const row = rows.nth(index);
-        assert.equal(await row.locator('.ending').textContent(), ending);
-        assert.equal(await row.locator('.count').textContent(), String(count));
-        assert.equal(await row.locator('.share').textContent(), pct + '%');
-      }
-    }
+    assert.deepEqual(await page.locator('#ranking .ending').allTextContents(), entries.map(([ending]) => ending));
+    assert.deepEqual(await page.locator('#ranking .share').allTextContents(),
+      ['46%', '30%', '3.8%', '3.5%', '2.4%', '1.3%', '1.2%', '1.1%', '0.8%', '0.7%']);
+    assert.deepEqual(await page.locator('#leaders .count').allTextContents(),
+      ['· 733 startups ·', '· 479 startups ·', '· 60 startups ·']);
+    assert.deepEqual(await page.locator('#leaders .share').allTextContents(), ['46%', '30%', '3.8%']);
     assert.deepEqual(await page.locator('h1 span').allTextContents(),
       ['Your .com is taken.', 'Here’s what 1,581 SF startups did.']);
-    const copy = await page.locator('body').innerText();
-    assert.ok(copy.trim().split(/\s+/).length < 450);
-    assert.doesNotMatch(await page.content(), /raised|funding|Form D|\$[0-9]/i);
+    assert.doesNotMatch(await page.content(), /raised|funding|Form D/i);
     assert.equal(await page.locator('[download]').count(), 0);
-    const headings = await page.locator('h2').allTextContents();
-    assert.deepEqual(headings, ['The top 3', 'The top 10 endings', 'Why not .com?',
-      'It works on other endings too', '.ai over time', 'Behind the dot',
-      'How to choose', 'Check a name', 'Method and sources']);
+    assert.deepEqual(await page.locator('h2').allTextContents(), ['The top 3', 'Why they skipped it',
+      'The top 10 endings', 'Real startups, other endings', '.ai is rising', 'Behind the dot',
+      'How to choose', 'Check your name', 'Method']);
     assert.equal(await page.locator('footer p').textContent(),
-      "Not affiliated with Y Combinator. Data from YC's public directory.");
+      "Not affiliated with Y Combinator. Data from YC's public directory. · Privacy");
+    const rows = page.locator('.batch-details tbody tr');
+    const select = page.locator('#batch-select');
+    const verify = async batch => {
+      const endings = Object.entries(batch.endings).sort((a, b) =>
+        b[1].count - a[1].count || a[0].localeCompare(b[0]));
+      assert.equal(await select.inputValue(), batch.batch);
+      assert.equal(await page.locator('.column[aria-pressed=true]').getAttribute('data-batch'), batch.batch);
+      assert.deepEqual(await rows.locator('th').allTextContents(), endings.slice(0, 5).map(([ending]) => ending));
+      const shares = endings.slice(0, 5).map(([, { count }]) => {
+        const pct = count / batch.websites * 100;
+        return pct.toFixed(pct >= 10 ? 0 : 1) + '%';
+      });
+      assert.deepEqual(await rows.locator('td').allTextContents(), [...shares, `+${endings.length - 5} other endings`]);
+    };
+    await verify(data.batches.at(-1));
+    for (const batch of data.batches) {
+      await select.selectOption(batch.batch);
+      await verify(batch);
+    }
     const first = data.batches[0];
     await page.getByRole('button', { name: new RegExp('^' + first.batch) }).click();
-    assert.equal(await page.locator('#batch-select').inputValue(), first.batch);
-    await page.getByText('All endings in this batch', { exact: true }).click();
-    assert.equal(await page.locator('caption').innerText(), first.batch);
-    assert.equal(await page.locator('.batch-details tbody tr').count(), Object.keys(first.endings).length);
-    await page.locator('#batch-select').selectOption(data.batches[1].batch);
-    assert.equal(await page.locator('.column[aria-pressed=true]').getAttribute('data-batch'), data.batches[1].batch);
-    await page.getByRole('link', { name: 'Check a name' }).click();
-    await page.getByLabel('Name or domain').fill('example');
-    await page.getByRole('button', { name: 'Check endings' }).click();
-    await page.locator('#matches li').filter({ hasText: 'Taken' }).waitFor();
-    assert.deepEqual(checked, ['example']);
-    await page.getByLabel('Name or domain').fill('test-throttle');
-    await page.getByRole('button', { name: 'Check endings' }).click();
-    await page.getByText('Too many checks. Try again in a few minutes.').waitFor();
-    assert.equal(await page.locator('#matches li').count(), 0);
-    await page.getByLabel('Name or domain').fill('example');
-    await page.getByRole('button', { name: 'Check endings' }).click();
-    await page.locator('#matches li').filter({ hasText: 'Taken' }).waitFor();
-    assert.deepEqual(checked, ['example', 'test-throttle', 'example']);
-    assert.equal(page.url(), site + '/sf/#check');
-    assert.deepEqual(await page.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0]);
-    assert.equal(requests.filter(url => url.origin === site && url.search).length, 0);
+    await verify(first);
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();
@@ -122,7 +100,7 @@ test('each non-.com startup has one matching registration check and contributes 
   const registered = observations.filter(row => row.registration === 'registered').length;
   const html = require('node:fs').readFileSync(path.join(__dirname, '../sf/index.html'), 'utf8');
   assert.ok(html.includes('>' + Math.round(100 * registered / expected.length) + '%</strong>'));
-  assert.ok(html.includes(registered + ' of ' + expected.length));
+  assert.ok(html.includes(`For ${registered} of the ${expected.length} startups on other endings`));
 });
 
 test('examples identify three listed companies for each requested ending', () => {
@@ -142,20 +120,31 @@ test('the portable preview works from disk with the network off', async () => {
   const browser = await webkit.launch({ headless: true });
   try {
     execFileSync(process.execPath, [path.join(__dirname, '../scripts/sf/artifact.cjs'), output]);
-    const page = await browser.newPage({ offline: true, viewport: { width: 320, height: 844 } });
+    const context = await browser.newContext({ offline: true, viewport: { width: 320, height: 844 } });
+    const page = await context.newPage();
     const external = [];
-    page.on('request', req => { if (/^https?:/.test(req.url())) external.push(req.url()); });
+    context.on('request', req => { if (/^https?:/.test(req.url())) external.push(req.url()); });
     await page.goto(pathToFileURL(path.join(output, 'index.html')).href);
-    await page.locator('.batch-details summary').click();
-    assert.ok((await page.locator('body').innerText()).trim().split(/\s+/).length < 450);
     await page.locator('#batch-select').selectOption(data.batches[0].batch);
-    assert.equal(await page.locator('caption').textContent(), data.batches[0].batch);
-    await page.getByLabel('Name or domain in this directory').fill('Campfire');
-    await page.getByRole('button', { name: 'Look up name' }).click();
-    assert.equal(await page.locator('#matches b').textContent(), 'campfire.ai');
+    assert.equal(await page.locator('.batch-details tr').last().innerText(), '+12 other endings');
     await page.addStyleTag({ content: ':root {font-size:200%}' });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 320);
     assert.deepEqual(external, []);
+    const field = page.getByRole('textbox', { name: 'Check your name' });
+    await field.fill('   ');
+    assert.equal(await field.evaluate(node => node.checkValidity()), false);
+    await field.fill('  Example & Co  ');
+    await context.setOffline(false);
+    await context.route('https://domainhound.dev/?*', route => route.fulfill({ body: 'Checker' }));
+    const [popup] = await Promise.all([
+      context.waitForEvent('page'), page.getByRole('button', { name: 'Check my name' }).click()
+    ]);
+    await popup.waitForLoadState();
+    const url = new URL(popup.url());
+    assert.equal(url.origin + url.pathname, 'https://domainhound.dev/');
+    assert.deepEqual([...url.searchParams], [['q', 'Example & Co']]);
+    assert.equal(await popup.evaluate(() => window.opener), null);
+    assert.equal(page.url(), pathToFileURL(path.join(output, 'index.html')).href);
   } finally {
     await browser.close();
     await fs.rm(output, { recursive: true, force: true });

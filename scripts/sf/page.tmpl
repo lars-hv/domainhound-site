@@ -3,16 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Your .com is taken. Here’s what {{total}} SF startups did. | Domain Hound</title>
-  <meta name="description" content="The top 3 endings among {{total}} Bay Area YC startups: {{description}}.">
+  <title>{{headline}}</title>
+  <meta name="description" content="{{dek}}">
   <meta property="og:type" content="article">
-  <meta property="og:site_name" content="Domain Hound">
-  <meta property="og:title" content="Your .com is taken. Here’s what {{total}} SF startups did.">
-  <meta property="og:description" content="The top 3 endings among {{total}} Bay Area YC startups: {{description}}.">
+  <meta property="og:title" content="{{headline}}">
+  <meta property="og:description" content="{{dek}}">
   <meta property="og:image" content="https://domainhound.dev/sf/share.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="The top 3 endings among {{total}} Bay Area YC startups: {{description}}.">
+  <meta property="og:image:alt" content="{{shareAlt}}">
   <meta property="og:url" content="https://domainhound.dev/sf/">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://domainhound.dev/sf/">
@@ -26,19 +25,17 @@
 <body>
 <header><div class="frame mast">
   <a class="paper-art" href="/" aria-label="Domain Hound home">
-    <span class="paper-word first">Domain</span><span class="paper-word second">Hound</span>
     <span class="paper-dog"><img src="/assets/hound-mark.svg" width="180" height="180" alt=""></span>
   </a>
-  <a class="jump" href="#check">Check a name</a>
 </div></header>
 <main>
   <section class="intro"><div class="frame spread">
-    <div><p class="eyebrow">Bay Area YC directory</p>
-      <h1><span>Your .com is taken.</span> <span>Here’s what {{total}} SF startups did.</span></h1>
-      <p class="lede">You don’t always need the .com.</p>
+    <div><p class="eyebrow">SF startups · YC directory · {{edition}}</p>
+      <h1><span>{{lead}}</span> <span>{{subhead}}</span></h1>
+      <p class="lede">{{dek}}</p>
     </div>
     <section class="ticket" aria-labelledby="leaders-title">
-      <div class="ticket-top"><h2 id="leaders-title">The top 3</h2><span>Sites · Share</span></div>
+      <div class="ticket-top"><h2 id="leaders-title">The top 3</h2></div>
       <ol id="leaders">{{leaders}}</ol>
       <svg class="postcard-scene" viewBox="0 0 400 110" aria-hidden="true" focusable="false">
         <defs>
@@ -61,63 +58,58 @@
     </section>
   </div></section>
   <div class="ranking-band"><div class="frame ranking-spread">
-    <section><h2>The top 10 endings</h2><ol id="ranking">{{ranking}}</ol></section>
-    <section class="reason"><h2>Why not .com?</h2>
-      <strong>{{takenPct}}%</strong>
-      <p>Among startups on other endings, {{registered}} of {{nonCom}} matching .coms were taken when checked.</p>
-      <p>Buying one from its owner can cost a lot.</p>
+    <section class="reason"><h2>Why they skipped it</h2>
+      <strong>{{takenPct}}</strong>
+      <p>For {{registered}} of the {{nonCom}} startups on other endings, the matching .com is already registered today.</p>
+      <p>Getting a taken .com means buying it from the owner, at the owner’s price.</p>
     </section>
+    <section><h2>The top 10 endings</h2><ol id="ranking">{{ranking}}</ol></section>
   </div></div>
   <section class="examples-band"><div class="frame">
-    <h2>It works on other endings too</h2>
+    <h2>Real startups, other endings</h2>
     <div class="examples">{{groups}}</div>
   </div></section>
   <section class="chart-band"><div class="frame">
-    <h2>.ai over time</h2>
-    <p class="deck">{{firstAi}}% in {{first}}, {{lastAi}}% in {{latest}}.</p>
+    <h2>.ai is rising</h2>
+    <p class="deck">1 in 5 in early 2023. 1 in 3 today.</p>
     <div class="legend"><span><i class="com"></i>.com</span><span><i class="ai"></i>.ai</span><span><i class="rest"></i>Other endings</span></div>
     <div class="plot">
       <div class="axis" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
       <div class="years">{{bars}}</div>
     </div>
-    <div class="batch-readout"><select aria-label="YC batch" id="batch-select" disabled>{{options}}</select><span id="batch-summary" role="status">{{summary}}</span></div>
-    <details class="batch-details"><summary>All endings in this batch</summary>
-      <table><caption>{{latest}}</caption><thead><tr><th>Ending</th><th>Sites</th></tr></thead><tbody>{{tableRows}}</tbody></table>
-    </details>
+    <div class="batch-readout"><select aria-label="YC batch" id="batch-select" disabled>{{options}}</select></div>
+    <table class="batch-details" aria-label="Top 5 endings"><tbody aria-live="polite">{{tableRows}}</tbody></table>
+    <div id="batch-templates" hidden>{{batchTemplates}}</div>
   </div></section>
   <section class="facts-band"><div class="frame">
     <h2>Behind the dot</h2>
     <div class="cards">
-      <article><h3>Compound names</h3><strong>{{compound}}</strong><p>names resemble joined dictionary words.</p></article>
-      <article><h3>Branded prefixes</h3><strong>{{get}} / {{try}}</strong><p>used “get” / “try” before the exact brand.</p></article>
-      <article><h3>Shortest to longest</h3><strong>{{shortest}} to {{longest}}</strong><p>characters, from <b>{{shortestDomain}}</b> to <b>{{longestDomain}}</b>.</p></article>
+      <article><p><strong>{{compound}}</strong> names are two words glued together.</p></article>
+      <article><p><strong>{{prefixed}}</strong> put “get” or “try” in front of the name.</p></article>
+      <article><p>Shortest: <b>{{shortestDomain}}</b>. Longest: <b>{{longestDomain}}</b>.</p></article>
     </div>
   </div></section>
   <section class="choice-band"><div class="frame choice">
     <h2>How to choose</h2>
-    <ol><li>Take the exact .com if it’s available at the usual registration price.</li>
-      <li>Try .ai, .dev or .io if it fits your work.</li>
-      <li>Favor your exact brand over a longer .com.</li>
-      <li>Check app stores and trademarks.</li></ol>
+    <ol><li><span aria-hidden="true" class="step">1.</span> <span>Your exact name on .com at the normal price? Take it.</span></li>
+      <li><span aria-hidden="true" class="step">2.</span> <span>Taken? Pick the ending that says what you do: .ai, .dev or .io.</span></li>
+      <li><span aria-hidden="true" class="step">3.</span> <span>Keep the exact name. A short ending beats a long .com.</span></li>
+      <li><span aria-hidden="true" class="step">4.</span> <span>Check app stores and trademarks before you buy.</span></li></ol>
   </div></section>
   <section id="check" class="check-band"><div class="frame">
-    <h2>Check a name</h2>
-    <form id="check-form" hidden autocomplete="off"><label for="candidate">Name or domain</label><div class="field">
-      <input id="candidate" type="text" maxlength="253" required placeholder="Your startup name" autocapitalize="none" spellcheck="false">
-      <button type="submit">Check endings</button>
+    <h2 id="check-title">Check your name</h2>
+    <p>Domain, cheapest shop with renewal, app stores and trademarks. Free.</p>
+    <form id="check-form" action="/" autocomplete="off"><div class="field">
+      <input id="candidate" name="q" type="text" maxlength="253" required pattern=".*\S.*" aria-labelledby="check-title" autocapitalize="none" spellcheck="false">
+      <button type="submit">Check my name</button>
     </div></form>
-    <noscript><p>Turn on JavaScript for a live domain check.</p></noscript>
-    <p id="check-status" role="status"></p><ul id="matches"></ul>
   </div></section>
   <section class="method"><div class="frame">
-    <h2>Method and sources</h2>
-    <p>One site per Bay Area startup, {{first}} to {{latest}}. {{excluded}} lacked websites.</p>
-    <p><a href="https://rdap.verisign.com/com/v1/help">Verisign RDAP</a>, {{checked}}. We matched lowercase brand letters and digits. {{redirected}} .coms redirected to listed sites. Launch-day availability and ownership are unknown.</p>
-    <p><a href="{{source}}">Directory snapshot</a> · <a href="https://publicsuffix.org/list/">Public Suffix List</a> · <a href="https://www.nltk.org/howto/wordnet.html">WordNet</a></p>
-    <div class="foot-links"><button id="share" hidden>Share this page</button><span id="share-status" role="status"></span></div>
+    <h2>Method</h2>
+    <p>One site per Bay Area YC startup, {{first}} to {{latest}}; {{excluded}} had none. .com status from Verisign RDAP on {{checked}}, matched on the brand’s letters and digits. Who owns each .com, and what was free at launch, is not known.</p>
+    <p>Sources: <a href="{{source}}">Directory snapshot</a> · <a href="https://rdap.verisign.com/com/v1/help">Verisign RDAP</a> · <a href="https://publicsuffix.org/list/">Public Suffix List</a> · <a href="https://www.nltk.org/howto/wordnet.html">WordNet</a></p>
   </div></section>
 </main>
-<footer><div class="frame"><p>Not affiliated with Y Combinator. <a href="https://www.ycombinator.com/companies">Data from YC's public directory.</a></p><a href="/privacy/">Privacy</a></div></footer>
-<script type="application/json" id="batch-data">{{batchData}}</script>
+<footer><div class="frame"><p>Not affiliated with Y Combinator. <a href="https://www.ycombinator.com/companies">Data from YC's public directory.</a> · <a href="/privacy/">Privacy</a></p></div></footer>
 </body>
 </html>
