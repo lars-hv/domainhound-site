@@ -124,7 +124,14 @@ test('SF chart and name check work without publishing a search to the page URL o
     assert.deepEqual(await body.locator('.site-domain').allTextContents(),
       top50.companies.map(row => row.domain).sort(new Intl.Collator('en', { sensitivity: 'base', numeric: true }).compare));
     await page.setViewportSize({ width: 320, height: 844 });
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 320);
+    await sort.selectOption('com:asc');
+    const { scrollWidth, overflows } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      overflows: Array.from(document.querySelectorAll('body *'))
+        .filter(element => element.getBoundingClientRect().right > innerWidth + 1)
+        .map(element => element.id || element.getAttribute('class') || element.tagName).slice(0, 10),
+    }));
+    assert.equal(scrollWidth, 320, `Elements extending past the viewport: ${overflows.join(', ')}`);
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await body.count(), 50);
     const first = data.batches[0];

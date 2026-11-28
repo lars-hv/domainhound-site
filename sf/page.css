@@ -113,8 +113,8 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
 #funding-source { margin-top: .8rem; }
 .funding-picker { display: none; }
 @media (max-width: 800px) {
-  .funding-picker:not([hidden]) { display: flex; align-items: center; gap: .65rem; flex-basis: 100%; font-size: .95rem; font-weight: 800; }
-  .funding-picker select { min-width: 0; max-width: 100%; }
+  .funding-picker:not([hidden]) { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: .65rem; width: min(100%, 22rem); font-size: .95rem; font-weight: 800; }
+  .funding-picker select { width: 100%; min-width: 0; }
   #company-table, #company-table tbody { display: block; }
   #company-table thead { display: none; }
   #company-table tr { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem .65rem; padding: 1.05rem; background: var(--mist); border-top: 2px solid var(--forest); margin-top: .75rem; }
