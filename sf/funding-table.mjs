@@ -6,10 +6,21 @@ async function enableFundingTable() {
   const { companies } = await response.json();
   const table = document.querySelector('#company-table');
   const picker = document.querySelector('#funding-sort');
+  const more = document.getElementById('more-companies');
+  function showRows(expanded) {
+    Array.from(table.tBodies[0].rows).forEach((row, i) => { row.hidden = !expanded && i >= 3; });
+    more.setAttribute('aria-expanded', String(expanded));
+    more.textContent = expanded ? 'Show the first 3 companies' : 'Show all 50 companies';
+  }
+  showRows(false);
+  more.hidden = false;
+  more.addEventListener('click', () => showRows(more.getAttribute('aria-expanded') !== 'true'));
+
   let key = 'raised_usd', order = 'desc';
 
   function update() {
     table.tBodies[0].innerHTML = tableRows(sorted(companies, key, order));
+    showRows(true);
     picker.value = key + ':' + order;
     for (const th of table.tHead.rows[0].cells) {
       if (th.dataset.key === key) th.setAttribute('aria-sort', order === 'asc' ? 'ascending' : 'descending');
@@ -29,7 +40,7 @@ async function enableFundingTable() {
   }
   const directions = {
     raised_usd: ['low to high', 'high to low'], team_size: ['low to high', 'high to low'],
-    com: ['available first', 'yes first'],
+    com: ['registration first', 'yes first'],
   };
   for (const [field, label] of Object.entries(columns)) {
     const labels = directions[field] || ['A to Z', 'Z to A'];

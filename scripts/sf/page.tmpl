@@ -31,13 +31,15 @@
   <a class="jump" href="#check">Check a name</a>
 </div></header>
 <main>
-  <section class="intro"><div class="frame spread">
-    <div><p class="eyebrow">San Francisco Bay Area &nbsp;/&nbsp; {{years}}</p>
-    <h1>{{headlineLead}}<br>{{headlineFollowup}}</h1>
-    <div id="check">{{heroCheck}}</div>
-    <a class="funding-jump" href="#funding">See funding by company</a></div>
-    <div class="ticket"><div class="ticket-top"><span>Third most used</span><b>.io</b></div>
-      <strong>{{io}}<small>%</small></strong><p>of these startups use <b>.io</b></p>
+  <article>
+  <header class="intro"><div class="frame spread">
+    <div><p class="eyebrow">San Francisco Bay Area &nbsp;/&nbsp; {{month}}</p>
+      <h1>{{headlineLead}}<br>{{headlineFollowup}}</h1>
+      <p class="dek">{{dek}}</p>
+    </div>
+    <figure class="ticket" aria-label="Emergent funding postcard">
+      <div class="ticket-top"><span>San Francisco</span><b>.sh</b></div>
+      <strong>{{leadAmount}}</strong><p>raised by Emergent</p>
       <svg class="postcard-scene" viewBox="0 0 400 110" aria-hidden="true" focusable="false">
         <defs>
           <g id="gate-span" fill="none" stroke="currentColor" stroke-linejoin="round">
@@ -49,20 +51,37 @@
             <path d="M94 14h7m-7 7h7m-8 16h9m-10 16h11m-11 17h12m172-26h6m-7 9h8m-8 12h8m-9 13h10" stroke-width="3"/>
           </g>
         </defs>
-        <path fill="var(--leaf)" d="M0 0h400v110H0z"/>
-        <circle cx="331" cy="30" r="18" fill="var(--paper)"/>
+        <path fill="var(--mist)" d="M0 0h400v110H0z"/>
+        <circle cx="331" cy="30" r="18" fill="var(--leaf)"/>
         <path fill="var(--mint)" d="M0 60q30-14 59-9t52 5q25-1 53-12t55-6q30 6 55 24t57 9q40-13 69-8v47H0z"/>
         <path fill="var(--paper)" d="M0 67h70q8 0 8 3t-8 3H0zm180-7h74q7 0 7 2.5t-7 2.5h-74q-6 0-6-2.5t6-2.5z"/>
         <use href="#gate-span"/>
         <path fill="currentColor" d="M0 76q16 0 34 9l32 17q8 4 17 8H0zm400 7q-23 0-44 10t-50 17h94z"/>
       </svg>
-      <div class="ticket-foot">{{ioCount}} of {{total}} sites <span>{{month}}</span></div>
-    </div>
-  </div></section>
+      <figcaption class="ticket-foot"><b>emergent.sh</b><span>Summer 2024 batch</span></figcaption>
+    </figure>
+  </div></header>
   <div class="bay-divider" aria-hidden="true"><svg viewBox="0 0 400 104" focusable="false"><use href="#gate-span"/></svg></div>
-  <section class="chart-band"><div class="frame">
-    <h2>What did startups pick?</h2>
-    <p class="deck">Each bar is one Y Combinator batch. Pick one to see its endings.</p>
+  <div class="reading">
+    <p class="lede">Emergent turns a written idea into a working app. Among the Bay Area startups we counted in Y Combinator’s directory, only {{shCount}} use its .sh ending.</p>
+    <section aria-labelledby="picks-title">
+      <h2 id="picks-title">{{picksTitle}}</h2>
+      <ol id="picks">{{picks}}</ol>
+    </section>
+    <section aria-labelledby="ten-title">
+      <h2 id="ten-title">The top 10 go well beyond .com</h2>
+      <p>{{tenNote}}</p>
+      <table id="top-ten" aria-labelledby="ten-title"><thead><tr><th>Rank</th><th>Ending</th><th>Sites</th><th>Share</th></tr></thead><tbody>{{topTen}}</tbody></table>
+    </section>
+    <section class="ai-trend" aria-labelledby="ai-trend-title">
+      <h2 id="ai-trend-title">{{trendTitle}}</h2>
+      <p class="chart-note">In {{firstBatch}}, {{firstAi}}% used .ai. The share peaked at {{trendPeak}}. In {{latest}} it stood at {{trendLatest}}.</p>
+      <figure aria-label="Share of sites using .ai by YC batch">
+        <div class="trend-head" aria-hidden="true"><span>YC batch</span><span>.ai share</span><span>Batch size</span></div>
+        <div class="trend-plot">{{trend}}</div>
+      </figure>
+      <details class="compare"><summary>Compare all endings by batch</summary>
+        <p>Pick a bar or choose a batch to see the counts.</p>
     <div class="legend"><span><i class="com"></i>.com</span><span><i class="ai"></i>.ai</span><span><i class="io"></i>.io</span><span><i class="rest"></i>Other endings</span></div>
     <div class="plot">
       <div class="axis" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
@@ -72,56 +91,45 @@
     <details class="batch-details"><summary>All endings in this batch</summary>
       <table><caption>{{latest}}</caption><thead><tr><th>Ending</th><th>Sites</th><th>Share</th></tr></thead><tbody>{{tableRows}}</tbody></table>
     </details>
-    <p class="chart-note">.io came third after .com and .ai, with {{ioCount}} of {{total}} sites.</p>
-  </div></section>
-  <section class="facts-band pick-band" aria-labelledby="pick-title"><div class="frame">
-    <h2 id="pick-title">Which ending should you pick?</h2>
-    <div class="cards pick-cards">{{picks}}</div>
-    <p class="pick-rule">Price depends on your exact name. <a href="#check-yours">Check yours below.</a></p>
-  </div></section>
-  <div class="chart-band trend-band"><div class="frame">
-    <section class="ai-trend" aria-labelledby="ai-trend-title">
-      <h2 id="ai-trend-title">Has .ai peaked?</h2>
-      <p class="chart-note">In {{firstBatch}}, {{firstAi}}% used .ai. The high so far is <strong>{{trendPeak}}</strong>. {{latest}} came in at {{trendLatest}}.</p>
-      <figure aria-label="Share of sites using .ai by YC batch">
-        <div class="trend-head" aria-hidden="true"><span>YC batch</span><span>.ai share</span><span>Batch size</span></div>
-        <div class="trend-plot">{{trend}}</div>
-      </figure>
+      </details>
     </section>
-  </div></div>
+  </div>
   <section id="funding" class="funding-band"><div class="frame">
-    <h2>50 SF Bay Area YC startups ranked by funding</h2>
-    <p class="deck">{{fundingHeadline}}</p>
-    <details class="funding-note"><summary>What the numbers mean</summary>
-      <p>We looked for public rounds and SEC filings among the largest teams in the YC snapshot and companies with verified Form D filings. Team sizes come from the YC snapshot.</p>
-      <p>For .com, we use the name just before the listed ending. A listed .com or a .com that leads to the listed site counts as “Yes”. Other results come from Verisign’s .com registry and the domain’s redirect.</p>
-      <a href="/data/sf/top50.json" download>Download funding sources and domain checks (JSON)</a>
-    </details>
+    <h2>The 50 best-funded on our shortlist</h2>
+    <p class="deck">We checked {{candidates}} Bay Area startups for public funding figures. The list covers large teams, companies with verified SEC filings and Emergent.</p>
+    <p>Corgi tops the list at {{corgiAmount}}. Next come Emergent on .sh and HappyRobot on .ai. {{fundingHeadline}}</p>
+
     <div class="funding-tools">
       <label class="funding-picker" hidden>Sort by <select id="funding-sort"></select></label>
     </div>
     <table id="company-table" aria-label="Bay Area YC companies ranked by funding" aria-describedby="funding-source">
       <thead><tr>{{fundingHeaders}}</tr></thead><tbody>{{companyRows}}</tbody>
     </table>
-    <p id="funding-source" class="funding-note">Announced funding from public sources, checked {{fundingDay}}.</p>
+    <button class="more-rows" id="more-companies" aria-controls="company-table" aria-expanded="false" type="button" hidden>Show all 50 companies</button>
+    <p id="funding-source" class="funding-note">Publicly disclosed funding, including SEC filings. Checked {{fundingDay}}.</p>
   </div></section>
-  <section class="facts-band"><div class="frame">
-    <h2>Behind the dot</h2>
-    <div class="cards">
-      <article><h3>How long is a name?</h3><strong>{{median}}</strong><p>characters before the dot. That’s the median. Names ranged from {{shortest}} to {{longest}} characters.</p></article>
-      <article><h3>Get, try or hq?</h3><strong>{{prefixCount}}</strong><p>sites put “get” or “try” before the brand name. “Get” appeared {{get}} times, “try” {{try}} and “hq” {{hq}}.</p></article>
-      <article><h3>The .com detour</h3><strong>{{different}}</strong><p>of {{comCount}} .com sites had something other than the exact brand name before the dot.</p></article>
-    </div>
+  <div class="reading">
+  <section>
+    <h2>{{different}} .com sites put a twist on the name</h2>
+    <p>Among the {{comCount}} .com sites, {{different}} used something other than the company’s exact name before the dot. Across all endings, {{get}} startups put “get” in front of their name and {{try}} used “try”.</p>
+    <p>The median name was {{median}} characters long before the dot. The shortest had {{shortest}} character and the longest had {{longest}}.</p>
     <details><summary>More naming facts and name shapes</summary>
       <p>We found {{distinct}} endings. {{single}} showed up once. Before the dot, {{hyphen}} names had a hyphen and {{digits}} had a digit.</p>
       <h3>How the brand names read</h3>
       <p>We sorted names by spelling. An English dictionary can miss surnames and words in other languages.</p>
       <table><thead><tr><th>Name shape</th><th>Brands</th><th>Share</th></tr></thead><tbody>{{shapes}}</tbody></table>
     </details>
-  </div></section>
+  </section>
   <!-- Future input is weekly ending/count aggregates only, with at least 20 per published bucket. -->
   <section hidden id="weekly"><h2>Endings founders searched this week</h2></section>
-  <section class="method"><div class="frame">
+  <section class="check-band" id="check-yours">
+    <h2>Keep the name you want to say out loud</h2>
+    <p>Start with your exact name on .com. If it’s taken, try .ai for an AI product, or say the .io version out loud. Compare those with a .com that adds a short word, like “get”.</p>
+    <p class="check-help">Check what’s available and what your exact name costs to renew.</p>
+    <div id="check">{{closingCheck}}</div>
+  </section>
+  </div>
+  <section class="method"><div class="reading">
     <h2>How we counted</h2>
     <p>On {{day}}, we counted one listed site per startup across {{batches}} YC batches, from {{firstBatch}} through {{latest}}. Of {{eligible}} eligible companies, {{excluded}} had no usable site. A startup can change its domain after launch.</p>
     <details><summary>Coverage, sources and terms</summary>
@@ -130,12 +138,16 @@
       <p>For name shapes, <a href="https://www.nltk.org/howto/wordnet.html">WordNet</a> supplies English words. We split compounds at spaces, hyphens or capital letters, or into two words of at least three letters each. A single string of letters absent from the dictionary counts as “Possibly invented”. Other spellings go under “Other”.</p>
       <p>The sites come from <a href="https://github.com/yc-oss/api">YC OSS</a>, an unofficial feed of the <a href="https://www.ycombinator.com/companies">YC directory</a>. YC’s <a href="https://www.ycombinator.com/legal#tou">terms of use</a> restrict scraping and commercial reuse. The feed grants no separate data license. Domain Hound is independent of YC.</p>
     </details>
+    <details class="funding-note"><summary>Funding sources and .com checks</summary>
+      <p>We started with the 150 largest teams listed by YC and added companies with verified Form D filings. We included Emergent after checking its published round history. YC does not list its team size. Comparable revenue figures were unavailable.</p>
+      <p>We added distinct public rounds and amounts sold in SEC filings. Corgi’s figure combines its named early rounds with three later filings. Its reported cumulative total differs from that sum. The table uses the six individual amounts.</p>
+      <p>For each listed domain we checked its label with .com. “Yes” means the company listed that .com or it redirected to the listed site. “Registered only” means we confirmed registration without establishing a link to the company. Registration does not identify the owner.</p>
+      <p><a href="{{leadSource}}">Emergent’s funding history</a> · <a href="https://www.greptile.com/blog/seed">Greptile’s seed round</a></p>
+      <a href="/data/sf/top50.json" download>Download funding sources and domain checks (JSON)</a>
+    </details>
     <div class="foot-links"><a href="/data/sf/endings.json" download>Download the counts (JSON)</a><button id="share" hidden>Share this page</button><span id="share-status" role="status"></span></div>
   </div></section>
-  <section class="check-band" id="check-yours"><div class="frame">
-    <h2>Which ending can you get?</h2>
-    {{closingCheck}}
-  </div></section>
+  </article>
 </main>
 <footer><div class="frame"><a href="/">Domain Hound</a><a href="/privacy/">Privacy</a><p>Not affiliated with Y Combinator. Data from YC's public directory.</p></div></footer>
 </body>

@@ -6,7 +6,7 @@ const { webkit } = require('playwright-core');
 const data = require('../data/sf/endings.json');
 const { companies } = require('../data/sf/companies.json');
 const top50 = require('../data/sf/top50.json');
-const headline = 'Your .com is taken. Here’s what 1,581 SF startups did.';
+const headline = "Your .com is taken. Here's what 1,581 SF startups did.";
 
 test('SF counts reconcile across cohorts, endings, and brand shapes', () => {
   assert.equal(data.websites + data.excluded_websites, data.eligible_companies);
@@ -64,24 +64,22 @@ test('SF chart and name check work without publishing a search to the page URL o
     assert.equal((await page.locator('h1').innerText()).replace(/\s+/g, ' '), headline);
     assert.equal(await page.title(), headline);
     assert.equal(await page.locator('meta[property="og:title"]').getAttribute('content'), headline);
-    const pick = page.getByRole('region', { name: 'Which ending should you pick?' });
-    const cards = pick.getByRole('article');
-    const endings = ['.com', '.ai', '.io'];
-    assert.deepEqual(await cards.locator('h3').allTextContents(), endings);
-    for (const [index, ending] of endings.entries()) {
-      const paragraphs = await cards.nth(index).locator('p').allTextContents();
-      assert.equal(paragraphs.length, 2);
-      const { count, pct } = data.endings[ending];
-      assert.equal(paragraphs[0], `${count.toLocaleString('en-US')} of ${data.websites.toLocaleString('en-US')} sites · ${pct}%`);
-      assert.ok(paragraphs[1].endsWith('.'));
+    assert.match(await page.locator('.dek').innerText(), /emergent\.sh.*\$230 million/);
+    const rankedEndings = Object.entries(data.endings).sort(([a, x], [b, y]) =>
+      y.count - x.count || a.localeCompare(b)).slice(0, 10);
+    const picks = page.locator('#picks li');
+    assert.equal(await picks.count(), 3);
+    for (const [i, [ending, values]] of rankedEndings.slice(0, 3).entries()) {
+      const pick = picks.nth(i);
+      const domain = await pick.locator('b').innerText();
+      assert.ok(companies.some(row => row.domain === domain && row.ending === ending));
+      assert.ok((await pick.innerText()).includes(`${values.count} sites · ${values.pct}%`));
     }
-    assert.doesNotMatch(await pick.innerText(), /\$|first year|renewal|three years|Spaceship|Dynadot|where the prices come from/i);
-    assert.equal(await pick.locator('details').count(), 0);
-    assert.equal(await page.locator('.ticket b').first().innerText(), '.io');
+    assert.deepEqual(await page.locator('#top-ten tbody tr').allTextContents(),
+      rankedEndings.map(([ending, values], i) => `${i + 1}${ending}${values.count}${values.pct}%`));
+    assert.equal(await page.locator('a[download]').count(), 2);
     assert.equal(await page.locator('.column .io').count(), data.batches.length);
-    await pick.getByRole('link', { name: 'Check yours below.' }).click();
-    assert.equal(page.url(), site + '/sf/#check-yours');
-    assert.equal(await page.locator(':target .name-check').count(), 1);
+    await page.getByText('Compare all endings by batch', { exact: true }).click();
     const trend = page.locator('.ai-trend');
     const trendRows = data.batches.map(row => {
       const ai = row.endings['.ai']?.count ?? 0;
@@ -101,17 +99,20 @@ test('SF chart and name check work without publishing a search to the page URL o
     }
     const body = page.locator('#company-table tbody tr');
     const sort = page.locator('#funding-sort');
+    assert.equal(await page.locator('#company-table tbody tr:visible').count(), 3);
+    await page.getByRole('button', { name: 'Show all 50 companies' }).click();
+    assert.equal(await page.locator('#company-table tbody tr:visible').count(), 50);
     await sort.waitFor();
     assert.equal(await body.count(), 50);
     assert.equal(await body.first().locator('.amount').getAttribute('title'),
       '$' + top50.companies[0].raised_usd.toLocaleString('en-US'));
     assert.deepEqual(await page.locator('#company-table thead th').allTextContents(),
-      ['Company', 'Domain', 'Ending', 'Raised', 'Team size', 'Owns the .com?']);
-    assert.equal(await body.locator('td').count(), 250);
+      ['Company', 'What they do', 'Domain', 'Ending', 'Raised', 'Team size', '.com used or redirects?']);
+    assert.equal(await body.locator('td').count(), 300);
     assert.ok((await body.locator('td').allTextContents()).every(cell => cell.trim()));
     assert.doesNotMatch(await page.content(), /Unverified|No match|unknown|n\/a/i);
-    const owners = top50.companies.filter(row => row.com.status === 'yes').length;
-    assert.equal(await page.locator('#funding .deck').innerText(), `${owners} of the 50 own their .com.`);
+    const comSites = top50.companies.filter(row => row.com.status === 'yes').length;
+    assert.ok((await page.locator('#funding').innerText()).includes(`${comSites} of the 50 use a .com or have one that redirects to their site.`));
     await sort.selectOption('raised_usd:asc');
     assert.equal(await body.first().locator('.amount').getAttribute('title'),
       '$' + top50.companies.at(-1).raised_usd.toLocaleString('en-US'));
@@ -138,26 +139,22 @@ test('SF chart and name check work without publishing a search to the page URL o
     await page.getByRole('button', { name: new RegExp('^' + first.batch) }).click();
     assert.equal(await page.locator('#batch-select').inputValue(), first.batch);
     await page.getByText('All endings in this batch', { exact: true }).click();
-    assert.equal(await page.locator('caption').innerText(), first.batch);
+    assert.equal(await page.locator('.batch-details caption').innerText(), first.batch);
     assert.equal(await page.locator('.batch-details tbody tr').count(), Object.keys(first.endings).length);
     await page.locator('#batch-select').selectOption(data.batches[1].batch);
     assert.equal(await page.locator('.column[aria-pressed=true]').getAttribute('data-batch'), data.batches[1].batch);
     assert.equal(await page.locator('#weekly').isVisible(), false);
     await page.getByRole('link', { name: 'Check a name' }).click();
-    const forms = page.locator('.name-check');
-    assert.equal(await forms.count(), 2);
-    for (const [i, name] of ['example', 'secondexample'].entries()) {
-      const form = forms.nth(i);
-      await form.getByLabel('Name or domain').fill(name);
-      await form.getByRole('button', { name: 'Check endings' }).click();
-      await form.getByText(name + '.io', { exact: true }).waitFor();
-      assert.deepEqual(await form.locator('.matches b').allTextContents(), [name + '.com', name + '.io']);
-      assert.deepEqual(await form.locator('.matches li p').allTextContents(), [
-        'The owner sets the price.',
-        'USD 16.00 upfront for 2 years at Example Shop. USD 20.00 to renew for 2 years.',
-      ]);
-    }
-    assert.deepEqual(checked, ['example', 'example.io', 'secondexample', 'secondexample.io']);
+    const form = page.locator('.name-check');
+    await form.getByLabel('Name or domain').fill('example');
+    await form.getByRole('button', { name: 'Check endings' }).click();
+    await form.getByText('example.io', { exact: true }).waitFor();
+    assert.deepEqual(await form.locator('.matches b').allTextContents(), ['example.com', 'example.io']);
+    assert.deepEqual(await form.locator('.matches li p').allTextContents(), [
+      'The owner sets the price.',
+      'USD 16.00 upfront for 2 years at Example Shop. USD 20.00 to renew for 2 years.',
+    ]);
+    assert.deepEqual(checked, ['example', 'example.io']);
     assert.equal(page.url(), site + '/sf/#check');
     assert.deepEqual(await page.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0]);
     assert.equal(requests.filter(url => url.origin === site && url.search).length, 0);
@@ -165,6 +162,19 @@ test('SF chart and name check work without publishing a search to the page URL o
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();
+  }
+});
+
+test('the offline artifact omits the downloads and includes the local lookup', async () => {
+  const output = await fs.mkdtemp(path.join(require('node:os').tmpdir(), 'sf-artifact-'));
+  try {
+    require('node:child_process').execFileSync('python3', [path.join(__dirname, '../scripts/sf/artifact.py'), output]);
+    const html = await fs.readFile(path.join(output, 'index.html'), 'utf8');
+    assert.doesNotMatch(html, /<a\b[^>]*\bdownload\b/i);
+    assert.match(html, /Look up name<\/button>/);
+    assert.match(html, /<script defer src="sf\/page.js">/);
+  } finally {
+    await fs.rm(output, { recursive: true, force: true });
   }
 });
 
@@ -203,6 +213,14 @@ test('directory snapshot reconciles to the chart and to distinct SEC offerings',
   }
 });
 
+test('the funding ranking includes the audited rounds and the company without a listed team size', () => {
+  const emergent = top50.companies[1];
+  assert.equal(emergent.company, 'Emergent');
+  assert.equal(emergent.raised_usd, 230_000_000);
+  assert.equal(emergent.team_size, null);
+  assert.equal(top50.companies.find(row => row.company === 'Greptile').raised_usd, 79_100_000);
+});
+
 test('the 50 ranked companies reconcile to sourced funding rounds and domain observations', () => {
   const directory = new Map(companies.map(row => [row.id, row]));
   const ranked = top50.companies;
@@ -214,7 +232,8 @@ test('the 50 ranked companies reconcile to sourced funding rounds and domain obs
     if (top50.directory_snapshot === data.source.snapshot) {
       for (const key of ['company', 'domain', 'ending']) assert.equal(row[key], directory.get(row.id)[key]);
     }
-    assert.ok(Number.isInteger(row.team_size) && row.team_size > 0);
+    assert.ok(row.team_size === null || (Number.isInteger(row.team_size) && row.team_size > 0));
+    assert.ok(row.what_they_do.trim());
     assert.ok(row.rounds.length > 0 && row.raised_usd > 0);
     assert.equal(row.raised_usd, row.rounds.reduce((sum, round) => sum + round.amount_usd, 0));
     for (const round of row.rounds) {

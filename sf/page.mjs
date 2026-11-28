@@ -80,13 +80,13 @@ for (const form of document.querySelectorAll('.name-check')) {
     try {
       const result = await lookup(name, request.signal);
       if (request.signal.aborted) return;
-      const labels = { taken: 'Taken', available: 'Available', reserved: 'Reserved', unknown: 'Unconfirmed' };
+      const labels = { taken: 'Taken', available: 'Available', reserved: 'Reserved' };
       for (const item of result.items) {
         const li = document.createElement('li');
         const domain = document.createElement('b');
         domain.textContent = item.domain;
         const label = document.createElement('span');
-        label.textContent = labels[item.status];
+        label.textContent = labels[item.status] ?? 'Unconfirmed';
         li.append(domain, label);
         const note = priceNote(item);
         if (note) {
