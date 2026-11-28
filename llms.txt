@@ -8,12 +8,12 @@ Use this when you want to know if a domain is available and where it is cheapest
 
 Buy opens the shop. Dated list prices, source shown. Trademark results are a search aid, not legal advice. No account, no cost.
 
-Works in your agent (Claude, ChatGPT, Codex) and on domainhound.dev. Made by BrightBoard AS. Privacy policy https://domainhound.dev/privacy/ and terms of service https://domainhound.dev/terms/
+Use Domain Hound on the web, as a custom Claude connector, or through the npm package in Claude Code and Codex. Made by BrightBoard AS. Privacy policy https://domainhound.dev/privacy/ and terms of service https://domainhound.dev/terms/
 
 ## Use Domain Hound
 
 - [Website](https://domainhound.dev/). Search domains and find names in your browser. Buy opens the shop.
-- [Hosted connector for Claude and ChatGPT](https://domainhound.dev/#install). Buy opens the shop.
+- [Custom Claude connector](https://domainhound.dev/docs/claude/). Connect through Claude settings. Buy opens the shop.
 - [Claude Code and Codex](https://domainhound.dev/guides/domain-hound-claude-code-codex/). Install the npm package with Node.js 20 or later. Never buys without your yes. With your Spaceship key and your yes, your agent can buy it and set up DNS.
   - Claude Code: `claude mcp add domain-hound -- npx -y domain-hound`
   - Codex: `codex mcp add domain-hound -- npx -y domain-hound`
