@@ -1,33 +1,47 @@
+@import url("palette.css");
+
 .frame { width: min(100% - 2.5rem, 72rem); margin-inline: auto; }
-header, .intro, .check-band { background: var(--forest); color: var(--paper); }
+header, .intro { background: var(--paper); color: var(--pine); }
+.check-band { background: var(--leaf); color: var(--pine); }
 .mast, .ticket-top, .ticket-foot, .foot-links, footer .frame, .batch-readout { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.mast { height: 86px; border-bottom: 1px solid var(--leaf); }
+.mast { height: 76px; border-bottom: 1px solid var(--pine); }
 .mast .paper-art { margin: 0; scale: .65; transform-origin: left center; }
 .jump, .foot-links, footer { font-size: .95rem; font-weight: 850; }
 .spread { display: grid; align-items: center; gap: 2rem; padding-block: 2.6rem 3rem; }
 .eyebrow, .ticket-top, .ticket-foot, .legend, .year-label, .axis, .season { font: 600 .76rem/1.35 var(--mono); }
 .eyebrow, .ticket-top { text-transform: uppercase; letter-spacing: .08em; }
-.eyebrow { color: var(--mint); }
+.eyebrow { color: var(--forest); }
 h1 { font-size: clamp(2.6rem, 6.2vw, 5.55rem); max-width: none; font-weight: 850; line-height: .94; margin: .19em 0 .22em; letter-spacing: -.035em; text-wrap: initial; }
 h2 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: -.025em; font-weight: 850; }
 .deck { font-size: clamp(1.05rem, 1.4vw, 1.28rem); }
-.ticket { position: relative; background: var(--mint); color: var(--pine); padding: 1.2rem 1.55rem; transform: rotate(-2deg); width: min(100% - .5rem, 28rem); justify-self: center; }
-.ticket-top { border-bottom: 1px solid var(--forest); padding-bottom: .5rem; }
+.ticket { position: relative; background: var(--mist); border: 2px solid var(--pine); color: var(--pine); padding: 0; transform: rotate(-2deg); width: min(100% - .5rem, 28rem); justify-self: center; }
+.ticket-top { background: var(--mint); border-bottom: 1px solid var(--pine); padding: .55rem 1.15rem; }
 .ticket-top b { font: 850 1.45rem/1 var(--mono); text-transform: lowercase; }
-.ticket strong { display: block; font: 900 clamp(4.7rem, 9vw, 8rem)/1.06 Mulish, sans-serif; letter-spacing: -.027em; }
+.ticket strong { display: block; padding: .25rem 1.15rem 0; font: 1000 clamp(4.1rem, 8vw, 7rem)/1.02 Mulish, sans-serif; letter-spacing: -.027em; }
 .ticket strong small { font-size: .48em; letter-spacing: -.02em; margin-left: .03em; }
-.ticket p { font-weight: 750; }
-.ticket-foot { margin-top: 1rem; border-top: 2px dashed var(--forest); padding-top: .7rem; font-size: .72rem; }
+.ticket p { padding: 0 1.15rem .75rem; font-weight: 750; }
+.postcard-scene { display: block; width: 100%; height: auto; border-block: 1px solid var(--pine); }
+.ticket-foot { padding: .55rem 1.15rem; font-size: .72rem; }
+.bay-divider { display: flex; align-items: end; gap: .6rem; color: var(--pine); background: var(--paper); }
+.bay-divider::before, .bay-divider::after { content: ""; flex: 1; border-bottom: 1px solid; }
+.bay-divider svg { display: block; width: 6.5rem; height: auto; margin-bottom: -2px; }
 .chart-band, .facts-band, .method, .check-band { padding-block: clamp(2.5rem, 5vw, 4.8rem); }
 .chart-band { background: var(--paper); }
 .deck { margin-block: .65rem 1.25rem; }
 .legend { display: flex; flex-wrap: wrap; gap: .6rem 1.3rem; }
 .legend span { display: inline-flex; align-items: center; gap: .4rem; }
 .legend i { width: .9rem; height: .9rem; border: 1px solid var(--pine); }
-.com { background: var(--forest); }
-.ai { background: var(--leaf); }
-.io { background: var(--mint); }
-.rest { background: var(--amber); }
+/* Share swatches with their legend keys so the series also read in grayscale. */
+.com { background-color: var(--forest); }
+.ai {
+  background-color: var(--amber);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='m-1 1 2-2M0 6l6-6m-1 7 2-2' fill='none' stroke='%23482b1c'/%3E%3C/svg%3E");
+}
+.io {
+  background-color: var(--mint);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23482b1c'/%3E%3C/svg%3E");
+}
+.rest { background-color: var(--paper); }
 .plot { --height: clamp(10rem, 17vw, 15rem); display: flex; margin-top: 1.5rem; gap: .45rem; }
 .axis { display: flex; flex-direction: column; justify-content: space-between; align-items: end; height: var(--height); font-size: .64rem; }
 .years { flex: 1; display: flex; min-width: 0; gap: clamp(4px, 1.2vw, 16px); }
@@ -70,7 +84,7 @@ th:not(:first-child), td:not(:first-child) { text-align: right; }
 caption { font-weight: 850; }
 .name-check { margin-top: 1.35rem; }
 .name-check label { display: block; font-size: .95rem; margin-bottom: .4rem; }
-.field { display: flex; max-width: 34rem; }
+.field { display: flex; max-width: 34rem; border: 2px solid var(--pine); }
 .field input { min-width: 0; width: 100%; border: 0; border-radius: 0; padding: .65em; color: var(--pine); background: var(--paper); }
 .field input::placeholder { color: var(--forest); opacity: 1; }
 .field button { flex-shrink: 0; padding: .7em 1em; border: 0; border-left: 2px solid var(--pine); border-radius: 0; background: var(--leaf); color: var(--pine); font-weight: 900; }
@@ -87,7 +101,6 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
 @media (min-width: 700px) {
   .frame { width: min(100% - 6rem, 72rem); }
   .spread { grid-template-columns: 1.35fr 1fr; gap: clamp(2rem, 6vw, 6rem); padding-block: 3.8rem 4.4rem; }
-  .ticket { padding: 1.55rem 2rem; }
   .cards { grid-template-columns: repeat(3, 1fr); }
   .cards article { padding: 1.4rem; }
   .cards article:first-child { padding-left: 0; }
@@ -128,4 +141,11 @@ footer { background: var(--mint); color: var(--pine); padding-block: 1rem; }
 .pick-cards h3 { font: 900 2.65rem/1.2 Mulish, sans-serif; letter-spacing: -.03em; }
 .pick-cards p + p { margin-top: .45rem; }
 .pick-rule { margin-top: 1.25rem; max-width: 64ch; }
-.name-check label span { color: var(--mint); }
+.intro .name-check label span { color: var(--forest); }
+
+footer .frame { justify-content: flex-start; flex-wrap: wrap; gap: .4rem 1.3rem; }
+footer p { margin-left: auto; font-size: .9rem; font-weight: 650; }
+@media (max-width: 699px) {
+  .spread { padding-block: 1.6rem 1.9rem; gap: 1.6rem; }
+  footer p { flex-basis: 100%; }
+}

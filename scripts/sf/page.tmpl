@@ -38,9 +38,28 @@
     <a class="funding-jump" href="#funding">See funding by company</a></div>
     <div class="ticket"><div class="ticket-top"><span>Third most used</span><b>.io</b></div>
       <strong>{{io}}<small>%</small></strong><p>of these startups use <b>.io</b></p>
+      <svg class="postcard-scene" viewBox="0 0 400 110" aria-hidden="true" focusable="false">
+        <defs>
+          <g id="gate-span" fill="none" stroke="currentColor" stroke-linejoin="round">
+            <!-- The nearer tower and deck sit higher in the perspective view. -->
+            <path d="M-4 77Q37 69 97 12Q167 112 279 44Q326 87 404 87" stroke-width="2.6"/>
+            <path d="M18 71v14m19-24v24m19-37v37m20-54v54m42-48v49m18-32v33m19-23v24m19-19v19m19-16v17m19-18v18m20-22v23m19-30v30m17-40v41m30-28v29m18-18v19m19-12v13m20-9v9m21-5v6" stroke-width="1.5"/>
+            <path d="M-4 84l408 10" stroke-width="5"/>
+            <path d="M90 101l3-94h3l-1 94zm12 0l-2-94h3l4 94zm171 0l3-63h2l-1 63zm9 0l-2-63h2l4 63z" fill="currentColor" stroke-width="1.4"/>
+            <path d="M94 14h7m-7 7h7m-8 16h9m-10 16h11m-11 17h12m172-26h6m-7 9h8m-8 12h8m-9 13h10" stroke-width="3"/>
+          </g>
+        </defs>
+        <path fill="var(--leaf)" d="M0 0h400v110H0z"/>
+        <circle cx="331" cy="30" r="18" fill="var(--paper)"/>
+        <path fill="var(--mint)" d="M0 60q30-14 59-9t52 5q25-1 53-12t55-6q30 6 55 24t57 9q40-13 69-8v47H0z"/>
+        <path fill="var(--paper)" d="M0 67h70q8 0 8 3t-8 3H0zm180-7h74q7 0 7 2.5t-7 2.5h-74q-6 0-6-2.5t6-2.5z"/>
+        <use href="#gate-span"/>
+        <path fill="currentColor" d="M0 76q16 0 34 9l32 17q8 4 17 8H0zm400 7q-23 0-44 10t-50 17h94z"/>
+      </svg>
       <div class="ticket-foot">{{ioCount}} of {{total}} sites <span>{{month}}</span></div>
     </div>
   </div></section>
+  <div class="bay-divider" aria-hidden="true"><svg viewBox="0 0 400 104" focusable="false"><use href="#gate-span"/></svg></div>
   <section class="chart-band"><div class="frame">
     <h2>What did startups pick?</h2>
     <p class="deck">Each bar is one Y Combinator batch. Pick one to see its endings.</p>
@@ -118,6 +137,6 @@
     {{closingCheck}}
   </div></section>
 </main>
-<footer><div class="frame"><a href="/">Domain Hound</a><a href="/privacy/">Privacy</a></div></footer>
+<footer><div class="frame"><a href="/">Domain Hound</a><a href="/privacy/">Privacy</a><p>Not affiliated with Y Combinator. Data from YC's public directory.</p></div></footer>
 </body>
 </html>

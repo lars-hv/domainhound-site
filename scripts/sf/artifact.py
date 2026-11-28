@@ -53,7 +53,7 @@ def portable_script():
 
 def package(output):
     files = ["assets/home.css", "assets/palette.css", "assets/mulish-latin-wght-normal.woff2",
-             "assets/OFL.txt", "assets/hound-mark.svg", "sf/page.css", "sf/share.png",
+             "assets/OFL.txt", "assets/hound-mark.svg", "sf/page.css", "sf/palette.css", "sf/share.png",
              "data/sf/endings.json", "data/sf/companies.json", "data/sf/top50.json"]
     for file in files:
         target = output / file
