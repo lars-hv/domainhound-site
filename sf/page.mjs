@@ -13,7 +13,7 @@ async function enableChart() {
     for (const bar of columns) bar.setAttribute('aria-pressed', String(bar.dataset.batch === batch));
     const share = ending => row.endings[ending]?.pct || 0;
     document.getElementById('batch-summary').textContent =
-      `${row.websites} sites · ${share('.com')}% .com · ${share('.ai')}% .ai`;
+      `${row.websites} sites · ${share('.com')}% .com · ${share('.ai')}% .ai · ${share('.io')}% .io`;
     details.querySelector('caption').textContent = batch;
     const body = details.querySelector('tbody');
     body.replaceChildren();
@@ -39,7 +39,7 @@ enableChart().catch(() => {}); // The static chart, latest batch and download re
 async function lookup(name, signal) {
   const { runSearch } = await import('/assets/search-api.mjs');
   signal.throwIfAborted();
-  return runSearch('name', { name, extraEnding: 'si' }, signal);
+  return runSearch('name', { name, extraEnding: 'io' }, signal);
 }
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', currencyDisplay: 'code' });

@@ -36,15 +36,15 @@
     <h1>{{headlineLead}}<br>{{headlineFollowup}}</h1>
     <div id="check">{{heroCheck}}</div>
     <a class="funding-jump" href="#funding">See funding by company</a></div>
-    <div class="ticket"><div class="ticket-top"><span>Website ending</span><b>.ai</b></div>
-      <strong>{{ai}}<small>%</small></strong><p>of these startups use <b>.ai</b></p>
-      <div class="ticket-foot">{{aiCount}} of {{total}} sites <span>{{month}}</span></div>
+    <div class="ticket"><div class="ticket-top"><span>Third most used</span><b>.io</b></div>
+      <strong>{{io}}<small>%</small></strong><p>of these startups use <b>.io</b></p>
+      <div class="ticket-foot">{{ioCount}} of {{total}} sites <span>{{month}}</span></div>
     </div>
   </div></section>
   <section class="chart-band"><div class="frame">
     <h2>What did startups pick?</h2>
     <p class="deck">Each bar is one Y Combinator batch. Pick one to see its endings.</p>
-    <div class="legend"><span><i class="com"></i>.com</span><span><i class="ai"></i>.ai</span><span><i class="rest"></i>Other endings</span></div>
+    <div class="legend"><span><i class="com"></i>.com</span><span><i class="ai"></i>.ai</span><span><i class="io"></i>.io</span><span><i class="rest"></i>Other endings</span></div>
     <div class="plot">
       <div class="axis" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
       <div class="years">{{bars}}</div>
@@ -53,7 +53,7 @@
     <details class="batch-details"><summary>All endings in this batch</summary>
       <table><caption>{{latest}}</caption><thead><tr><th>Ending</th><th>Sites</th><th>Share</th></tr></thead><tbody>{{tableRows}}</tbody></table>
     </details>
-    <p class="chart-note">.com was the most common ending overall. Just {{siCount}} of {{total}} sites used .si, shown under “Other endings”.</p>
+    <p class="chart-note">.io came third after .com and .ai, with {{ioCount}} of {{total}} sites.</p>
   </div></section>
   <section class="facts-band pick-band" aria-labelledby="pick-title"><div class="frame">
     <h2 id="pick-title">Which ending should you pick?</h2>
@@ -71,22 +71,20 @@
     </section>
   </div></div>
   <section id="funding" class="funding-band"><div class="frame">
-    <p class="eyebrow">Funding by company</p>
-    <h2>{{fundingHeadline}}</h2>
-    <p class="deck">Here are all {{total}} startups and their domains. We matched {{matched}} to SEC filings and ranked those by the amount each reported raising.</p>
+    <h2>50 SF Bay Area YC startups ranked by funding</h2>
+    <p class="deck">{{fundingHeadline}}</p>
     <details class="funding-note"><summary>What the numbers mean</summary>
-      <p>“Raised (Form D)” adds up what each company told the SEC it sold through {{day}}. We use the latest filing for each offering. Some rounds never appear here. These are funding totals. They don’t tell us what a company is worth.</p>
-      <p>“No match” means we couldn’t confirm a filing under the exact legal name. For “Has the .com?” we drop spaces and punctuation from the brand. “Yes” means YC lists that .com or we saw a redirect between it and the listed site. Otherwise, ownership is unverified.</p>
-      <a href="/data/sf/companies.json" download>Download companies and filing sources (JSON)</a>
+      <p>We looked for public rounds and SEC filings among the largest teams in the YC snapshot and companies with verified Form D filings. Team sizes come from the YC snapshot.</p>
+      <p>For .com, we use the name just before the listed ending. A listed .com or a .com that leads to the listed site counts as “Yes”. Other results come from Verisign’s .com registry and the domain’s redirect.</p>
+      <a href="/data/sf/top50.json" download>Download funding sources and domain checks (JSON)</a>
     </details>
     <div class="funding-tools">
       <label class="funding-picker" hidden>Sort by <select id="funding-sort"></select></label>
-      <p id="funding-count" role="status">{{visible}} of {{total}} companies</p>
-      <button id="funding-more" aria-controls="company-table" aria-expanded="false" hidden>Show all</button>
     </div>
-    <table id="company-table" aria-label="Bay Area YC companies and Form D funding">
+    <table id="company-table" aria-label="Bay Area YC companies ranked by funding" aria-describedby="funding-source">
       <thead><tr>{{fundingHeaders}}</tr></thead><tbody>{{companyRows}}</tbody>
     </table>
+    <p id="funding-source" class="funding-note">Announced funding from public sources, checked {{fundingDay}}.</p>
   </div></section>
   <section class="facts-band"><div class="frame">
     <h2>Behind the dot</h2>
@@ -110,7 +108,7 @@
     <details><summary>Coverage, sources and terms</summary>
       <p>We included public YC startups of any status with a listed location in a Bay Area town or city, or at Stanford. Each counted once. We left out fully remote companies and future batches.</p>
       <p>We took endings from the <a href="https://publicsuffix.org/list/">Public Suffix List</a> so endings like .co.uk stay together. We measured the name just before the ending. To match brands and prefixes, we kept letters and digits, ignored case and dropped spaces and punctuation. We kept legal suffixes such as Inc.</p>
-      <p>For name shapes, <a href="https://www.nltk.org/howto/wordnet.html">WordNet</a> supplies English words. We split compounds at spaces, hyphens or capital letters, or into two words of at least three letters each. A single string of letters with no match counts as “Possibly invented”. Other spellings go under “Other”.</p>
+      <p>For name shapes, <a href="https://www.nltk.org/howto/wordnet.html">WordNet</a> supplies English words. We split compounds at spaces, hyphens or capital letters, or into two words of at least three letters each. A single string of letters absent from the dictionary counts as “Possibly invented”. Other spellings go under “Other”.</p>
       <p>The sites come from <a href="https://github.com/yc-oss/api">YC OSS</a>, an unofficial feed of the <a href="https://www.ycombinator.com/companies">YC directory</a>. YC’s <a href="https://www.ycombinator.com/legal#tou">terms of use</a> restrict scraping and commercial reuse. The feed grants no separate data license. Domain Hound is independent of YC.</p>
     </details>
     <div class="foot-links"><a href="/data/sf/endings.json" download>Download the counts (JSON)</a><button id="share" hidden>Share this page</button><span id="share-status" role="status"></span></div>

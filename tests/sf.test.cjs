@@ -5,6 +5,7 @@ const fs = require('node:fs/promises');
 const { webkit } = require('playwright-core');
 const data = require('../data/sf/endings.json');
 const { companies } = require('../data/sf/companies.json');
+const top50 = require('../data/sf/top50.json');
 const headline = 'Your .com is taken. Here’s what 1,581 SF startups did.';
 
 test('SF counts reconcile across cohorts, endings, and brand shapes', () => {
@@ -46,10 +47,10 @@ test('SF chart and name check work without publishing a search to the page URL o
       assert.equal(url.pathname, '/v1/check');
       const name = url.searchParams.get('name');
       checked.push(name);
-      const exact = name.endsWith('.si');
+      const exact = name.endsWith('.io');
       const ascii = name.split('.')[0];
       const domain = exact ? {
-        domain: name, ending: 'si', status: 'available', evidence: 'rdap-404',
+        domain: name, ending: 'io', status: 'available', evidence: 'rdap-404',
         checkedAt: '2026-11-27T12:00:00Z', priceShown: true,
         prices: [{ shop: 'Example Shop', minimumYears: 2, firstYearUsd: 8, renewalUsd: 10,
           firstPaymentUsd: 16, renewalPaymentUsd: 20, threeYearUsd: 36 }],
@@ -65,7 +66,7 @@ test('SF chart and name check work without publishing a search to the page URL o
     assert.equal(await page.locator('meta[property="og:title"]').getAttribute('content'), headline);
     const pick = page.getByRole('region', { name: 'Which ending should you pick?' });
     const cards = pick.getByRole('article');
-    const endings = ['.com', '.ai', '.si'];
+    const endings = ['.com', '.ai', '.io'];
     assert.deepEqual(await cards.locator('h3').allTextContents(), endings);
     for (const [index, ending] of endings.entries()) {
       const paragraphs = await cards.nth(index).locator('p').allTextContents();
@@ -76,6 +77,8 @@ test('SF chart and name check work without publishing a search to the page URL o
     }
     assert.doesNotMatch(await pick.innerText(), /\$|first year|renewal|three years|Spaceship|Dynadot|where the prices come from/i);
     assert.equal(await pick.locator('details').count(), 0);
+    assert.equal(await page.locator('.ticket b').first().innerText(), '.io');
+    assert.equal(await page.locator('.column .io').count(), data.batches.length);
     await pick.getByRole('link', { name: 'Check yours below.' }).click();
     assert.equal(page.url(), site + '/sf/#check-yours');
     assert.equal(await page.locator(':target .name-check').count(), 1);
@@ -97,19 +100,39 @@ test('SF chart and name check work without publishing a search to the page URL o
       assert.ok(trendNote.includes(`(${aiCount(row).toLocaleString('en-US')} of ${row.websites.toLocaleString('en-US')} sites)`));
     }
     const body = page.locator('#company-table tbody tr');
-    const more = page.getByRole('button', { name: 'Show all', exact: true });
-    await more.waitFor();
+    const sort = page.locator('#funding-sort');
+    await sort.waitFor();
     assert.equal(await body.count(), 50);
-    const funded = companies.filter(row => row.funding);
-    const highest = Math.max(...funded.map(row => row.funding.sold));
-    assert.equal(await body.first().locator('.amount').innerText(), '$' + highest.toLocaleString('en-US'));
-    await more.click();
-    assert.equal(await body.count(), data.websites);
-    await page.locator('#funding-sort').selectOption('funding:asc');
-    const lowest = Math.min(...funded.map(row => row.funding.sold));
-    assert.equal(await body.first().locator('.amount').innerText(), '$' + lowest.toLocaleString('en-US'));
-    if (funded.length < companies.length) assert.equal(await body.last().locator('.amount').innerText(), 'No match');
-    await page.getByRole('button', { name: 'Show 50' }).click();
+    assert.equal(await body.first().locator('.amount').getAttribute('title'),
+      '$' + top50.companies[0].raised_usd.toLocaleString('en-US'));
+    assert.deepEqual(await page.locator('#company-table thead th').allTextContents(),
+      ['Company', 'Domain', 'Ending', 'Raised', 'Team size', 'Owns the .com?']);
+    assert.equal(await body.locator('td').count(), 250);
+    assert.ok((await body.locator('td').allTextContents()).every(cell => cell.trim()));
+    assert.doesNotMatch(await page.content(), /Unverified|No match|unknown|n\/a/i);
+    const owners = top50.companies.filter(row => row.com.status === 'yes').length;
+    assert.equal(await page.locator('#funding .deck').innerText(), `${owners} of the 50 own their .com.`);
+    await sort.selectOption('raised_usd:asc');
+    assert.equal(await body.first().locator('.amount').getAttribute('title'),
+      '$' + top50.companies.at(-1).raised_usd.toLocaleString('en-US'));
+    await sort.selectOption('team_size:desc');
+    assert.equal(Number(await body.first().locator('[data-label="Team size"]').textContent()),
+      Math.max(...top50.companies.map(row => row.team_size)));
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.getByRole('button', { name: 'Domain', exact: true }).click();
+    assert.equal(await page.locator('#company-table [aria-sort]').getAttribute('aria-sort'), 'ascending');
+    assert.deepEqual(await body.locator('.site-domain').allTextContents(),
+      top50.companies.map(row => row.domain).sort(new Intl.Collator('en', { sensitivity: 'base', numeric: true }).compare));
+    await page.setViewportSize({ width: 320, height: 844 });
+    await sort.selectOption('com:asc');
+    const { scrollWidth, overflows } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      overflows: Array.from(document.querySelectorAll('body *'))
+        .filter(element => element.getBoundingClientRect().right > innerWidth + 1)
+        .map(element => element.id || element.getAttribute('class') || element.tagName).slice(0, 10),
+    }));
+    assert.equal(scrollWidth, 320, `Elements extending past the viewport: ${overflows.join(', ')}`);
+    await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await body.count(), 50);
     const first = data.batches[0];
     await page.getByRole('button', { name: new RegExp('^' + first.batch) }).click();
@@ -127,14 +150,14 @@ test('SF chart and name check work without publishing a search to the page URL o
       const form = forms.nth(i);
       await form.getByLabel('Name or domain').fill(name);
       await form.getByRole('button', { name: 'Check endings' }).click();
-      await form.getByText(name + '.si', { exact: true }).waitFor();
-      assert.deepEqual(await form.locator('.matches b').allTextContents(), [name + '.com', name + '.si']);
+      await form.getByText(name + '.io', { exact: true }).waitFor();
+      assert.deepEqual(await form.locator('.matches b').allTextContents(), [name + '.com', name + '.io']);
       assert.deepEqual(await form.locator('.matches li p').allTextContents(), [
         'The owner sets the price.',
         'USD 16.00 upfront for 2 years at Example Shop. USD 20.00 to renew for 2 years.',
       ]);
     }
-    assert.deepEqual(checked, ['example', 'example.si', 'secondexample', 'secondexample.si']);
+    assert.deepEqual(checked, ['example', 'example.io', 'secondexample', 'secondexample.io']);
     assert.equal(page.url(), site + '/sf/#check');
     assert.deepEqual(await page.evaluate(() => [localStorage.length, sessionStorage.length]), [0, 0]);
     assert.equal(requests.filter(url => url.origin === site && url.search).length, 0);
@@ -145,7 +168,7 @@ test('SF chart and name check work without publishing a search to the page URL o
   }
 });
 
-test('company table reconciles to the chart and to distinct SEC offerings', () => {
+test('directory snapshot reconciles to the chart and to distinct SEC offerings', () => {
   assert.equal(new Set(companies.map(row => row.id)).size, data.websites);
   const counts = {};
   const issuers = new Set();
@@ -177,5 +200,40 @@ test('company table reconciles to the chart and to distinct SEC offerings', () =
   }
   for (const batch of data.batches) {
     assert.deepEqual(counts[batch.batch], Object.fromEntries(Object.entries(batch.endings).map(([k, v]) => [k, v.count])));
+  }
+});
+
+test('the 50 ranked companies reconcile to sourced funding rounds and domain observations', () => {
+  const directory = new Map(companies.map(row => [row.id, row]));
+  const ranked = top50.companies;
+  assert.equal(ranked.length, 50);
+  assert.equal(new Set(ranked.map(row => row.id)).size, 50);
+  assert.deepEqual(ranked.map(row => row.raised_usd), ranked.map(row => row.raised_usd).sort((a, b) => b - a));
+  assert.match(top50.directory_snapshot, /^https:\/\/raw\.githubusercontent\.com\/yc-oss\/api\/[\da-f]{40}\/companies\/all\.json$/);
+  for (const row of ranked) {
+    if (top50.directory_snapshot === data.source.snapshot) {
+      for (const key of ['company', 'domain', 'ending']) assert.equal(row[key], directory.get(row.id)[key]);
+    }
+    assert.ok(Number.isInteger(row.team_size) && row.team_size > 0);
+    assert.ok(row.rounds.length > 0 && row.raised_usd > 0);
+    assert.equal(row.raised_usd, row.rounds.reduce((sum, round) => sum + round.amount_usd, 0));
+    for (const round of row.rounds) {
+      assert.ok(Number.isSafeInteger(round.amount_usd) && round.amount_usd > 0);
+      assert.match(round.date, /^20\d\d(?:-\d\d(?:-\d\d)?)?$/);
+      assert.ok(round.date <= top50.funding_checked);
+      assert.match(round.source_url, /^https:\/\//);
+    }
+    const { com } = row;
+    const stem = row.domain.slice(0, -row.ending.length).split('.').at(-1);
+    assert.equal(com.domain, stem + '.com');
+    assert.equal(com.rdap_url, 'https://rdap.verisign.com/com/v1/domain/' + com.domain);
+    assert.match(com.checked, /^20\d\d-\d\d-\d\d$/);
+    assert.ok(['yes', 'registered', 'available'].includes(com.status));
+    assert.equal(com.rdap_status, com.status === 'available' ? 404 : 200);
+    if (com.status === 'yes' && row.ending !== '.com') {
+      const root = stem + row.ending;
+      const finalHost = new URL(com.final_url).hostname;
+      assert.ok(finalHost === root || finalHost.endsWith('.' + root));
+    }
   }
 });
