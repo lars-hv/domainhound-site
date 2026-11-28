@@ -1,0 +1,20 @@
+name: IndexNow
+on: deployment_status
+permissions:
+  contents: read
+jobs:
+  submit:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'github-pages' &&
+      github.event.deployment.ref == 'main' &&
+      github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+          persist-credentials: false
+      - name: Submit the deployed sitemap to IndexNow
+        run: node scripts/indexnow.mjs

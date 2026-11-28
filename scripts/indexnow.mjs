@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const HOST = 'domainhound.dev';
-const KEY = 'a486ad900c8a321da66dd2adaa43dd58';
+const KEY = '79f71f8a4e67821699ccdced7b0c5492';
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
 const ENDPOINT = 'https://api.indexnow.org/indexnow';
 const root = new URL('..', import.meta.url);
